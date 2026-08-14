@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>붕어빵 타이쿤 🐟 온라인 협동판</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
+<style>
+:root{
+  --night:#141b2e; --night2:#1d2740;
+  --tarp:#ff7a3d; --glow:#ffb347;
+  --batter:#f2dfb6; --golden:#d98a2b; --burnt:#4a2e1c;
+  --ink:#fff6ea; --danger:#ff5d5d; --ok:#7ee08a; --blue:#6ea8ff;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{height:100%}
+body{
+  font-family:'Gowun Dodum',sans-serif;
+  background:linear-gradient(180deg,#0d1322 0%,var(--night) 40%,var(--night2) 100%);
+  color:var(--ink);display:flex;justify-content:center;overflow:hidden;touch-action:manipulation;
+}
+#app{width:100%;max-width:430px;height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden}
+
+.snow{position:absolute;top:-10px;color:#fff;opacity:.7;pointer-events:none;animation:fall linear infinite;font-size:10px;z-index:1}
+@keyframes fall{to{transform:translateY(105dvh) translateX(20px);opacity:.2}}
+@media (prefers-reduced-motion: reduce){.snow{display:none}}
+
+header{z-index:5;padding:10px 14px 6px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stat{font-family:'Jua';font-size:16.5px;display:flex;align-items:center;gap:4px}
+.stat small{font-size:11px;opacity:.65;font-family:'Gowun Dodum'}
+#dayBar{flex:1;margin:0 6px;height:8px;background:#ffffff22;border-radius:99px;overflow:hidden}
+#dayFill{height:100%;width:0%;background:linear-gradient(90deg,#5a7bd8,var(--glow));border-radius:99px;transition:width .3s linear}
+
+#roleBar{z-index:5;display:none;align-items:center;gap:8px;padding:0 14px 4px;font-size:12.5px}
+body.multi #roleBar{display:flex}
+#roleBadge{font-family:'Jua';font-size:12.5px;background:#ffffff18;border:1.5px solid #ffffff2a;border-radius:99px;padding:3px 11px;color:var(--glow)}
+#partnerDot{width:8px;height:8px;border-radius:99px;background:#777;display:inline-block}
+#partnerDot.on{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+#netDot{width:8px;height:8px;border-radius:99px;background:#777;display:inline-block}
+#netDot.on{background:var(--blue);box-shadow:0 0 6px var(--blue)}
+#roomCodeTag{margin-left:auto;opacity:.7;font-family:'Jua';letter-spacing:2px}
+
+#rushBanner{
+  position:absolute;top:52px;left:50%;transform:translateX(-50%) scale(0);
+  background:var(--danger);color:#fff;font-family:'Jua';font-size:15px;
+  padding:6px 18px;border-radius:99px;z-index:9;transition:transform .3s;box-shadow:0 4px 14px #ff5d5d66;
+}
+#rushBanner.on{transform:translateX(-50%) scale(1)}
+
+/* 손님 줄 */
+#customers{z-index:5;height:118px;display:flex;gap:10px;padding:6px 14px;align-items:flex-end}
+body.role-host.multi #customers{display:none}
+.customer{flex:1;max-width:110px;background:#ffffff10;border:1.5px solid #ffffff22;border-radius:14px;
+  padding:8px 6px 6px;text-align:center;cursor:pointer;animation:walkin .35s ease-out;position:relative}
+@keyframes walkin{from{transform:translateX(60px);opacity:0}}
+.customer.leaving{animation:walkout .4s ease-in forwards}
+@keyframes walkout{to{transform:translateX(-60px);opacity:0}}
+.customer .face{font-size:26px;line-height:1}
+.customer .order{margin-top:3px;font-size:13px;background:#fff;color:#333;border-radius:8px;padding:2px 4px;
+  font-family:'Jua';display:flex;justify-content:center;gap:5px;flex-wrap:wrap}
+.order span{display:flex;align-items:center;gap:1px}
+.patience{height:5px;background:#ffffff25;border-radius:99px;margin-top:5px;overflow:hidden}
+.patience i{display:block;height:100%;background:var(--ok);border-radius:99px}
+.patience i.low{background:var(--danger)}
+.customer.servable{border-color:var(--ok);box-shadow:0 0 12px #7ee08a55}
+
+/* 포장마차 */
+#stall{z-index:5;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;position:relative;padding-top:4px}
+.tarpline{width:92%;height:26px;border-radius:12px 12px 0 0;position:relative;overflow:hidden;
+  background:repeating-linear-gradient(90deg,var(--tarp) 0 26px,#ffffff 26px 52px);box-shadow:0 4px 10px #0006}
+.tarpline::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#0000 40%,#0004)}
+.stallname{font-family:'Jua';font-size:15px;background:#2a1c12;color:var(--glow);padding:3px 16px;
+  border-radius:0 0 10px 10px;letter-spacing:1px;border:1.5px solid #ffb34744;border-top:none}
+#griddle{margin-top:10px;width:88%;background:radial-gradient(ellipse at 50% 0%,#3a3f4c,#22242e 70%);
+  border-radius:20px;padding:14px 12px 16px;box-shadow:0 0 34px 4px #ffb34733,inset 0 3px 10px #0009,0 8px 20px #0008;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;position:relative}
+#griddle::before{content:'';position:absolute;inset:-6px;border-radius:24px;z-index:-1;
+  background:radial-gradient(ellipse at 50% 100%,#ff8c2b44,#0000 70%)}
+body.role-guest.multi #griddle{display:none}
+body.role-guest.multi .stallname::after{content:' — 판매대'}
+
+#sellerPanel{display:none;margin-top:12px;width:88%;background:#ffffff0d;border:1.5px solid #ffffff1c;
+  border-radius:16px;padding:14px;text-align:center}
+body.role-guest.multi #sellerPanel{display:block}
+#sellerPanel .big{font-family:'Jua';font-size:16px;color:var(--glow);margin-bottom:6px}
+#sellerPanel .sub{font-size:12.5px;opacity:.7;line-height:1.6}
+
+.mold{aspect-ratio:1.5/1;border-radius:12px;background:#181a22;box-shadow:inset 0 2px 8px #000c;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:transform .1s}
+.mold:active{transform:scale(.95)}
+.mold.locked{opacity:.28;cursor:default}
+.mold svg{width:82%;height:auto;filter:drop-shadow(0 2px 3px #0008)}
+.mold .tag{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);font-family:'Jua';font-size:10.5px;
+  padding:1px 8px;border-radius:99px;white-space:nowrap;background:#000a;color:#fff}
+.mold.flip .tag{background:var(--glow);color:#3a2200;animation:pulse .5s infinite alternate}
+.mold.perfect .tag{background:var(--ok);color:#0c2f14;animation:pulse .5s infinite alternate}
+.mold.burnt .tag{background:var(--danger)}
+@keyframes pulse{to{transform:translateX(-50%) scale(1.12)}}
+.mold.perfect svg{animation:sparkle .6s infinite alternate}
+@keyframes sparkle{to{filter:drop-shadow(0 0 8px #ffe08a)}}
+.steam{position:absolute;top:-6px;left:50%;font-size:13px;opacity:0;pointer-events:none;animation:steam 1.6s ease-out infinite}
+@keyframes steam{0%{opacity:.7;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-22px)}}
+
+/* 핑 버튼 */
+#pingRow{display:none;gap:6px;padding:6px 14px 0;z-index:5}
+body.multi #pingRow{display:flex}
+.pingbtn{flex:1;font-family:'Jua';font-size:12px;padding:8px 2px;border-radius:10px;border:1.5px solid #ffffff22;
+  background:#ffffff0d;color:var(--ink);cursor:pointer}
+.pingbtn:active{background:#ffffff22}
+
+/* 하단 */
+#bottom{z-index:5;padding:8px 14px calc(12px + env(safe-area-inset-bottom))}
+.fillrow{display:flex;gap:8px;margin-bottom:8px}
+body.role-guest.multi .fillrow{display:none}
+.fillbtn{flex:1;font-family:'Jua';font-size:15px;padding:9px 4px;border-radius:12px;border:2px solid #ffffff22;
+  background:#ffffff10;color:var(--ink);cursor:pointer}
+.fillbtn.sel{border-color:var(--glow);background:#ffb34722;box-shadow:0 0 10px #ffb34733}
+.fillbtn small{display:block;font-size:11px;font-family:'Gowun Dodum';opacity:.7}
+.trayrow{display:flex;align-items:center;gap:10px;background:#ffffff0d;border:1.5px solid #ffffff1c;border-radius:14px;padding:8px 12px}
+.trayrow .lbl{font-family:'Jua';font-size:14px;color:var(--glow)}
+.traycount{font-family:'Jua';font-size:15px;display:flex;align-items:center;gap:3px}
+#shopBtn{margin-left:auto;font-family:'Jua';font-size:14px;padding:8px 14px;border-radius:12px;border:none;
+  background:var(--tarp);color:#fff;cursor:pointer;box-shadow:0 3px 0 #c4531d}
+#shopBtn:active{transform:translateY(2px);box-shadow:0 1px 0 #c4531d}
+
+#toast{position:absolute;bottom:150px;left:50%;transform:translateX(-50%);background:#000c;color:#fff;
+  padding:8px 18px;border-radius:99px;font-size:13.5px;opacity:0;transition:opacity .25s;z-index:40;
+  pointer-events:none;white-space:nowrap;font-family:'Jua'}
+.floatmoney{position:absolute;font-family:'Jua';font-size:16px;color:var(--ok);z-index:15;pointer-events:none;
+  animation:floatup 1s ease-out forwards;text-shadow:0 1px 4px #000}
+@keyframes floatup{to{transform:translateY(-46px);opacity:0}}
+
+/* 모달 */
+.modal{position:absolute;inset:0;background:#000a;z-index:30;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px)}
+.modal.open{display:flex}
+.sheet{width:100%;max-width:430px;background:#20283e;border-radius:22px 22px 0 0;padding:18px 18px calc(20px + env(safe-area-inset-bottom));
+  max-height:78dvh;overflow-y:auto;animation:sheetup .28s ease-out;border-top:2px solid #ffffff22}
+@keyframes sheetup{from{transform:translateY(60px);opacity:0}}
+.sheet h2{font-family:'Jua';font-size:19px;color:var(--glow);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.sheet h2 .close{font-size:14px;background:#ffffff18;border:none;color:#fff;border-radius:99px;padding:5px 13px;cursor:pointer;font-family:'Jua'}
+.item{display:flex;align-items:center;gap:10px;background:#ffffff0a;border:1.5px solid #ffffff14;border-radius:14px;padding:11px 12px;margin-bottom:9px}
+.item .info{flex:1}
+.item .name{font-family:'Jua';font-size:15px}
+.item .desc{font-size:12px;opacity:.65;margin-top:2px}
+.buybtn{font-family:'Jua';font-size:13.5px;border:none;border-radius:10px;padding:9px 12px;cursor:pointer;
+  background:var(--glow);color:#3a2200;white-space:nowrap;box-shadow:0 3px 0 #b97e1e}
+.buybtn:disabled{background:#555c70;color:#aaa;box-shadow:none}
+.buybtn:not(:disabled):active{transform:translateY(2px);box-shadow:0 1px 0 #b97e1e}
+.sect{font-family:'Jua';font-size:13px;opacity:.6;margin:14px 0 8px}
+
+.center-modal{align-items:center}
+.card{width:88%;max-width:340px;background:#20283e;border-radius:22px;padding:24px 20px;text-align:center;
+  border:2px solid #ffffff22;animation:sheetup .3s ease-out}
+.card h2{font-family:'Jua';font-size:22px;color:var(--glow);margin-bottom:14px}
+.card .row{display:flex;justify-content:space-between;font-size:15px;padding:7px 6px;border-bottom:1px dashed #ffffff1c}
+.card .row b{font-family:'Jua'}
+.bigbtn{margin-top:14px;width:100%;font-family:'Jua';font-size:17px;padding:13px;border:none;border-radius:14px;
+  background:var(--tarp);color:#fff;cursor:pointer;box-shadow:0 4px 0 #c4531d}
+.bigbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #c4531d}
+.bigbtn.blue{background:#4d7bd6;box-shadow:0 4px 0 #35569a}
+.bigbtn.blue:active{box-shadow:0 1px 0 #35569a}
+.bigbtn.ghost{background:#ffffff14;box-shadow:0 4px 0 #ffffff0a;color:var(--ink)}
+.bigbtn:disabled{background:#555c70;box-shadow:none;color:#aaa}
+.card p.tip{font-size:12px;opacity:.6;margin-top:10px;line-height:1.5}
+.codebox{font-family:'Jua';font-size:34px;letter-spacing:10px;background:#ffffff10;border:2px dashed #ffb34766;
+  border-radius:14px;padding:12px 6px 12px 16px;margin:10px 0;color:var(--glow)}
+.codeinput{width:100%;font-family:'Jua';font-size:26px;letter-spacing:8px;text-align:center;background:#ffffff10;
+  border:2px solid #ffffff33;border-radius:14px;padding:12px;color:var(--ink);margin:10px 0;text-transform:uppercase;outline:none}
+.codeinput:focus{border-color:var(--glow)}
+.waitdots::after{content:'…';animation:dots 1.2s steps(3) infinite}
+@keyframes dots{0%{content:'.'}50%{content:'..'}100%{content:'...'}}
+.rolecard{display:flex;gap:8px;margin:10px 0 2px}
+.rolecard div{flex:1;background:#ffffff0d;border:1.5px solid #ffffff1c;border-radius:12px;padding:10px 6px;font-size:12px;line-height:1.5}
+.rolecard b{font-family:'Jua';font-size:14px;color:var(--glow);display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="stat">💰 <span id="money">15,000</span><small>원</small></div>
+    <div class="stat" style="font-size:14px">DAY <span id="day">1</span></div>
+    <div id="dayBar"><div id="dayFill"></div></div>
+    <div class="stat" id="rep">❤️ 3.0</div>
+  </header>
+
+  <div id="roleBar">
+    <span id="roleBadge">🔥 굽기 담당</span>
+    <span><i id="netDot"></i> <span id="netLbl">서버</span></span>
+    <span><i id="partnerDot"></i> <span id="partnerLbl">파트너 대기중</span></span>
+    <span id="roomCodeTag"></span>
+  </div>
+
+  <div id="rushBanner">🔥 러시아워! 손님이 몰려와요!</div>
+
+  <div id="customers"></div>
+
+  <div id="stall">
+    <div class="tarpline"></div>
+    <div class="stallname">🐟 우리동네 붕어빵</div>
+    <div id="griddle"></div>
+    <div id="sellerPanel">
+      <div class="big">🔥 파트너가 열심히 굽는 중</div>
+      <div class="sub">완성된 붕어빵이 쟁반에 올라오면<br>손님을 탭해서 판매하세요!<br><span id="prodInfo" style="color:var(--glow)"></span></div>
+    </div>
+  </div>
+
+  <div id="pingRow"></div>
+
+  <div id="bottom">
+    <div class="fillrow" id="fillrow"></div>
+    <div class="trayrow">
+      <span class="lbl">쟁반</span>
+      <span class="traycount">🟤 <span id="trayRed">0</span></span>
+      <span class="traycount" id="trayCreamWrap" style="display:none">🟡 <span id="trayCream">0</span></span>
+      <span class="traycount" style="opacity:.75;font-size:13px">반죽 <span id="batterCnt">10</span></span>
+      <button id="shopBtn">🛒 상점</button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <!-- 상점 -->
+  <div class="modal" id="shopModal">
+    <div class="sheet">
+      <h2>재료 · 업그레이드 <button class="close" id="shopClose">닫기</button></h2>
+      <div class="sect">재료 (누구나 구매 가능 — 공동 금고에서 차감)</div>
+      <div class="item"><div class="info"><div class="name">반죽 10개</div><div class="desc">붕어빵의 기본! 없으면 못 구워요</div></div><button class="buybtn" data-buy="batter">1,000원</button></div>
+      <div class="item"><div class="info"><div class="name">팥 앙금 10개</div><div class="desc">달콤한 국민 필링</div></div><button class="buybtn" data-buy="red">800원</button></div>
+      <div class="item" id="creamBuyRow" style="display:none"><div class="info"><div class="name">슈크림 10개</div><div class="desc">부드럽고 인기 많은 필링</div></div><button class="buybtn" data-buy="cream">1,200원</button></div>
+      <div class="sect" id="upSect">업그레이드 <span id="upNote" style="font-family:'Gowun Dodum';font-size:11px"></span></div>
+      <div class="item up-item"><div class="info"><div class="name">화로 확장 (틀 +1)</div><div class="desc">한 번에 더 많이 구워요 (최대 6칸)</div></div><button class="buybtn" data-buy="mold">8,000원</button></div>
+      <div class="item up-item"><div class="info"><div class="name">두꺼운 장갑</div><div class="desc">노릇노릇 타이밍이 2초 길어져요</div></div><button class="buybtn" data-buy="glove">6,000원</button></div>
+      <div class="item up-item"><div class="info"><div class="name">슈크림 메뉴 개발</div><div class="desc">🟡 슈크림 붕어빵 판매! (개당 1,000원, 즉시 10개 증정)</div></div><button class="buybtn" data-buy="creamMenu">12,000원</button></div>
+    </div>
+  </div>
+
+  <!-- 하루 결산 -->
+  <div class="modal center-modal" id="dayModal">
+    <div class="card">
+      <h2>🌙 DAY <span id="sumDay">1</span> 마감!</h2>
+      <div class="row"><span>오늘 매출</span><b id="sumSales">0원</b></div>
+      <div class="row"><span>판매한 붕어빵</span><b id="sumSold">0개</b></div>
+      <div class="row"><span>놓친 손님</span><b id="sumMissed">0명</b></div>
+      <div class="row"><span>태운 붕어빵</span><b id="sumBurnt">0개</b></div>
+      <div class="row"><span>평판</span><b id="sumRep">❤️ 3.0</b></div>
+      <button class="bigbtn" id="nextDayBtn">다음 날 장사 시작 →</button>
+      <p class="tip" id="sumTip"></p>
+    </div>
+  </div>
+
+  <!-- 시작 화면 -->
+  <div class="modal center-modal open" id="startModal">
+    <div class="card" id="menuCard">
+      <h2>🐟 붕어빵 타이쿤</h2>
+      <p style="font-size:13.5px;line-height:1.7;opacity:.85">친구와 함께 포장마차를 운영하세요!<br>한 명은 굽고, 한 명은 팔고 🔥💰</p>
+      <button class="bigbtn" id="soloBtn">🐟 혼자 하기</button>
+      <button class="bigbtn blue" id="hostBtn">🔥 방 만들기 (굽기 담당)</button>
+      <button class="bigbtn ghost" id="joinBtn">💰 코드로 참가 (판매 담당)</button>
+      <p class="tip" id="storageNote">협동 모드는 무료 공개 테스트 서버로 실시간 연결돼요.<br>프로토타입이라 코드를 아는 사람은 누구나 입장할 수 있어요.</p>
+    </div>
+
+    <div class="card" id="hostCard" style="display:none">
+      <h2>🔥 방 만들기</h2>
+      <p style="font-size:13.5px;opacity:.85" id="hostSub">친구에게 이 코드를 알려주세요!</p>
+      <div class="codebox" id="roomCodeBig">----</div>
+      <div class="rolecard">
+        <div><b>🔥 나 (굽기)</b>반죽 붓고<br>뒤집고 꺼내기</div>
+        <div><b>💰 친구 (판매)</b>손님 응대<br>주문 판매</div>
+      </div>
+      <p style="font-size:13px;margin-top:10px" id="hostWaitMsg" class="waitdots">파트너 접속 대기중</p>
+      <button class="bigbtn" id="hostStartBtn" disabled>장사 시작!</button>
+      <button class="bigbtn ghost" id="hostBackBtn">← 뒤로</button>
+    </div>
+
+    <div class="card" id="joinCard" style="display:none">
+      <h2>💰 코드로 참가</h2>
+      <p style="font-size:13.5px;opacity:.85">사장님(친구)에게 받은 4자리 코드 입력</p>
+      <input class="codeinput" id="codeInput" maxlength="4" placeholder="ABCD" autocomplete="off">
+      <button class="bigbtn blue" id="joinGoBtn">입장하기</button>
+      <button class="bigbtn ghost" id="joinBackBtn">← 뒤로</button>
+    </div>
+
+    <div class="card" id="guestWaitCard" style="display:none">
+      <h2>💰 입장 완료!</h2>
+      <p style="font-size:14px;line-height:1.8">당신은 <b style="color:var(--glow)">판매 담당</b>이에요.<br>손님 주문을 받고 붕어빵을 파세요!</p>
+      <p style="font-size:13px;margin-top:12px" class="waitdots">사장님이 장사를 시작하길 기다리는 중</p>
+    </div>
+
+    <div class="card" id="soloHelpCard" style="display:none">
+      <h2>🐟 혼자 연습하기</h2>
+      <p style="font-size:14px;line-height:1.7;text-align:left;opacity:.9">
+        ① 빈 틀을 눌러 반죽을 부어요<br>
+        ② <b style="color:var(--glow)">"뒤집어!"</b> 뜨면 바로 탭!<br>
+        ③ <b style="color:var(--ok)">"꺼내!"</b> 타이밍에 탭하면 완성<br>
+        ④ 손님을 눌러 주문대로 판매 💰
+      </p>
+      <button class="bigbtn" id="soloStartBtn">장사 시작!</button>
+      <button class="bigbtn ghost" id="soloBackBtn">← 뒤로</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════ 유틸 ═══════════ */
+const $=s=>document.querySelector(s);
+const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+let toastTimer;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.style.opacity=1;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.style.opacity=0,1800);}
+function floatMoney(x,y,txt){const el=document.createElement('div');el.className='floatmoney';el.textContent=txt;el.style.left=x+'px';el.style.top=y+'px';$('#app').appendChild(el);setTimeout(()=>el.remove(),1000);}
+for(let i=0;i<14;i++){const s=document.createElement('div');s.className='snow';s.textContent='❄';
+s.style.left=Math.random()*100+'%';s.style.animationDuration=(6+Math.random()*7)+'s';
+s.style.animationDelay=(-Math.random()*10)+'s';s.style.fontSize=(7+Math.random()*7)+'px';$('#app').appendChild(s);}
+
+/* ═══════════ 상수 ═══════════ */
+const FILLS={red:{name:'팥',emoji:'🟤',price:700},cream:{name:'슈크림',emoji:'🟡',price:1000}};
+const DAY_LEN=120, START_MONEY=15000, START_BATTER=10, START_RED=10;
+const T={cook1:4,flipWin:3,cook2:4,burnAfterFlipMiss:4};
+
+/* ═══════════ 로컬 상태 ═══════════ */
+const S={
+  running:false,paused:false,mode:'solo',
+  day:1,time:0,
+  money:START_MONEY,rep:3.0,batter:START_BATTER,stock:{red:START_RED,cream:0},
+  creamUnlocked:false,perfectBonus:0,moldCount:3,
+  selFill:'red',tray:{red:0,cream:0},
+  molds:[],customers:[],spawnTimer:3,
+  daySales:0,daySold:0,dayMissed:0,dayBurnt:0,
+};
+for(let i=0;i<6;i++)S.molds.push({st:'empty',fill:null,t:0});
+
+/* ═══════════ 멀티플레이: 공개 MQTT 브로커 실시간 동기화 ═══════════ */
+function emptyBlob(){return{prod:{red:0,cream:0},sold:{red:0,cream:0},cons:{batter:0,red:0,cream:0},
+  buy:{batter:0,red:0,cream:0},spend:0,earned:0,burnt:0,missed:0,served:0,
+  up:{mold:3,glove:0,cream:false},ping:null,hb:Date.now()};}
+const MP={
+  active:false,role:null,code:null,
+  me:emptyBlob(),other:null,meta:null,
+  lastPingSeen:0,lastStartedAt:-1,summaryShownFor:0,snap:null,
+};
+const BROKERS=[
+  'wss://mqtt.eclipseprojects.io:443/mqtt', /* 443 포트: 어떤 네트워크에서도 잘 뚫림 */
+  'wss://broker.emqx.io:8084/mqtt',
+  'wss://broker.hivemq.com:8884/mqtt',
+  'wss://test.mosquitto.org:8081',
+];
+let client=null,netOn=false;
+const mqttOK=()=>typeof mqtt!=='undefined';
+const TOPIC_ROOT='bungeo-tycoon-v1';
+const tMeta=()=>`${TOPIC_ROOT}/${MP.code}/meta`;
+const tMe=()=>`${TOPIC_ROOT}/${MP.code}/${MP.role}`;
+const tOther=()=>`${TOPIC_ROOT}/${MP.code}/${MP.role==='host'?'guest':'host'}`;
+
+function connectBroker(onReady,onFail){
+  if(client){onReady();return;}
+  let idx=0;
+  const tried=[];
+  function tryNext(){
+    if(idx>=BROKERS.length){onFail('모든 서버 연결 실패 ('+tried.join(', ')+')');return;}
+    const url=BROKERS[idx++];
+    const shortName=url.replace('wss://','').split(/[:/]/)[0];
+    toast(`서버 ${idx}/${BROKERS.length} 연결 시도중: ${shortName}…`);
+    let settled=false;
+    let c;
+    try{
+      c=mqtt.connect(url,{clientId:'bp_'+Math.random().toString(16).slice(2,12),
+        keepalive:30,connectTimeout:9000,reconnectPeriod:2500,clean:true});
+    }catch(e){tried.push(shortName+':예외');tryNext();return;}
+    const to=setTimeout(()=>{if(!settled){settled=true;tried.push(shortName+':시간초과');try{c.end(true);}catch(e){}tryNext();}},10000);
+    c.on('connect',()=>{
+      if(!settled){
+        settled=true;clearTimeout(to);
+        client=c;netOn=true;renderNet();
+        client.on('message',(t,p)=>handleMsg(t,p.toString()));
+        client.on('close',()=>{netOn=false;renderNet();});
+        client.on('reconnect',()=>{});
+        client.on('connect',()=>{netOn=true;renderNet();resubscribe();});
+        onReady();
+      }else{netOn=true;renderNet();resubscribe();}
+    });
+    c.on('error',()=>{});
+  }
+  tryNext();
+}
+function resubscribe(){if(client&&MP.active&&MP.code)client.subscribe([tMeta(),tOther()]);}
+function subscribeRoom(){if(client)client.subscribe([tMeta(),tOther()]);}
+function unsubscribeRoom(){if(client&&MP.code)try{client.unsubscribe([tMeta(),tOther()]);}catch(e){}}
+
+function handleMsg(topic,payload){
+  let obj=null;try{obj=JSON.parse(payload);}catch(e){return;}
+  if(topic===tMeta()){
+    MP.meta=obj;onMetaTick();
+  }else if(topic===tOther()){
+    MP.other=obj;onPingTick();
+    if(joinWait.active&&MP.role==='guest'){/* no-op */}
+  }
+  renderPartner();
+  if(!S.running)renderAll();
+  else renderHUD();
+}
+
+/* 내 상태 발행 (디바운스 + 하트비트) */
+let pubTimer=null;
+function markDirty(){
+  if(!MP.active)return;
+  if(pubTimer)return;
+  pubTimer=setTimeout(()=>{pubTimer=null;pubMe();},350);
+}
+function pubMe(){
+  if(!client||!MP.active)return;
+  MP.me.hb=Date.now();
+  try{client.publish(tMe(),JSON.stringify(MP.me),{retain:true});}catch(e){}
+}
+function pubMeta(){
+  if(!client||!MP.active||MP.role!=='host')return;
+  try{client.publish(tMeta(),JSON.stringify(MP.meta),{retain:true});}catch(e){}
+}
+setInterval(()=>{if(MP.active&&netOn)pubMe();},4000);
+
+/* 파생 경제 상태: 솔로면 S에서, 멀티면 두 블롭 합산 */
+function E(){
+  if(!MP.active){
+    return{money:S.money,tray:S.tray,batter:S.batter,stock:S.stock,rep:S.rep,
+      up:{mold:S.moldCount,glove:S.perfectBonus,cream:S.creamUnlocked}};
+  }
+  const a=MP.me,b=MP.other||emptyBlob();
+  const up={mold:Math.max(a.up.mold,b.up.mold),glove:Math.max(a.up.glove,b.up.glove),cream:a.up.cream||b.up.cream};
+  const tray={
+    red:Math.max(0,a.prod.red+b.prod.red-a.sold.red-b.sold.red),
+    cream:Math.max(0,a.prod.cream+b.prod.cream-a.sold.cream-b.sold.cream),
+  };
+  const money=START_MONEY+a.earned+b.earned-a.spend-b.spend;
+  const batter=START_BATTER+(a.buy.batter+b.buy.batter)*10-(a.cons.batter+b.cons.batter);
+  const stock={
+    red:START_RED+(a.buy.red+b.buy.red)*10-(a.cons.red+b.cons.red),
+    cream:(a.buy.cream+b.buy.cream)*10-(a.cons.cream+b.cons.cream),
+  };
+  const served=a.served+b.served,missed=a.missed+b.missed;
+  const rep=Math.min(5,Math.max(0,3+served*0.1-missed*0.3));
+  return{money,tray,batter,stock,rep,up};
+}
+function combinedStats(){
+  const a=MP.me,b=MP.other||emptyBlob();
+  return{earned:a.earned+b.earned,served:a.served+b.served,missed:a.missed+b.missed,
+    burnt:a.burnt+b.burnt,soldCnt:a.sold.red+b.sold.red+a.sold.cream+b.sold.cream};
+}
+
+function onMetaTick(){
+  const m=MP.meta;if(!m)return;
+  if(m.state==='playing'&&m.startedAt!==MP.lastStartedAt){
+    MP.lastStartedAt=m.startedAt;
+    startDayLocal(m.day);
+  }
+}
+function onPingTick(){
+  const o=MP.other;if(!o||!o.ping)return;
+  if(o.ping.ts>MP.lastPingSeen){
+    MP.lastPingSeen=o.ping.ts;
+    if(Date.now()-o.ping.ts<15000)toast('📢 '+o.ping.msg);
+  }
+}
+function renderNet(){
+  $('#netDot').classList.toggle('on',netOn);
+  $('#netLbl').textContent=netOn?'서버 연결됨':'서버 끊김';
+}
+function renderPartner(){
+  const on=MP.other&&Date.now()-MP.other.hb<12000;
+  $('#partnerDot').classList.toggle('on',!!on);
+  $('#partnerLbl').textContent=on?'파트너 접속중':'파트너 대기중';
+  if(MP.role==='host'){
+    const btn=$('#hostStartBtn');
+    if(btn&&on&&btn.disabled){btn.disabled=false;
+      $('#hostWaitMsg').textContent='파트너 접속 완료! 시작하세요 🎉';
+      $('#hostWaitMsg').classList.remove('waitdots');}
+  }
+  if(MP.role==='guest'&&MP.other){
+    $('#prodInfo').textContent=`지금까지 구운 붕어빵 ${MP.other.prod.red+MP.other.prod.cream}개`;
+  }
+}
+setInterval(()=>{if(MP.active)renderPartner();},2000);
+
+/* 하루 시작(양쪽 공통 로컬 리셋) */
+function startDayLocal(day){
+  S.day=day;S.time=0;
+  S.customers=[];S.spawnTimer=3;
+  S.molds.forEach(m=>{m.st='empty';m.fill=null;m.t=0;});
+  MP.snap=combinedStats();
+  MP.summaryShownFor=0;
+  $('#dayModal').classList.remove('open');
+  $('#startModal').classList.remove('open');
+  S.running=true;S.paused=false;
+  renderAll();
+}
+
+/* ═══════════ 붕어빵 SVG ═══════════ */
+function fishSVG(color,eye){
+  return `<svg viewBox="0 0 100 60">
+    <path d="M8 30 Q8 8 38 8 L64 8 Q86 8 90 22 L98 12 L96 30 L98 48 L90 38 Q86 52 64 52 L38 52 Q8 52 8 30 Z"
+      fill="${color}" stroke="#00000030" stroke-width="2"/>
+    <path d="M30 16 Q34 30 30 44 M42 14 Q46 30 42 46 M54 14 Q58 30 54 46 M66 15 Q70 30 66 45"
+      fill="none" stroke="#00000022" stroke-width="3" stroke-linecap="round"/>
+    ${eye?'<circle cx="20" cy="24" r="3.4" fill="#3a2410"/>':''}
+  </svg>`;
+}
+const COLORS={empty:'#2c2f3a',cook1:'#f2dfb6',flip:'#eecf96',cook2:'#e0b06a',perfect:'#d98a2b',burnt:'#4a2e1c'};
+
+/* ═══════════ 렌더링 ═══════════ */
+function renderGriddle(){
+  if(MP.active&&MP.role==='guest')return;
+  const e=E();
+  const g=$('#griddle');g.innerHTML='';
+  for(let i=0;i<6;i++){
+    const m=S.molds[i];
+    const d=document.createElement('div');
+    d.className='mold '+(i>=e.up.mold?'locked':m.st);
+    if(i<e.up.mold){
+      d.innerHTML=fishSVG(COLORS[m.st]||COLORS.empty,m.st!=='empty');
+      let tag='';
+      if(m.st==='empty')tag='탭해서 반죽 붓기';
+      else if(m.st==='cook1'||m.st==='cook2')tag='굽는 중… 🔥';
+      else if(m.st==='flip')tag='뒤집어! 👆';
+      else if(m.st==='perfect')tag='꺼내! ✨';
+      else if(m.st==='burnt')tag='탔다… 탭해서 버리기';
+      d.innerHTML+=`<div class="tag">${tag}</div>`;
+      if(m.st==='cook1'||m.st==='cook2'||m.st==='perfect')d.innerHTML+=`<div class="steam">♨️</div>`;
+      d.addEventListener('click',ev=>tapMold(i,ev));
+    }else d.innerHTML='<div style="font-size:20px;opacity:.5">🔒</div>';
+    g.appendChild(d);
+  }
+}
+function renderFills(){
+  const e=E();
+  const row=$('#fillrow');row.innerHTML='';
+  ['red','cream'].forEach(k=>{
+    if(k==='cream'&&!e.up.cream)return;
+    const f=FILLS[k];
+    const b=document.createElement('button');
+    b.className='fillbtn'+(S.selFill===k?' sel':'');
+    b.innerHTML=`${f.emoji} ${f.name}<small>재고 ${e.stock[k]} · ${fmt(f.price)}원</small>`;
+    b.onclick=()=>{S.selFill=k;renderFills();};
+    row.appendChild(b);
+  });
+}
+function renderHUD(){
+  const e=E();
+  $('#money').textContent=fmt(e.money);
+  $('#day').textContent=S.day;
+  $('#rep').textContent='❤️ '+e.rep.toFixed(1);
+  $('#trayRed').textContent=e.tray.red;
+  $('#trayCream').textContent=e.tray.cream;
+  $('#trayCreamWrap').style.display=e.up.cream?'flex':'none';
+  $('#batterCnt').textContent=e.batter;
+  $('#dayFill').style.width=Math.min(100,S.time/DAY_LEN*100)+'%';
+}
+function renderCustomers(){
+  if(MP.active&&MP.role==='host')return;
+  const e=E();
+  const c=$('#customers');c.innerHTML='';
+  S.customers.forEach((cu,idx)=>{
+    const d=document.createElement('div');
+    const canServe=Object.keys(cu.order).every(k=>e.tray[k]>=cu.order[k]);
+    d.className='customer'+(canServe?' servable':'');
+    const orderHtml=Object.keys(cu.order).map(k=>`<span>${FILLS[k].emoji}×${cu.order[k]}</span>`).join('');
+    const pct=cu.patience/cu.maxPatience*100;
+    d.innerHTML=`<div class="face">${cu.face}</div><div class="order">${orderHtml}</div>
+      <div class="patience"><i class="${pct<35?'low':''}" style="width:${pct}%"></i></div>`;
+    d.addEventListener('click',ev=>serveCustomer(idx,ev));
+    c.appendChild(d);
+  });
+}
+function renderPings(){
+  const row=$('#pingRow');row.innerHTML='';
+  if(!MP.active)return;
+  const msgs=MP.role==='host'
+    ?['✨ 붕어빵 나왔어!','🆘 재료 좀 사줘!','🔥 러시아워 힘내!']
+    :['🙏 붕어빵 더 줘!','💰 방금 팔았어!','👍 잘하고 있어!'];
+  msgs.forEach(m=>{
+    const b=document.createElement('button');b.className='pingbtn';b.textContent=m;
+    b.onclick=()=>{MP.me.ping={msg:m,ts:Date.now()};markDirty();toast('전송! 📢');};
+    row.appendChild(b);
+  });
+}
+function renderAll(){renderGriddle();renderFills();renderHUD();renderCustomers();}
+
+/* ═══════════ 상호작용 ═══════════ */
+function tapMold(i,ev){
+  if(MP.active&&MP.role!=='host')return;
+  const m=S.molds[i];const e=E();
+  if(m.st==='empty'){
+    if(e.batter<=0){toast('반죽이 없어요! 🛒 상점에서 구매');return;}
+    if(e.stock[S.selFill]<=0){toast(FILLS[S.selFill].name+' 재고가 없어요!');return;}
+    if(MP.active){MP.me.cons.batter++;MP.me.cons[S.selFill]++;markDirty();}
+    else{S.batter--;S.stock[S.selFill]--;}
+    m.st='cook1';m.fill=S.selFill;m.t=0;
+    renderFills();
+  }else if(m.st==='flip'){m.st='cook2';m.t=0;toast('촤악~ 잘 뒤집었어요! 🐟');}
+  else if(m.st==='perfect'){
+    if(MP.active){MP.me.prod[m.fill]++;markDirty();}
+    else S.tray[m.fill]++;
+    m.st='empty';m.fill=null;m.t=0;toast('노릇노릇 완성! ✨');
+  }else if(m.st==='burnt'){
+    if(MP.active){MP.me.burnt++;markDirty();}
+    m.st='empty';m.fill=null;m.t=0;S.dayBurnt++;toast('까맣게 탔어요… 🥲');
+  }
+  renderGriddle();renderHUD();
+}
+function serveCustomer(idx,ev){
+  if(MP.active&&MP.role!=='guest')return;
+  const cu=S.customers[idx];if(!cu||cu.leaving)return;
+  const e=E();
+  const can=Object.keys(cu.order).every(k=>e.tray[k]>=cu.order[k]);
+  if(!can){toast('붕어빵이 모자라요!');return;}
+  let pay=0,cnt=0;
+  Object.keys(cu.order).forEach(k=>{
+    if(MP.active)MP.me.sold[k]+=cu.order[k];
+    else S.tray[k]-=cu.order[k];
+    pay+=FILLS[k].price*cu.order[k];cnt+=cu.order[k];
+  });
+  if(cu.patience/cu.maxPatience>0.6)pay=Math.round(pay*1.2);
+  if(MP.active){MP.me.earned+=pay;MP.me.served++;markDirty();}
+  else{S.money+=pay;S.rep=Math.min(5,S.rep+0.1);}
+  S.daySales+=pay;S.daySold+=cnt;
+  cu.leaving=true;
+  const r=ev.currentTarget.getBoundingClientRect(),a=$('#app').getBoundingClientRect();
+  floatMoney(r.left-a.left+r.width/2-20,r.top-a.top,'+'+fmt(pay)+'원');
+  renderCustomers();renderHUD();
+  setTimeout(()=>{S.customers.splice(S.customers.indexOf(cu),1);renderCustomers();},380);
+}
+
+/* ═══════════ 손님 ═══════════ */
+const FACES=['🧑','👵','👦','👩','🧔','👧','🧓','👨‍🦰','🙎‍♀️','👶'];
+function spawnCustomer(){
+  if(S.customers.length>=3)return;
+  const e=E();
+  const kinds=e.up.cream?['red','cream']:['red'];
+  const order={};
+  const n=1+Math.floor(Math.random()*Math.min(3,1+S.day*0.5));
+  for(let i=0;i<n;i++){const k=kinds[Math.floor(Math.random()*kinds.length)];order[k]=(order[k]||0)+1;}
+  const maxP=Math.max(14,26-S.day*1.5);
+  S.customers.push({face:FACES[Math.floor(Math.random()*FACES.length)],order,patience:maxP,maxPatience:maxP,leaving:false});
+  renderCustomers();
+}
+
+/* ═══════════ 메인 루프 ═══════════ */
+let last=0;
+function loop(ts){
+  requestAnimationFrame(loop);
+  if(!S.running||S.paused){last=ts;return;}
+  const dt=Math.min(0.25,(ts-last)/1000||0);last=ts;
+
+  if(MP.active&&MP.meta&&MP.meta.state!=='waiting'){
+    S.time=(Date.now()-MP.meta.startedAt)/1000;
+  }else S.time+=dt;
+
+  const rush=S.time>DAY_LEN*0.5&&S.time<DAY_LEN*0.75;
+  $('#rushBanner').classList.toggle('on',rush);
+
+  const isSeller=!MP.active||MP.role==='guest';
+  const isBaker=!MP.active||MP.role==='host';
+
+  if(isSeller){
+    const e=E();
+    S.spawnTimer-=dt*(rush?2.2:1)*(1+(e.rep-3)*0.15);
+    if(S.spawnTimer<=0){spawnCustomer();S.spawnTimer=Math.max(2.5,7-S.day*0.4)+Math.random()*3;}
+    let dirtyC=false;
+    S.customers.forEach(cu=>{
+      if(cu.leaving)return;
+      cu.patience-=dt;dirtyC=true;
+      if(cu.patience<=0){
+        cu.leaving=true;S.dayMissed++;
+        if(MP.active){MP.me.missed++;markDirty();}
+        else S.rep=Math.max(0,S.rep-0.3);
+        toast('손님이 화나서 떠났어요… 💢');
+        setTimeout(()=>{S.customers.splice(S.customers.indexOf(cu),1);renderCustomers();},380);
+      }
+    });
+    if(dirtyC)renderCustomers();
+  }
+
+  if(isBaker){
+    const e=E();
+    let dirtyM=false;
+    S.molds.forEach((m,i)=>{
+      if(i>=e.up.mold)return;
+      if(m.st==='cook1'){m.t+=dt;if(m.t>=T.cook1){m.st='flip';m.t=0;dirtyM=true;}}
+      else if(m.st==='flip'){m.t+=dt;if(m.t>=T.flipWin+T.burnAfterFlipMiss){m.st='burnt';m.t=0;dirtyM=true;}}
+      else if(m.st==='cook2'){m.t+=dt;if(m.t>=T.cook2){m.st='perfect';m.t=0;dirtyM=true;}}
+      else if(m.st==='perfect'){m.t+=dt;if(m.t>=4+e.up.glove){m.st='burnt';m.t=0;dirtyM=true;}}
+    });
+    if(dirtyM)renderGriddle();
+  }
+
+  renderHUD();
+
+  if(S.time>=DAY_LEN)endDay();
+}
+requestAnimationFrame(loop);
+
+/* ═══════════ 하루 결산 ═══════════ */
+function endDay(){
+  if(MP.active){
+    if(MP.summaryShownFor===S.day)return;
+    MP.summaryShownFor=S.day;
+    S.running=false;
+    $('#rushBanner').classList.remove('on');
+    if(MP.role==='host'&&MP.meta&&MP.meta.state==='playing'){
+      MP.meta.state='summary';pubMeta();
+    }
+    const cur=combinedStats(),sn=MP.snap||{earned:0,served:0,missed:0,burnt:0,soldCnt:0};
+    const e=E();
+    $('#sumDay').textContent=S.day;
+    $('#sumSales').textContent=fmt(cur.earned-sn.earned)+'원';
+    $('#sumSold').textContent=(cur.soldCnt-sn.soldCnt)+'개';
+    $('#sumMissed').textContent=(cur.missed-sn.missed)+'명';
+    $('#sumBurnt').textContent=(cur.burnt-sn.burnt)+'개';
+    $('#sumRep').textContent='❤️ '+e.rep.toFixed(1);
+    $('#sumTip').textContent=MP.role==='guest'?'사장님이 다음 날을 시작하길 기다리는 중…':'준비되면 다음 날을 시작하세요!';
+    $('#nextDayBtn').style.display=MP.role==='host'?'block':'none';
+    $('#dayModal').classList.add('open');
+    return;
+  }
+  S.running=false;
+  $('#rushBanner').classList.remove('on');
+  $('#sumDay').textContent=S.day;
+  $('#sumSales').textContent=fmt(S.daySales)+'원';
+  $('#sumSold').textContent=S.daySold+'개';
+  $('#sumMissed').textContent=S.dayMissed+'명';
+  $('#sumBurnt').textContent=S.dayBurnt+'개';
+  $('#sumRep').textContent='❤️ '+S.rep.toFixed(1);
+  const tips=[];
+  if(S.dayBurnt>2)tips.push('타이밍을 놓치면 재료가 아까워요!');
+  if(S.dayMissed>2)tips.push('손님을 놓치면 평판이 떨어져요. 미리 구워두세요!');
+  if(S.money>=8000)tips.push('화로를 확장하면 러시아워가 수월해져요.');
+  $('#sumTip').textContent=tips[0]||'내일도 노릇노릇하게! 🐟';
+  $('#nextDayBtn').style.display='block';
+  $('#dayModal').classList.add('open');
+}
+$('#nextDayBtn').onclick=()=>{
+  if(MP.active){
+    if(MP.role!=='host')return;
+    MP.meta={day:S.day+1,state:'playing',startedAt:Date.now()};
+    pubMeta();
+    MP.lastStartedAt=MP.meta.startedAt;
+    startDayLocal(MP.meta.day);
+    return;
+  }
+  S.day++;S.time=0;S.daySales=0;S.daySold=0;S.dayMissed=0;S.dayBurnt=0;
+  S.customers=[];S.spawnTimer=3;
+  S.molds.forEach(m=>{m.st='empty';m.fill=null;m.t=0;});
+  $('#dayModal').classList.remove('open');
+  renderAll();S.running=true;
+};
+
+/* ═══════════ 상점 ═══════════ */
+$('#shopBtn').onclick=()=>{
+  if(!MP.active)S.paused=true;
+  const e=E();
+  $('#creamBuyRow').style.display=e.up.cream?'flex':'none';
+  const sellerLock=MP.active&&MP.role==='guest';
+  document.querySelectorAll('.up-item').forEach(el=>el.style.opacity=sellerLock?.45:1);
+  $('#upNote').textContent=sellerLock?'(굽기 담당만 구매 가능)':'';
+  updateShopBtns();
+  $('#shopModal').classList.add('open');
+};
+$('#shopClose').onclick=()=>{S.paused=false;$('#shopModal').classList.remove('open');};
+function updateShopBtns(){
+  const e=E();
+  const sellerLock=MP.active&&MP.role==='guest';
+  document.querySelectorAll('[data-buy]').forEach(b=>{
+    const k=b.dataset.buy;
+    if(k==='mold'){b.disabled=sellerLock||e.up.mold>=6||e.money<8000;if(e.up.mold>=6)b.textContent='최대!';}
+    else if(k==='glove'){b.disabled=sellerLock||e.up.glove>0||e.money<6000;if(e.up.glove>0)b.textContent='보유중';}
+    else if(k==='creamMenu'){b.disabled=sellerLock||e.up.cream||e.money<12000;if(e.up.cream)b.textContent='보유중';}
+    else if(k==='batter')b.disabled=e.money<1000;
+    else if(k==='red')b.disabled=e.money<800;
+    else if(k==='cream')b.disabled=e.money<1200;
+  });
+}
+document.querySelectorAll('[data-buy]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const k=b.dataset.buy;const e=E();
+    const pay=(cost)=>{if(e.money<cost){toast('돈이 부족해요!');return false;}
+      if(MP.active){MP.me.spend+=cost;}else S.money-=cost;return true;};
+    if(k==='batter'&&pay(1000)){MP.active?MP.me.buy.batter++:S.batter+=10;toast('반죽 +10 🥣');}
+    if(k==='red'&&pay(800)){MP.active?MP.me.buy.red++:S.stock.red+=10;toast('팥 +10 🟤');}
+    if(k==='cream'&&pay(1200)){MP.active?MP.me.buy.cream++:S.stock.cream+=10;toast('슈크림 +10 🟡');}
+    if(k==='mold'&&e.up.mold<6&&pay(8000)){MP.active?MP.me.up.mold++:S.moldCount++;toast('화로 확장! 🔥');}
+    if(k==='glove'&&!e.up.glove&&pay(6000)){MP.active?MP.me.up.glove=2:S.perfectBonus=2;toast('장갑 장착! 🧤');}
+    if(k==='creamMenu'&&!e.up.cream&&pay(12000)){
+      if(MP.active){MP.me.up.cream=true;MP.me.buy.cream++;}
+      else{S.creamUnlocked=true;S.stock.cream+=10;}
+      toast('슈크림 메뉴 개발 완료! 🟡');
+    }
+    if(MP.active)markDirty();
+    renderAll();updateShopBtns();
+  });
+});
+
+/* ═══════════ 시작 화면 & 로비 ═══════════ */
+function showCard(id){
+  ['menuCard','hostCard','joinCard','guestWaitCard','soloHelpCard'].forEach(c=>$('#'+c).style.display=c===id?'block':'none');
+}
+$('#soloBtn').onclick=()=>showCard('soloHelpCard');
+$('#soloBackBtn').onclick=()=>showCard('menuCard');
+$('#soloStartBtn').onclick=()=>{S.mode='solo';$('#startModal').classList.remove('open');S.running=true;};
+
+const CODE_CHARS='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+const genCode=()=>Array.from({length:4},()=>CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]).join('');
+
+/* 방 만들기 */
+$('#hostBtn').onclick=()=>{
+  if(!mqttOK()){toast('네트워크 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인하세요.');return;}
+  MP.code=genCode();MP.role='host';MP.active=true;MP.me=emptyBlob();
+  MP.other=null;MP.meta={day:1,state:'waiting',startedAt:0};MP.lastStartedAt=-1;
+  document.body.classList.add('multi','role-host');
+  document.body.classList.remove('role-guest');
+  $('#roleBadge').textContent='🔥 굽기 담당';
+  $('#roomCodeTag').textContent='#'+MP.code;
+  $('#roomCodeBig').textContent='접속중…';
+  $('#hostStartBtn').disabled=true;
+  $('#hostWaitMsg').textContent='파트너 접속 대기중';
+  $('#hostWaitMsg').classList.add('waitdots');
+  showCard('hostCard');renderPings();renderNet();
+  connectBroker(()=>{
+    subscribeRoom();
+    pubMeta();pubMe();
+    $('#roomCodeBig').textContent=MP.code;
+    toast('서버 연결 완료! 친구에게 코드를 알려주세요 📡');
+  },err=>{
+    toast('서버 연결 실패: '+err);
+    MP.active=false;document.body.classList.remove('multi','role-host');
+    showCard('menuCard');
+  });
+};
+$('#hostBackBtn').onclick=()=>{
+  unsubscribeRoom();MP.active=false;
+  document.body.classList.remove('multi','role-host');
+  showCard('menuCard');
+};
+$('#hostStartBtn').onclick=()=>{
+  MP.meta={day:1,state:'playing',startedAt:Date.now()};
+  pubMeta();
+  MP.lastStartedAt=MP.meta.startedAt;
+  S.mode='host';startDayLocal(1);
+};
+
+/* 코드로 참가 */
+const joinWait={active:false,timer:null};
+$('#joinBtn').onclick=()=>{
+  if(!mqttOK()){toast('네트워크 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인하세요.');return;}
+  showCard('joinCard');setTimeout(()=>$('#codeInput').focus(),200);
+};
+$('#joinBackBtn').onclick=()=>{
+  if(joinWait.timer){clearTimeout(joinWait.timer);joinWait.timer=null;}
+  joinWait.active=false;
+  if(MP.active){unsubscribeRoom();MP.active=false;document.body.classList.remove('multi','role-guest');}
+  showCard('menuCard');
+};
+$('#joinGoBtn').onclick=()=>{
+  const code=$('#codeInput').value.trim().toUpperCase();
+  if(code.length!==4){toast('4자리 코드를 입력하세요');return;}
+  $('#joinGoBtn').disabled=true;
+  MP.code=code;MP.role='guest';MP.me=emptyBlob();MP.other=null;MP.meta=null;MP.lastStartedAt=-1;
+  connectBroker(()=>{
+    MP.active=true;
+    subscribeRoom();
+    joinWait.active=true;
+    /* 방(호스트의 retained meta)이 오는지 4초 대기 */
+    joinWait.timer=setTimeout(()=>{
+      joinWait.timer=null;joinWait.active=false;
+      $('#joinGoBtn').disabled=false;
+      if(!MP.meta){
+        unsubscribeRoom();MP.active=false;
+        toast('방을 찾을 수 없어요 🥲 코드를 확인하세요');
+        return;
+      }
+      enterAsGuest();
+    },4000);
+    /* meta가 즉시 도착하면 빨리 입장 */
+    const quick=setInterval(()=>{
+      if(MP.meta&&joinWait.active){
+        clearInterval(quick);
+        if(joinWait.timer){clearTimeout(joinWait.timer);joinWait.timer=null;}
+        joinWait.active=false;$('#joinGoBtn').disabled=false;
+        enterAsGuest();
+      }else if(!joinWait.active)clearInterval(quick);
+    },200);
+  },err=>{
+    $('#joinGoBtn').disabled=false;
+    toast('서버 연결 실패: '+err);
+  });
+};
+function enterAsGuest(){
+  document.body.classList.add('multi','role-guest');
+  document.body.classList.remove('role-host');
+  $('#roleBadge').textContent='💰 판매 담당';
+  $('#roomCodeTag').textContent='#'+MP.code;
+  S.mode='guest';
+  renderPings();renderNet();
+  pubMe();
+  if(MP.meta.state==='playing'){
+    MP.lastStartedAt=MP.meta.startedAt;
+    startDayLocal(MP.meta.day);
+  }else{
+    showCard('guestWaitCard');
+  }
+  toast('입장 완료! 💰');
+}
+
+/* 초기 렌더 */
+window.addEventListener('load',()=>{
+  if(!mqttOK())$('#storageNote').innerHTML='⚠️ 네트워크 라이브러리 로드 실패.<br>인터넷 연결 후 새로고침 해주세요.';
+});
+renderAll();
+</script>
+</body>
+</html>
