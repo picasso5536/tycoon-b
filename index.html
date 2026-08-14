@@ -144,6 +144,51 @@ body.deco-snowman #snowmanDeco{display:block}
 #plantDeco{display:none;position:absolute;bottom:2px;left:44px;font-size:20px;z-index:4;pointer-events:none}
 body.deco-plant #plantDeco{display:block}
 @keyframes cattail{0%,100%{transform:scaleX(1)}50%{transform:scaleX(-1)}}
+/* 아바타 캐릭터: 천막 아래에 서 있는 사장님 */
+#avatarChar{position:absolute;top:44px;left:14px;font-size:30px;z-index:5;pointer-events:none;
+  animation:avbob 2s ease-in-out infinite;filter:drop-shadow(0 3px 4px #0008)}
+@keyframes avbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+#avatarChar.pop{animation:avpop .4s ease-out}
+@keyframes avpop{0%{transform:scale(1)}40%{transform:scale(1.35) rotate(-8deg)}100%{transform:scale(1)}}
+#lobbyAvatarWrap{margin:2px 0 8px}
+#lobbyAvatar{font-size:44px;line-height:1.2;animation:avbob 2s ease-in-out infinite;display:inline-block}
+#lobbyAvName{font-family:'Jua';font-size:12px;color:var(--glow);opacity:.9}
+.avPreview{background:#ffffff0a;border:1.5px solid #ffffff1c;border-radius:14px;padding:12px;margin-bottom:10px;text-align:center}
+.avPreview .big{font-size:52px;line-height:1.2;animation:avbob 2s ease-in-out infinite;display:inline-block}
+.avPreview .nm{font-family:'Jua';font-size:14px;color:var(--glow);margin-top:2px}
+/* ── 미니 포장마차 미리보기 ── */
+#stallPreview{background:linear-gradient(180deg,#0d1322,#1a2238);border:1.5px solid #ffffff1c;
+  border-radius:14px;padding:8px 10px 8px;margin-bottom:10px;position:relative;overflow:hidden}
+.pv-tarp{height:13px;border-radius:8px 8px 0 0;
+  background:repeating-linear-gradient(90deg,var(--tarp) 0 18px,#ffffff 18px 36px)}
+body.eq-tarp_blue .pv-tarp{background:repeating-linear-gradient(90deg,#4d7bd6 0 18px,#ffffff 18px 36px)}
+body.eq-tarp_pink .pv-tarp{background:repeating-linear-gradient(90deg,#ff6fa5 0 18px,#ffffff 18px 36px)}
+body.eq-tarp_mint .pv-tarp{background:repeating-linear-gradient(90deg,#3ec9a7 0 18px,#ffffff 18px 36px)}
+body.eq-tarp_night .pv-tarp{background:repeating-linear-gradient(90deg,#2a3160 0 18px,#8a93c9 18px 36px)}
+.pv-lights{display:none;justify-content:center;gap:9px;font-size:7px;margin-top:1px}
+body.deco-lights .pv-lights{display:flex}
+.pv-lights span{animation:twinkle 1.2s ease-in-out infinite}
+.pv-lights span:nth-child(2n){animation-delay:.4s}
+.pv-sign{font-family:'Jua';font-size:10.5px;display:inline-block;padding:1px 10px;background:#2a1c12;
+  color:var(--glow);border-radius:0 0 8px 8px;border:1px solid #ffb34744;border-top:none;letter-spacing:.5px}
+body.eq-sign_gold .pv-sign{color:#ffe08a;border-color:#ffd94d99;background:#3a2a10;box-shadow:0 0 8px #ffd94d55}
+body.eq-sign_wood .pv-sign{color:#f2dfb6;background:#4a3520;border-color:#8a6a3a;border-radius:0 0 4px 4px}
+body.eq-sign_neon .pv-sign{color:#6ef3ff;background:#101828;border-color:#6ef3ff88;
+  text-shadow:0 0 5px #6ef3ff;box-shadow:0 0 8px #6ef3ff44;animation:neonflick 2.2s infinite}
+.pv-row{display:flex;align-items:center;justify-content:center;gap:10px;margin:7px 0 2px}
+.pv-avatar{font-size:26px;animation:avbob 2s ease-in-out infinite;filter:drop-shadow(0 2px 3px #0008)}
+.pv-molds{display:flex;gap:6px}
+.pv-mold{width:50px;aspect-ratio:1.55/1;border-radius:8px;background:#181a22;
+  box-shadow:inset 0 2px 5px #000c;display:flex;align-items:center;justify-content:center}
+body.eq-mold_copper .pv-mold{background:#2e2016;box-shadow:inset 0 2px 5px #000c,0 0 0 1.5px #c9803f66}
+body.eq-mold_sakura .pv-mold{background:#2e1c26;box-shadow:inset 0 2px 5px #000c,0 0 0 1.5px #ff9fc466}
+body.eq-mold_dark .pv-mold{background:#0d0d12;box-shadow:inset 0 2px 6px #000,0 0 0 1.5px #8a7ab866}
+.pv-mold svg{width:78%;height:auto}
+.pv-props{text-align:center;min-height:20px;font-size:15px;display:flex;justify-content:center;gap:14px}
+.pv-prop{display:none}
+body.deco-plant .pv-plant{display:inline}
+body.deco-cat .pv-cat{display:inline;animation:cattail 2.4s ease-in-out infinite}
+body.deco-snowman .pv-snow{display:inline;animation:snowbob 2.6s ease-in-out infinite}
 /* 꾸미기 상점 탭/보석팩 */
 .dectabs{display:flex;gap:5px;margin-bottom:10px;overflow-x:auto}
 .dectab{flex:1 0 auto;font-family:'Jua';font-size:12px;padding:8px 10px;border-radius:99px;
@@ -371,6 +416,7 @@ body.multi #pingRow{display:flex}
     <div id="catMascot">🐱</div>
     <div id="snowmanDeco">⛄</div>
     <div id="plantDeco">🌷</div>
+    <div id="avatarChar">🧑‍🍳</div>
   </div>
 
   <div id="pingRow"></div>
@@ -417,6 +463,23 @@ body.multi #pingRow{display:flex}
       <h2>🎪 꾸미기 상점 <button class="close" id="decorClose">닫기</button></h2>
       <div style="font-family:'Jua';font-size:14px;color:#8fd3ff;margin-bottom:8px">보유 보석: 💎 <span id="decorGemCnt">0</span>개
         <span style="font-family:'Gowun Dodum';font-size:10.5px;opacity:.6">붕어빵을 직접 판매하면 얻어요</span></div>
+      <!-- 미니 포장마차 미리보기: 모든 장착 아이템 실시간 반영 -->
+      <div id="stallPreview">
+        <div class="pv-tarp"></div>
+        <div class="pv-lights"><span>💡</span><span>✨</span><span>💡</span><span>✨</span><span>💡</span></div>
+        <div style="text-align:center"><span class="pv-sign">🐟 우리동네 붕어빵</span></div>
+        <div class="pv-row">
+          <span class="pv-avatar">🧑‍🍳</span>
+          <div class="pv-molds"><div class="pv-mold"></div><div class="pv-mold"></div><div class="pv-mold"></div></div>
+        </div>
+        <div class="pv-props">
+          <span class="pv-prop pv-plant">🌷</span>
+          <span class="pv-prop pv-cat">🐱</span>
+          <span class="pv-prop pv-snow">⛄</span>
+        </div>
+        <div style="text-align:center;font-size:10px;opacity:.5;margin-top:4px">장착한 아이템이 바로 반영돼요 · 게임 속 포장마차도 동일!</div>
+        <div id="pvFxLine" style="text-align:center;font-size:10px;color:#8fd3ff;margin-top:3px"></div>
+      </div>
       <div class="dectabs" id="decTabs"></div>
       <div id="decorShopBody"></div>
       <div class="sect">💳 보석 충전 (준비 중)</div>
@@ -463,6 +526,19 @@ body.multi #pingRow{display:flex}
     </div>
   </div>
 
+  <!-- 대결 결과 -->
+  <div class="modal center-modal top" id="vsResultModal">
+    <div class="card">
+      <h2 id="vsResultTitle">⚔️ 대결 종료!</h2>
+      <div style="font-size:44px;margin:4px 0" id="vsResultEmoji">🏆</div>
+      <div class="row"><span id="vsMyName">나</span><b id="vsMyScore">0원</b></div>
+      <div class="row"><span id="vsOppName">상대</span><b id="vsOppScore">0원</b></div>
+      <button class="bigbtn" id="vsRematchBtn">⚔️ 한 판 더!</button>
+      <button class="bigbtn ghost" id="vsLobbyBtn">🚪 로비로</button>
+      <p class="tip" id="vsWaitTip" style="display:none">방장이 재대결을 시작하길 기다리는 중…</p>
+    </div>
+  </div>
+
   <!-- 그만하기 확인 -->
   <div class="modal center-modal top" id="quitModal">
     <div class="card">
@@ -494,6 +570,7 @@ body.multi #pingRow{display:flex}
   <div class="modal center-modal open" id="startModal">
     <div class="card" id="menuCard">
       <h2>🐟 붕어빵 타이쿤</h2>
+      <div id="lobbyAvatarWrap"><div id="lobbyAvatar">🧑‍🍳</div><div id="lobbyAvName">기본 사장님</div></div>
       <p style="font-size:13.5px;line-height:1.7;opacity:.85">친구와 함께 포장마차를 운영하세요!<br>같이 굽고, 같이 팔고 🔥💰</p>
       <button class="bigbtn" id="soloBtn">🐟 혼자 하기</button>
       <button class="bigbtn blue" id="hostBtn">🔥 방 만들기</button>
@@ -508,6 +585,10 @@ body.multi #pingRow{display:flex}
 
     <div class="card" id="hostCard" style="display:none">
       <h2>🔥 방 만들기</h2>
+      <div class="moderow" id="mpTypeRow">
+        <button class="modebtn sel" data-mptype="coop">🤝 협동<small>같이 한 가게 운영</small></button>
+        <button class="modebtn" data-mptype="vs">⚔️ 대결<small>2분간 매출 승부!</small></button>
+      </div>
       <p style="font-size:13.5px;opacity:.85">친구에게 이 코드를 알려주세요!</p>
       <div class="codebox" id="roomCodeBig">----</div>
       <div class="rolecard">
@@ -641,32 +722,58 @@ function addGem(n,x,y){
 
 /* ═══════════ 포장마차 꾸미기 🎪 (카테고리형 카탈로그, 💎 결제) ═══════════ */
 const DECOR_CATS=[
+  {id:'avatar',name:'🧑‍🍳 아바타',type:'equip',items:[
+    {id:'av_chef',name:'기본 사장님',emoji:'🧑‍🍳',gem:0,eff:{}},
+    {id:'av_bear',name:'곰돌이 사장',emoji:'🐻',gem:8,eff:{pat:0.03}},
+    {id:'av_peng',name:'펭귄 사장',emoji:'🐧',gem:8,eff:{fire:0.05}},
+    {id:'av_fox',name:'여우 사장',emoji:'🦊',gem:10,eff:{tip:0.03}},
+    {id:'av_tiger',name:'호랑이 사장',emoji:'🐯',gem:12,eff:{cook:0.03}},
+    {id:'av_robot',name:'로봇 사장',emoji:'🤖',gem:15,eff:{perf:0.3}},
+  ]},
   {id:'tarp',name:'⛺ 천막',type:'equip',items:[
-    {id:'tarp_default',name:'기본 주황',emoji:'🟧',gem:0},
-    {id:'tarp_blue',name:'파랑 천막',emoji:'🟦',gem:3},
-    {id:'tarp_pink',name:'분홍 천막',emoji:'🌸',gem:3},
-    {id:'tarp_mint',name:'민트 천막',emoji:'🍃',gem:4},
-    {id:'tarp_night',name:'밤하늘 천막',emoji:'🌙',gem:6},
+    {id:'tarp_default',name:'기본 주황',emoji:'🟧',gem:0,eff:{}},
+    {id:'tarp_blue',name:'파랑 천막',emoji:'🟦',gem:3,eff:{pat:0.02}},
+    {id:'tarp_pink',name:'분홍 천막',emoji:'🌸',gem:3,eff:{spawn:0.02}},
+    {id:'tarp_mint',name:'민트 천막',emoji:'🍃',gem:4,eff:{fire:0.04}},
+    {id:'tarp_night',name:'밤하늘 천막',emoji:'🌙',gem:6,eff:{gem:0.01}},
   ]},
   {id:'sign',name:'🪧 간판',type:'equip',items:[
-    {id:'sign_default',name:'기본 간판',emoji:'🪧',gem:0},
-    {id:'sign_wood',name:'레트로 나무 간판',emoji:'🪵',gem:6},
-    {id:'sign_gold',name:'황금 간판',emoji:'✨',gem:8},
-    {id:'sign_neon',name:'네온 간판',emoji:'🌈',gem:10},
+    {id:'sign_default',name:'기본 간판',emoji:'🪧',gem:0,eff:{}},
+    {id:'sign_wood',name:'레트로 나무 간판',emoji:'🪵',gem:6,eff:{pat:0.02}},
+    {id:'sign_gold',name:'황금 간판',emoji:'✨',gem:8,eff:{tip:0.02}},
+    {id:'sign_neon',name:'네온 간판',emoji:'🌈',gem:10,eff:{spawn:0.03}},
   ]},
   {id:'mold',name:'🐟 붕어빵 틀',type:'equip',items:[
-    {id:'mold_default',name:'기본 무쇠 틀',emoji:'⬛',gem:0},
-    {id:'mold_copper',name:'구리 틀',emoji:'🟠',gem:5},
-    {id:'mold_sakura',name:'벚꽃 틀',emoji:'🌸',gem:7},
-    {id:'mold_dark',name:'흑임자 틀',emoji:'🖤',gem:7},
+    {id:'mold_default',name:'기본 무쇠 틀',emoji:'⬛',gem:0,eff:{}},
+    {id:'mold_copper',name:'구리 틀',emoji:'🟠',gem:5,eff:{cook:0.02}},
+    {id:'mold_sakura',name:'벚꽃 틀',emoji:'🌸',gem:7,eff:{gold:0.01}},
+    {id:'mold_dark',name:'흑임자 틀',emoji:'🖤',gem:7,eff:{perf:0.2}},
   ]},
   {id:'props',name:'🧸 장식 소품',type:'toggle',items:[
-    {id:'plant',name:'꽃 화분',emoji:'🌷',gem:4},
-    {id:'lights',name:'꼬마전구 장식',emoji:'💡',gem:5},
-    {id:'snowman',name:'눈사람 친구',emoji:'⛄',gem:6},
-    {id:'cat',name:'고양이 마스코트',emoji:'🐱',gem:10},
+    {id:'plant',name:'꽃 화분',emoji:'🌷',gem:4,eff:{pat:0.01}},
+    {id:'lights',name:'꼬마전구 장식',emoji:'💡',gem:5,eff:{spawn:0.02}},
+    {id:'snowman',name:'눈사람 친구',emoji:'⛄',gem:6,eff:{fire:0.03}},
+    {id:'cat',name:'고양이 마스코트',emoji:'🐱',gem:10,eff:{gem:0.01}},
   ]},
 ];
+/* 효과 집계: 장착형은 장착템만, 토글형은 켠 것만 */
+const FX_LABEL={tip:'판매 수익',pat:'손님 인내심',cook:'굽기 속도',gold:'황금 확률',gem:'보석 확률',fire:'화재 지연',spawn:'손님 유입',perf:'골든타임'};
+function effText(eff){
+  return Object.keys(eff||{}).map(k=>{
+    if(k==='perf')return`${FX_LABEL[k]} +${eff[k]}초`;
+    if(k==='gold'||k==='gem')return`${FX_LABEL[k]} +${Math.round(eff[k]*100)}%p`;
+    return`${FX_LABEL[k]} +${Math.round(eff[k]*100)}%`;
+  }).join(' · ')||'효과 없음';
+}
+let FXC={tip:0,pat:0,cook:0,gold:0,gem:0,fire:0,spawn:0,perf:0};
+function recalcFX(){
+  const f={tip:0,pat:0,cook:0,gold:0,gem:0,fire:0,spawn:0,perf:0};
+  DECOR_CATS.forEach(c=>c.items.forEach(it=>{
+    const active=c.type==='equip'?DECOR.equip[c.id]===it.id:!!DECOR.tg[it.id];
+    if(active&&it.eff)Object.keys(it.eff).forEach(k=>f[k]+=it.eff[k]);
+  }));
+  FXC=f;
+}
 /* 저장 구조 v2 + 이전 데이터 자동 이전 */
 let DECOR=lsGet('bp_decor2',null);
 if(!DECOR){
@@ -678,13 +785,32 @@ if(!DECOR){
   Object.keys(old.owned||{}).forEach(k=>{DECOR.owned[k==='sign'?'sign_gold':k]=1;});
   lsSet('bp_decor2',DECOR);
 }
+/* 기존 저장 데이터에 아바타 기본값 보정 */
+if(!DECOR.equip.avatar){DECOR.equip.avatar='av_chef';DECOR.owned.av_chef=1;lsSet('bp_decor2',DECOR);}
+function avItem(id){
+  const cat=DECOR_CATS.find(c=>c.id==='avatar');
+  return cat.items.find(i=>i.id===id)||cat.items[0];
+}
+function myAvatar(){return avItem(DECOR.equip.avatar);}
 function applyDecor(){
   DECOR_CATS.filter(c=>c.type==='equip').forEach(c=>{
     c.items.forEach(it=>document.body.classList.remove('eq-'+it.id));
     document.body.classList.add('eq-'+(DECOR.equip[c.id]||c.items[0].id));
   });
   Object.keys(DECOR.tg).forEach(k=>document.body.classList.toggle('deco-'+k,!!DECOR.tg[k]));
+  /* 아바타: 로비 + 인게임 캐릭터 + 미리보기 반영 */
+  const av=myAvatar();
+  const ac=$('#avatarChar');if(ac)ac.textContent=av.emoji;
+  const la=$('#lobbyAvatar');if(la)la.textContent=av.emoji;
+  const ln=$('#lobbyAvName');if(ln)ln.textContent=av.name;
+  const ml=$('#myLabel');if(ml)ml.textContent='내 화로 · '+av.emoji;
+  const pv=$('#stallPreview .pv-avatar');if(pv)pv.textContent=av.emoji;
+  document.querySelectorAll('#stallPreview .pv-mold').forEach(el=>{
+    if(!el.innerHTML)el.innerHTML=fishSVG('#d98a2b',true);
+  });
   lsSet('bp_decor2',DECOR);
+  recalcFX();
+  if(MP.active){MP.me.av=DECOR.equip.avatar;markDirty();}
 }
 
 /* ═══════════ 스토리 모드 🏪 ═══════════ */
@@ -722,14 +848,14 @@ function D(){
   const c=diffOf(),ed=effDay(S.day);
   return{
     spawn:Math.max(1.6,(7-ed*0.5)/c.spd),
-    patience:Math.max(7,(26-ed*1.7)*c.pat),
+    patience:Math.max(7,(26-ed*1.7)*c.pat)*(1+FXC.pat),
     orderMax:Math.min(4,Math.ceil(1+ed*0.45)),
-    cook:Math.max(2.4,4-(ed-1)*0.12),
+    cook:Math.max(2.4,(4-(ed-1)*0.12))*(1-FXC.cook),
     perfect:Math.max(1.8,4-(ed-1)*0.18),
     flipWin:Math.max(1.4,3-(ed-1)*0.12),
-    burntToFire:Math.max(3,6-(ed-1)*0.3),
+    burntToFire:Math.max(3,(6-(ed-1)*0.3))*(1+FXC.fire),
     fireSpread:Math.max(4.5,8-(ed-1)*0.25),
-    rawBurn:Math.max(5,12-(ed-1)*0.5),
+    rawBurn:Math.max(5,(12-(ed-1)*0.5))*(1+FXC.fire),
   };
 }
 /* 스테이지별 손님 수요: 개발 여부와 무관하게 손님이 먼저 요구! */
@@ -773,7 +899,7 @@ function emptyBlob(){return{prod:zeroFills(),cons:{batter:0,red:0,cream:0,sweet:
   up:{mold:MP_START_MOLDS,glove:0,cream:false,sweet:false,pizza:false},ping:null,hb:Date.now(),
   fireN:0,ext:0,moldsSnap:[],cust:[],combo:0,req:[]};}
 const MP={
-  active:false,role:null,code:null,
+  active:false,role:null,code:null,vs:false,vsSel:'coop',
   me:emptyBlob(),other:null,meta:null,
   lastPingSeen:0,lastStartedAt:-1,summaryShownFor:0,snap:null,
   lastExtApplied:0,lastReqT:0,custMirror:[],
@@ -786,6 +912,7 @@ const BROKERS=[
 ];
 let client=null,netOn=false;
 const mqttOK=()=>typeof mqtt!=='undefined';
+const isCoop=()=>MP.active&&!MP.vs; /* 경제 공유는 협동에서만 */
 const TOPIC_ROOT='bungeo-tycoon-v4';
 const tMeta=()=>`${TOPIC_ROOT}/${MP.code}/meta`;
 const tMe=()=>`${TOPIC_ROOT}/${MP.code}/${MP.role}`;
@@ -831,7 +958,7 @@ function handleMsg(topic,payload){
   }else if(topic===tOther()){
     MP.other=obj;onPingTick();applyRemoteExt();
     if(MP.role==='host')applyServeReqs();
-    if(MP.role==='guest'&&Array.isArray(obj.cust)){
+    if(MP.role==='guest'&&!MP.vs&&Array.isArray(obj.cust)){
       /* 손님 미러 병합: 있던 손님은 값만 갱신 (카드 재생성 방지) */
       const inc=obj.cust,byId={};inc.forEach(c=>byId[c.i]=c);
       let membership=false;
@@ -854,12 +981,14 @@ function markDirty(){
   if(pubTimer)return;
   pubTimer=setTimeout(()=>{pubTimer=null;pubMe();},350);
 }
-function myMoldCount(){return MP.active?MP.me.up.mold:S.moldCount;}
+function myMoldCount(){return isCoop()?MP.me.up.mold:S.moldCount;}
 function pubMe(){
   if(!client||!MP.active)return;
   MP.me.hb=Date.now();
+  MP.me.av=DECOR.equip.avatar;
+  MP.me.vsScore=S.daySales; /* 대결 모드 실시간 점수 */
   MP.me.moldsSnap=S.molds.slice(0,myMoldCount()).map(m=>({st:m.st,fill:m.fill,hp:m.fireHp||0,w:!!m.warn}));
-  if(MP.role==='host'){
+  if(MP.role==='host'&&!MP.vs){
     MP.me.cust=S.customers.filter(c=>!c.leaving).map(c=>({i:c.i,f:c.face,o:c.order,p:Math.round(c.patience*10)/10,m:c.maxPatience,y:c.ty||'normal'}));
     MP.me.combo=S.combo;
   }
@@ -873,11 +1002,11 @@ setInterval(()=>{ if(MP.active&&netOn&&!S.running)pubMe(); },4000);
 
 /* ═══════════ 파생 경제 상태 ═══════════ */
 function E(){
-  if(!MP.active){
+  if(!MP.active||MP.vs){ /* 대결: 각자 독립 가게 운영 */
     return{money:S.money,tray:S.tray,batter:S.batter,stock:S.stock,rep:S.rep,
       up:{glove:S.perfectBonus},menus:S.menus};
   }
-  const a=MP.me,b=MP.other||emptyBlob();
+  const a=MP.me,b=Object.assign(emptyBlob(),MP.other||{});
   const up={glove:Math.max(a.up.glove,b.up.glove)};
   const menus={red:true};
   ['cream','sweet','pizza'].forEach(k=>menus[k]=!!(a.up[k]||(b.up&&b.up[k])));
@@ -897,12 +1026,13 @@ function E(){
 }
 function menuOn(k){return k==='red'||E().menus[k];}
 function combinedStats(){
-  const a=MP.me,b=MP.other||emptyBlob();
+  const a=MP.me,b=Object.assign(emptyBlob(),MP.other||{});
   return{earned:a.earned+b.earned,served:a.served+b.served,missed:a.missed+b.missed,
     burnt:a.burnt+b.burnt,soldCnt:a.sold.red+b.sold.red+a.sold.cream+b.sold.cream};
 }
 function onMetaTick(){
   const m=MP.meta;if(!m)return;
+  MP.vs=(m.type==='vs');
   if(m.state==='ended'&&MP.active&&S.running){
     quitToLobby('사장님이 장사를 접었어요. 기록은 제출됐어요! 🚪');
     return;
@@ -933,6 +1063,11 @@ function renderPartner(){
       $('#hostWaitMsg').textContent='파트너 접속 완료! 시작하세요 🎉';
       $('#hostWaitMsg').classList.remove('waitdots');}
   }
+  /* 파트너 아바타 표시 */
+  if(MP.other&&MP.other.av){
+    const pa=avItem(MP.other.av);
+    $('#partnerLabel').textContent=`파트너 화로 · ${pa.emoji} ${pa.name} (불나면 탭!)`;
+  }
 }
 setInterval(()=>{if(MP.active)renderPartner();},2000);
 
@@ -945,7 +1080,7 @@ function syncFireN(){
 }
 function fireActiveTotal(){
   const mine=fireCount()>0;
-  const theirs=MP.active&&((MP.other&&MP.other.fireN)||0)>0;
+  const theirs=MP.active&&!MP.vs&&((MP.other&&MP.other.fireN)||0)>0;
   return mine||theirs;
 }
 function extinguishMold(m,fromRemote){
@@ -960,7 +1095,7 @@ function extinguishMold(m,fromRemote){
   syncFireN();renderMyPan();
 }
 function applyRemoteExt(){
-  if(!MP.active||!MP.other)return;
+  if(!MP.active||MP.vs||!MP.other)return;
   const ext=MP.other.ext||0;
   if(ext<MP.lastExtApplied)MP.lastExtApplied=ext;
   const d=ext-MP.lastExtApplied;
@@ -968,13 +1103,13 @@ function applyRemoteExt(){
     for(let i=0;i<d;i++)extinguishMold(S.molds.find(x=>x.st==='fire'),true);}
 }
 function renderExtBtn(){
-  const show=MP.active&&((MP.other&&MP.other.fireN)||0)>0&&S.running;
+  const show=MP.active&&!MP.vs&&((MP.other&&MP.other.fireN)||0)>0&&S.running;
   $('#extBtn').classList.toggle('show',!!show);
 }
 $('#extBtn').onclick=()=>{MP.me.ext=(MP.me.ext||0)+1;markDirty();SFX.ext();shake();};
 
 /* ═══════════ 콤보 ═══════════ */
-function comboVal(){return MP.active&&MP.role==='guest'?((MP.other&&MP.other.combo)||0):S.combo;}
+function comboVal(){return MP.active&&!MP.vs&&MP.role==='guest'?((MP.other&&MP.other.combo)||0):S.combo;}
 function comboMult(){return S.combo>=5?2:1+0.1*S.combo;}
 function renderCombo(){
   const v=comboVal();
@@ -996,7 +1131,7 @@ function startDayLocal(day){
   MP.custMirror=[];
   S.molds.forEach(m=>{m.st='empty';m.fill=null;m.t=0;m.fireHp=0;m.warn=false;});
   if(MP.active)MP.me.fireN=0;
-  MP.snap=combinedStats();
+  MP.snap=MP.vs?null:combinedStats();
   MP.summaryShownFor=0;
   $('#dayModal').classList.remove('open');
   $('#startModal').classList.remove('open');
@@ -1079,7 +1214,7 @@ function renderPartnerPan(){
     const d=document.createElement('div');
     d.className='mold '+sm.st;
     d.innerHTML=moldInner(sm.st,sm.fill,sm.hp,sm.w);
-    if(sm.st==='fire'){
+    if(sm.st==='fire'&&!MP.vs){
       d.addEventListener('click',()=>{MP.me.ext=(MP.me.ext||0)+1;markDirty();SFX.ext();shake();});
     }
     g.appendChild(d);
@@ -1160,8 +1295,13 @@ function renderHUD(){
   $('#rep').textContent='❤️ '+e.rep.toFixed(1);
   $('#batterCnt').textContent=e.batter;
   $('#dayFill').style.width=Math.min(100,Math.max(0,S.time/DAY_LEN*100))+'%';
-  $('#goalCur').textContent=fmt(dayEarned());
-  $('#goalTgt').textContent=fmt(goalFor(S.day));
+  if(MP.active&&MP.vs){
+    const opp=(MP.other&&MP.other.vsScore)||0;
+    $('#goalChip').innerHTML=`⚔️ 나 <b>${fmt(S.daySales)}</b>원 vs 상대 <b style="color:#ff8a8a">${fmt(opp)}</b>원 · <span style="color:#8fd3ff">💎 <span id="gemCnt">${GEMS}</span></span>`;
+  }else{
+    $('#goalCur').textContent=fmt(dayEarned());
+    $('#goalTgt').textContent=fmt(goalFor(S.day));
+  }
   /* 재고 카운트: 개발된 메뉴만 표시 */
   const cKey=FILL_KEYS.map(k=>(e.menus[k]?e.tray[k]:'-')).join('_');
   if(renderHUD._c!==cKey){
@@ -1173,7 +1313,7 @@ function renderHUD(){
   const tKey=FILL_KEYS.map(k=>e.tray[k]).join('_');
   if(renderHUD._t!==tKey){renderHUD._t=tKey;renderTray();}
 }
-function custList(){return(MP.active&&MP.role==='guest')?MP.custMirror:S.customers;}
+function custList(){return(MP.active&&!MP.vs&&MP.role==='guest')?MP.custMirror:S.customers;}
 function custEl(id){return document.querySelector(`.customer[data-cid="${id}"]`);}
 /* 전체 재구성: 손님이 새로 오거나 떠날 때만 호출 (매 프레임 호출 금지!) */
 function renderCustomers(){
@@ -1237,7 +1377,7 @@ function tapMold(i){
   if(m.st==='empty'){
     if(sel!=='batter'){toast('먼저 🥣 반죽부터 부어야 해요!');SFX.land();return;}
     if(e.batter<=0){toast('반죽이 없어요! 🛒 상점에서 구매');return;}
-    if(MP.active)MP.me.cons.batter++;else S.batter--;
+    if(isCoop())MP.me.cons.batter++;else S.batter--;
     m.st='batter1';m.fill=null;m.t=0;m.warn=false;
     SFX.pour();
     renderFills();
@@ -1245,7 +1385,7 @@ function tapMold(i){
   else if(m.st==='batter1'){
     if(sel==='batter'){toast('이제 속재료를 넣을 차례예요! 🟤');SFX.land();return;}
     if(e.stock[sel]<=0){toast(FILLS[sel].name+' 재고가 없어요!');return;}
-    if(MP.active)MP.me.cons[sel]++;else S.stock[sel]--;
+    if(isCoop())MP.me.cons[sel]++;else S.stock[sel]--;
     m.st='filled';m.fill=sel;
     SFX.collect();
     renderFills();
@@ -1253,19 +1393,19 @@ function tapMold(i){
   else if(m.st==='filled'){
     if(sel!=='batter'){toast('🥣 반죽으로 덮어야 구울 수 있어요!');SFX.land();return;}
     if(e.batter<=0){toast('반죽이 없어요! 🛒 상점에서 구매');return;}
-    if(MP.active)MP.me.cons.batter++;else S.batter--;
+    if(isCoop())MP.me.cons.batter++;else S.batter--;
     m.st='cook1';m.t=0;m.warn=false;
     SFX.pour();
     toast('지글지글~ 굽기 시작! 🔥');
     renderFills();
   }
   else if(m.st==='perfect'){
-    if(MP.active)MP.me.prod[m.fill]++;
+    if(isCoop())MP.me.prod[m.fill]++;
     else S.tray[m.fill]++;
     /* 🌟 황금 붕어빵: 7% 확률 즉시 보너스 */
-    if(Math.random()<0.07){
+    if(Math.random()<0.07+FXC.gold){
       const bonus=FILLS[m.fill].price*3;
-      if(MP.active){MP.me.earned+=bonus;}else S.money+=bonus;
+      if(isCoop()){MP.me.earned+=bonus;}else S.money+=bonus;
       S.daySales+=bonus;S.runEarned+=bonus;
       ach('golden');SFX.star();
       toast(`🌟 황금 붕어빵!! +${fmt(bonus)}원 대박!`);
@@ -1275,7 +1415,7 @@ function tapMold(i){
     }
     m.st='empty';m.fill=null;m.t=0;m.warn=false;
   }else if(m.st==='burnt'){
-    if(MP.active)MP.me.burnt++;
+    if(isCoop())MP.me.burnt++;
     m.st='empty';m.fill=null;m.t=0;m.warn=false;S.dayBurnt++;SFX.burnt();toast('까맣게 탔어요… 🥲');
   }else if(m.st==='fire'){
     extinguishMold(m,false);
@@ -1286,7 +1426,7 @@ function tapMold(i){
 
 /* ═══════════ 판매 ═══════════ */
 function onCustomerTap(cu,ev){
-  if(MP.active&&MP.role==='guest'){guestServeReq(cu);return;}
+  if(MP.active&&!MP.vs&&MP.role==='guest'){guestServeReq(cu);return;}
   serveLocal(cu,ev);
 }
 function serveLocal(cu,ev,byAlba){
@@ -1298,7 +1438,7 @@ function serveLocal(cu,ev,byAlba){
   if(!can){if(!byAlba)toast('붕어빵이 모자라요!');return;}
   let pay=0,cnt=0;
   Object.keys(cu.order).forEach(k=>{
-    if(MP.active)MP.me.sold[k]+=cu.order[k];
+    if(isCoop())MP.me.sold[k]+=cu.order[k];
     else S.tray[k]-=cu.order[k];
     pay+=FILLS[k].price*cu.order[k];cnt+=cu.order[k];
   });
@@ -1311,13 +1451,14 @@ function serveLocal(cu,ev,byAlba){
     if(ty==='group'){pay=Math.round(pay*1.3);ach('group_serve');} /* 단체 보너스 */
     if(ty==='reviewer'){S.pendingReview=Math.min(0.45,(S.pendingReview||0)+0.15);toast('📸 리뷰어가 홍보해줬어요! 내일 손님 증가!');}
     S.combo=Math.min(10,S.combo+1);
-    pay=Math.round(pay*comboMult());
+    pay=Math.round(pay*comboMult()*(1+FXC.tip));
     if(S.combo===5){SFX.fever();ach('fever');}else SFX.combo(S.combo);
     if(S.combo>=10)ach('combo10');
     renderCombo();SFX.sell();
+    (function(){const a=$('#avatarChar');if(a){a.classList.remove('pop');void a.offsetWidth;a.classList.add('pop');}})();
   }
   ach('first_sale');
-  if(MP.active){MP.me.earned+=pay;MP.me.served++;markDirty();}
+  if(isCoop()){MP.me.earned+=pay;MP.me.served++;markDirty();}
   else{S.money+=pay;S.rep=Math.min(5,S.rep+0.1);}
   S.daySales+=pay;S.daySold+=cnt;
   S.runEarned+=pay;
@@ -1327,7 +1468,7 @@ function serveLocal(cu,ev,byAlba){
   const lel=custEl(cu.i);if(lel)lel.classList.add('leaving');
   /* 💎 보석: 직접 서빙에서만 간헐 획득 (알바 X). 단체 손님은 확정 1개 */
   if(!byAlba&&ev){
-    const gemGet=(cu.ty==='group')||Math.random()<0.12;
+    const gemGet=(cu.ty==='group')||Math.random()<0.12+FXC.gem;
     if(gemGet){
       const r=ev.currentTarget.getBoundingClientRect(),a=$('#app').getBoundingClientRect();
       setTimeout(()=>addGem(1,r.left-a.left+r.width/2-16,r.top-a.top-24),300);
@@ -1355,7 +1496,7 @@ function guestServeReq(cu){
   markDirty();
   SFX.sell();
   /* 💎 파트너도 직접 서빙하면 보석 기회 (내 기기에 적립) */
-  if((cu.y||cu.ty)==='group'||Math.random()<0.12)setTimeout(()=>addGem(1),400);
+  if((cu.y||cu.ty)==='group'||Math.random()<0.12+FXC.gem)setTimeout(()=>addGem(1),400);
   updateCustomerBars();
 }
 function applyServeReqs(){
@@ -1416,10 +1557,11 @@ function loop(ts){
   $('#rushBanner').classList.toggle('on',rush);
 
   /* ── 손님 시뮬레이션: 솔로 or 사장님(호스트) ── */
-  const custAuthority=!MP.active||MP.role==='host';
+  const coop=MP.active&&!MP.vs;
+  const custAuthority=!coop||MP.role==='host';
   if(custAuthority){
     const e=E();
-    S.spawnTimer-=dt*(rush?2.2:1)*(1+(e.rep-3)*0.15)*(1+S.reviewBoost);
+    S.spawnTimer-=dt*(rush?2.2:1)*(1+(e.rep-3)*0.15)*(1+S.reviewBoost)*(1+FXC.spawn);
     if(S.spawnTimer<=0){spawnCustomer();S.spawnTimer=dd.spawn*(0.7+Math.random()*0.6);}
     const fMult=fireActiveTotal()?1.6:1;
     S.customers.forEach(cu=>{
@@ -1431,7 +1573,7 @@ function loop(ts){
         SFX.angry();shake();
         const jj=cu.ty==='jinsang';
         const el=custEl(cu.i);if(el)el.classList.add('leaving');
-        if(MP.active){MP.me.missed+=jj?2:1;markDirty();}
+        if(isCoop()){MP.me.missed+=jj?2:1;markDirty();}
         else S.rep=Math.max(0,S.rep-(jj?0.6:0.3));
         toast(jj?'진상 손님이 악담을 퍼붓고 떠났어요…💢💢':'손님이 화나서 떠났어요… 💢');
         setTimeout(()=>{const idx=S.customers.indexOf(cu);if(idx>=0)S.customers.splice(idx,1);renderCustomers();},380);
@@ -1460,7 +1602,7 @@ function loop(ts){
   /* ── 내 화로 시뮬레이션 (모두) ── */
   let dirtyM=false;
   const e2=E();
-  const perfWin=dd.perfect+e2.up.glove;
+  const perfWin=dd.perfect+e2.up.glove+FXC.perf;
   S.molds.slice(0,myMoldCount()).forEach(m=>{
     if(m.st==='batter1'||m.st==='filled'){
       m.t+=dt;
@@ -1479,7 +1621,7 @@ function loop(ts){
       if(m.t>=dd.burntToFire){
         m.st='fire';m.t=0;m.fireHp=FIRE_HP;dirtyM=true;
         S.dayBurnt++;
-        if(MP.active)MP.me.burnt++;
+        if(isCoop())MP.me.burnt++;
         toast('🚨 불이야!! 연타해서 꺼주세요!');
         SFX.fire();shake();syncFireN();
       }
@@ -1511,6 +1653,7 @@ const LB={map:{},open:false,diff:'normal',subT:null};
 const lbSub=d=>`bungeo-lb-v1/${d}/+`;
 const lbMy=d=>`bungeo-lb-v1/${d}/${PROFILE.pid}`;
 function lbSubmit(){
+  if(MP.vs)return; /* 대결 기록은 별도 */
   /* 하루 마감마다 최고 기록 갱신 시 제출 */
   const score=MP.active?combinedStats().earned:S.runEarned;
   const rec={n:(PROFILE.nick||'무명 사장').slice(0,10),d:S.day,s:score,m:MP.active?1:0,ts:Date.now()};
@@ -1597,6 +1740,7 @@ function showStars(earned,goal){
   return n;
 }
 function endDay(){
+  if(MP.active&&MP.vs){endVsRound();return;}
   const goal=goalFor(S.day);
   if(MP.active){
     if(MP.summaryShownFor===S.day)return;
@@ -1647,7 +1791,7 @@ function endDay(){
 $('#nextDayBtn').onclick=()=>{
   if(MP.active){
     if(MP.role!=='host')return;
-    MP.meta={day:S.day+1,state:'playing',startedAt:Date.now(),diff:S.diff};
+    MP.meta={day:S.day+1,state:'playing',startedAt:Date.now(),diff:S.diff,type:MP.vsSel};
     pubMeta();
     MP.lastStartedAt=MP.meta.startedAt;
     startDayLocal(MP.meta.day);
@@ -1705,7 +1849,7 @@ attachSheetSwipe('#shopSheet',()=>{$('#shopModal').classList.remove('open');S.pa
 attachSheetSwipe('#decorSheet',()=>$('#decorModal').classList.remove('open'));
 function updateShopBtns(){
   const e=E();
-  const moldMax=MP.active?MP_MAX_MOLDS:SOLO_MAX_MOLDS;
+  const moldMax=isCoop()?MP_MAX_MOLDS:SOLO_MAX_MOLDS;
   document.querySelectorAll('[data-buy]').forEach(b=>{
     const k=b.dataset.buy;
     if(k==='mold'){b.disabled=myMoldCount()>=moldMax||e.money<8000;b.textContent=myMoldCount()>=moldMax?'최대!':'8,000원';}
@@ -1727,16 +1871,16 @@ function updateShopBtns(){
 document.querySelectorAll('[data-buy]').forEach(b=>{
   b.addEventListener('click',()=>{
     const k=b.dataset.buy;const e=E();
-    const moldMax=MP.active?MP_MAX_MOLDS:SOLO_MAX_MOLDS;
+    const moldMax=isCoop()?MP_MAX_MOLDS:SOLO_MAX_MOLDS;
     const pay=(cost)=>{if(e.money<cost){toast('돈이 부족해요!');return false;}
-      if(MP.active){MP.me.spend+=cost;}else S.money-=cost;return true;};
-    if(k==='batter'&&pay(1000)){MP.active?MP.me.buy.batter++:S.batter+=20;toast('반죽 +20 🥣');}
+      if(isCoop()){MP.me.spend+=cost;}else S.money-=cost;return true;};
+    if(k==='batter'&&pay(1000)){isCoop()?MP.me.buy.batter++:S.batter+=20;toast('반죽 +20 🥣');}
     else if(FILL_KEYS.includes(k)&&pay(ING_COST[k])){
-      MP.active?MP.me.buy[k]++:S.stock[k]+=10;
+      isCoop()?MP.me.buy[k]++:S.stock[k]+=10;
       toast(`${FILLS[k].name} +10 ${FILLS[k].emoji}`);
     }
     else if(k==='mold'&&myMoldCount()<moldMax&&pay(8000)){
-      if(MP.active)MP.me.up.mold++;else S.moldCount++;
+      if(isCoop())MP.me.up.mold++;else S.moldCount++;
       toast('화로 확장! 틀 +1 🔥');
     }
     else if(k==='alba'&&!MP.active&&!S.alba&&pay(25000)){
@@ -1744,11 +1888,11 @@ document.querySelectorAll('[data-buy]').forEach(b=>{
       toast('🧑‍💼 알바생 출근! 이제 판매를 도와드려요');
       SFX.star();renderAlbaChip();
     }
-    else if(k==='glove'&&!e.up.glove&&pay(6000)){MP.active?MP.me.up.glove=2:S.perfectBonus=2;toast('장갑 장착! 🧤');}
+    else if(k==='glove'&&!e.up.glove&&pay(6000)){isCoop()?MP.me.up.glove=2:S.perfectBonus=2;toast('장갑 장착! 🧤');}
     else if(k.endsWith('Menu')){
       const fk=k.replace('Menu','');
       if(!e.menus[fk]&&pay(MENU_COST[fk])){
-        if(MP.active){MP.me.up[fk]=true;MP.me.buy[fk]++;}
+        if(isCoop()){MP.me.up[fk]=true;MP.me.buy[fk]++;}
         else{S.menus[fk]=true;S.stock[fk]+=10;}
         toast(`${FILLS[fk].emoji} ${FILLS[fk].name} 메뉴 개발 완료!`);
         SFX.star();
@@ -1811,6 +1955,48 @@ $('#quitBtn').onclick=()=>{
 $('#quitYesBtn').onclick=()=>quitToLobby();
 $('#quitNoBtn').onclick=()=>{S.paused=false;$('#quitModal').classList.remove('open');};
 
+/* ═══════════ ⚔️ 대결 모드 ═══════════ */
+document.querySelectorAll('#mpTypeRow .modebtn').forEach(b=>{
+  b.onclick=()=>{
+    MP.vsSel=b.dataset.mptype;
+    document.querySelectorAll('#mpTypeRow .modebtn').forEach(x=>x.classList.toggle('sel',x===b));
+  };
+});
+function endVsRound(){
+  if(MP.summaryShownFor===S.day)return;
+  MP.summaryShownFor=S.day;
+  S.running=false;
+  $('#rushBanner').classList.remove('on');
+  /* 최종 점수 동기화 여유 후 결과 표시 */
+  pubMe();
+  setTimeout(()=>{
+    const my=S.daySales,opp=(MP.other&&MP.other.vsScore)||0;
+    const myAv=myAvatar().emoji,oppAv=MP.other&&MP.other.av?avItem(MP.other.av).emoji:'❓';
+    $('#vsMyName').textContent=`${myAv} 나`;
+    $('#vsOppName').textContent=`${oppAv} 상대`;
+    $('#vsMyScore').textContent=fmt(my)+'원';
+    $('#vsOppScore').textContent=fmt(opp)+'원';
+    let t,e;
+    if(my>opp){t='🏆 승리!';e='🎉';SFX.star();}
+    else if(my<opp){t='😢 패배…';e='🥲';SFX.angry();}
+    else{t='🤝 무승부!';e='⚖️';}
+    $('#vsResultTitle').textContent=t;
+    $('#vsResultEmoji').textContent=e;
+    $('#vsRematchBtn').style.display=MP.role==='host'?'block':'none';
+    $('#vsWaitTip').style.display=MP.role==='host'?'none':'block';
+    $('#vsResultModal').classList.add('open');
+  },1600);
+}
+$('#vsRematchBtn').onclick=()=>{
+  if(MP.role!=='host')return;
+  $('#vsResultModal').classList.remove('open');
+  MP.meta={day:S.day+1,state:'playing',startedAt:Date.now(),diff:S.diff,type:'vs'};
+  pubMeta();
+  MP.lastStartedAt=MP.meta.startedAt;
+  startDayLocal(MP.meta.day);
+};
+$('#vsLobbyBtn').onclick=()=>{$('#vsResultModal').classList.remove('open');quitToLobby('⚔️ 대결 종료! 수고했어요');};
+
 /* ═══════════ 게임 모드 / 업적 / 랭킹 / 꾸미기 UI ═══════════ */
 document.querySelectorAll('#modeRow .modebtn').forEach(b=>{
   b.onclick=()=>{
@@ -1841,7 +2027,7 @@ $('#storyContinueBtn').onclick=()=>{
   toast('♾️ 엔드리스 모드로 계속! 기록에 도전하세요');
 };
 /* 꾸미기 상점 렌더 (로비 전용 · 카테고리 탭 · 💎 결제) */
-let decorTab='tarp';
+let decorTab='avatar';
 function renderDecorShop(){
   const body=$('#decorShopBody');if(!body)return;
   $('#decorGemCnt').textContent=GEMS;
@@ -1859,8 +2045,13 @@ function renderDecorShop(){
     else if(cat.type==='equip')btn=`<button class="buybtn" data-decor="${it.id}" ${equipped?'disabled':''}>${equipped?'장착중':'장착'}</button>`;
     else btn=`<button class="buybtn" data-decor="${it.id}">${equipped?'끄기':'켜기'}</button>`;
     return`<div class="item"><div class="info"><div class="name">${it.emoji} ${it.name}${equipped&&cat.type==='toggle'?' <span style="font-size:10px;color:var(--ok)">ON</span>':''}</div>
-      <div class="desc">${owned?'소장중 · 영구 보존':'포장마차를 예쁘게!'}</div></div>${btn}</div>`;
+      <div class="desc">✦ ${effText(it.eff)}${owned?' · 소장중':''}</div></div>${btn}</div>`;
   }).join('');
+  /* 현재 적용 중인 효과 합계 */
+  const fxLine=Object.keys(FXC).filter(k=>FXC[k]>0).map(k=>
+    k==='perf'?`${FX_LABEL[k]} +${FXC[k].toFixed(1)}초`:`${FX_LABEL[k]} +${Math.round(FXC[k]*100)}%${(k==='gold'||k==='gem')?'p':''}`).join(' · ');
+  const fxEl=$('#pvFxLine');
+  if(fxEl)fxEl.textContent=fxLine?'✦ 적용 효과: '+fxLine:'✦ 아이템을 장착하면 소소한 효과가 붙어요';
   body.querySelectorAll('[data-decor]').forEach(b=>{
     b.onclick=()=>{
       const id=b.dataset.decor;
@@ -1879,7 +2070,7 @@ function renderDecorShop(){
     };
   });
 }
-$('#decorBtn').onclick=()=>{renderDecorShop();$('#decorModal').classList.add('open');};
+$('#decorBtn').onclick=()=>{applyDecor();renderDecorShop();$('#decorModal').classList.add('open');};
 $('#decorClose').onclick=()=>$('#decorModal').classList.remove('open');
 /* 💳 보석 충전 (준비 중 자리) */
 document.querySelectorAll('[data-gempack]').forEach(b=>{
@@ -1919,7 +2110,8 @@ const genCode=()=>Array.from({length:4},()=>CODE_CHARS[Math.floor(Math.random()*
 $('#hostBtn').onclick=()=>{
   if(!mqttOK()){toast('네트워크 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인하세요.');return;}
   MP.code=genCode();MP.role='host';MP.active=true;MP.me=emptyBlob();
-  MP.other=null;MP.meta={day:1,state:'waiting',startedAt:0};MP.lastStartedAt=-1;
+  MP.vs=(MP.vsSel==='vs');
+  MP.other=null;MP.meta={day:1,state:'waiting',startedAt:0,type:MP.vsSel};MP.lastStartedAt=-1;
   MP.lastExtApplied=0;MP.lastReqT=0;MP.custMirror=[];
   document.body.classList.add('multi');
   $('#roleBadge').textContent='👨‍🍳 사장님';
@@ -1949,7 +2141,7 @@ $('#hostStartBtn').onclick=()=>{
   S.gameMode='endless';
   resetRun();
   $('.stallname').textContent='🐟 우리동네 붕어빵';
-  MP.meta={day:1,state:'playing',startedAt:Date.now(),diff:S.diff};
+  MP.meta={day:1,state:'playing',startedAt:Date.now(),diff:S.diff,type:MP.vsSel};
   pubMeta();
   MP.lastStartedAt=MP.meta.startedAt;
   S.mode='host';startDayLocal(1);
