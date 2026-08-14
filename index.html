@@ -242,6 +242,9 @@ body.multi #pingRow{display:flex}
 
 .modal{position:absolute;inset:0;background:#000b;z-index:30;display:none;align-items:flex-end;justify-content:center}
 .modal.open{display:flex}
+.modal.top{z-index:60} /* 시작 화면 위에도 뜨는 모달(업적/랭킹/스토리) */
+.grabbar{width:44px;height:5px;background:#ffffff33;border-radius:99px;margin:0 auto 12px;flex:none}
+.sheet{overscroll-behavior:contain}
 .sheet{width:100%;max-width:430px;background:#20283e;border-radius:22px 22px 0 0;padding:18px 18px calc(20px + env(safe-area-inset-bottom));
   max-height:78dvh;overflow-y:auto;animation:sheetup .28s ease-out;border-top:2px solid #ffffff22}
 @keyframes sheetup{from{transform:translateY(60px);opacity:0}}
@@ -348,7 +351,8 @@ body.multi #pingRow{display:flex}
 
   <!-- 상점 -->
   <div class="modal" id="shopModal">
-    <div class="sheet">
+    <div class="sheet" id="shopSheet">
+      <div class="grabbar"></div>
       <h2>재료 · 업그레이드 <button class="close" id="shopClose">닫기</button></h2>
       <div class="sect">재료 (공동 금고에서 차감)</div>
       <div class="item"><div class="info"><div class="name">반죽 20개</div><div class="desc">아래·위 두 번 붓는 공정! 넉넉하게 20개</div></div><button class="buybtn" data-buy="batter">1,000원</button></div>
@@ -370,7 +374,7 @@ body.multi #pingRow{display:flex}
   </div>
 
   <!-- 업적 -->
-  <div class="modal center-modal" id="achModal">
+  <div class="modal center-modal top" id="achModal">
     <div class="card">
       <h2>🏅 업적</h2>
       <div id="achList" style="max-height:50dvh;overflow-y:auto"></div>
@@ -379,7 +383,7 @@ body.multi #pingRow{display:flex}
   </div>
 
   <!-- 온라인 랭킹 -->
-  <div class="modal center-modal" id="lbModal">
+  <div class="modal center-modal top" id="lbModal">
     <div class="card">
       <h2>🏆 온라인 랭킹</h2>
       <div class="diffrow" id="lbDiffChips"></div>
@@ -394,7 +398,7 @@ body.multi #pingRow{display:flex}
   </div>
 
   <!-- 스토리 엔딩 -->
-  <div class="modal center-modal" id="storyModal">
+  <div class="modal center-modal top" id="storyModal">
     <div class="card">
       <h2>👑 붕어빵 명가 달성!</h2>
       <div style="font-size:48px;margin:6px 0">🎊🐟🎊</div>
@@ -835,7 +839,7 @@ function extinguishMold(m,fromRemote){
   if(!m||m.st!=='fire')return;
   m.fireHp--;SFX.ext();
   if(m.fireHp<=0){
-    m.st='empty';m.fill=null;m.t=0;
+    m.st='empty';m.fill=null;m.t=0;m.warn=false;
     S.runFires++;if(S.runFires>=3)ach('fire_hero');
     toast(fromRemote?'파트너 도움으로 진화 완료! 🤝':'진화 완료! 🧯');
     SFX.collect();
@@ -1120,7 +1124,7 @@ function tapMold(i){
     if(sel!=='batter'){toast('먼저 🥣 반죽부터 부어야 해요!');SFX.land();return;}
     if(e.batter<=0){toast('반죽이 없어요! 🛒 상점에서 구매');return;}
     if(MP.active)MP.me.cons.batter++;else S.batter--;
-    m.st='batter1';m.fill=null;m.t=0;
+    m.st='batter1';m.fill=null;m.t=0;m.warn=false;
     SFX.pour();
     renderFills();
   }
@@ -1136,7 +1140,7 @@ function tapMold(i){
     if(sel!=='batter'){toast('🥣 반죽으로 덮어야 구울 수 있어요!');SFX.land();return;}
     if(e.batter<=0){toast('반죽이 없어요! 🛒 상점에서 구매');return;}
     if(MP.active)MP.me.cons.batter++;else S.batter--;
-    m.st='cook1';m.t=0;
+    m.st='cook1';m.t=0;m.warn=false;
     SFX.pour();
     toast('지글지글~ 굽기 시작! 🔥');
     renderFills();
@@ -1155,10 +1159,10 @@ function tapMold(i){
     }else{
       SFX.collect();toast('노릇노릇 완성! ✨');
     }
-    m.st='empty';m.fill=null;m.t=0;
+    m.st='empty';m.fill=null;m.t=0;m.warn=false;
   }else if(m.st==='burnt'){
     if(MP.active)MP.me.burnt++;
-    m.st='empty';m.fill=null;m.t=0;S.dayBurnt++;SFX.burnt();toast('까맣게 탔어요… 🥲');
+    m.st='empty';m.fill=null;m.t=0;m.warn=false;S.dayBurnt++;SFX.burnt();toast('까맣게 탔어요… 🥲');
   }else if(m.st==='fire'){
     extinguishMold(m,false);
   }
@@ -1549,6 +1553,34 @@ $('#shopBtn').onclick=()=>{
   $('#shopModal').classList.add('open');
 };
 $('#shopClose').onclick=()=>{S.paused=false;$('#shopModal').classList.remove('open');};
+/* 상점 시트: 아래로 스와이프해서 닫기 */
+(function(){
+  const sheet=$('#shopSheet');if(!sheet)return;
+  let sy=null,dy=0,dragging=false;
+  sheet.addEventListener('touchstart',e=>{
+    if(sheet.scrollTop<=0){sy=e.touches[0].clientY;dy=0;dragging=true;sheet.style.transition='none';}
+  },{passive:true});
+  sheet.addEventListener('touchmove',e=>{
+    if(!dragging||sy===null)return;
+    dy=e.touches[0].clientY-sy;
+    if(dy>0)sheet.style.transform=`translateY(${dy}px)`;
+  },{passive:true});
+  sheet.addEventListener('touchend',()=>{
+    if(!dragging)return;dragging=false;
+    sheet.style.transition='transform .25s ease-out';
+    if(dy>90){
+      sheet.style.transform='translateY(105%)';
+      setTimeout(()=>{
+        $('#shopModal').classList.remove('open');S.paused=false;
+        sheet.style.transform='';sheet.style.transition='';
+      },240);
+    }else{
+      sheet.style.transform='';
+      setTimeout(()=>sheet.style.transition='',260);
+    }
+    sy=null;
+  });
+})();
 function updateShopBtns(){
   const e=E();
   const moldMax=MP.active?MP_MAX_MOLDS:SOLO_MAX_MOLDS;
