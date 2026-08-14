@@ -22,117 +22,181 @@ body{
 }
 #app{width:100%;max-width:430px;height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden}
 
-.snow{position:absolute;top:-10px;color:#fff;opacity:.7;pointer-events:none;animation:fall linear infinite;font-size:10px;z-index:1}
+.snow{position:absolute;top:-10px;color:#fff;opacity:.6;pointer-events:none;animation:fall linear infinite;font-size:10px;z-index:1}
 @keyframes fall{to{transform:translateY(105dvh) translateX(20px);opacity:.2}}
-@media (prefers-reduced-motion: reduce){.snow{display:none}}
+@media (prefers-reduced-motion: reduce){.snow{display:none}.fishwrap.flipping{animation:none !important}}
 
-header{z-index:5;padding:10px 14px 6px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.stat{font-family:'Jua';font-size:16.5px;display:flex;align-items:center;gap:4px}
+header{z-index:8;padding:8px 14px 4px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none}
+.stat{font-family:'Jua';font-size:16px;display:flex;align-items:center;gap:4px}
 .stat small{font-size:11px;opacity:.65;font-family:'Gowun Dodum'}
 #dayBar{flex:1;margin:0 6px;height:8px;background:#ffffff22;border-radius:99px;overflow:hidden}
 #dayFill{height:100%;width:0%;background:linear-gradient(90deg,#5a7bd8,var(--glow));border-radius:99px;transition:width .3s linear}
+#muteBtn{background:none;border:none;font-size:17px;cursor:pointer;padding:0 2px}
+#goalChip{z-index:8;text-align:center;font-family:'Jua';font-size:12px;color:#cfd8ef;padding:0 14px 2px;flex:none}
+#goalChip b{color:var(--glow)}
 
-#roleBar{z-index:5;display:none;align-items:center;gap:8px;padding:0 14px 4px;font-size:12.5px}
+#roleBar{z-index:8;display:none;align-items:center;gap:8px;padding:0 14px 2px;font-size:12px;flex:none}
 body.multi #roleBar{display:flex}
-#roleBadge{font-family:'Jua';font-size:12.5px;background:#ffffff18;border:1.5px solid #ffffff2a;border-radius:99px;padding:3px 11px;color:var(--glow)}
-#partnerDot{width:8px;height:8px;border-radius:99px;background:#777;display:inline-block}
+#roleBadge{font-family:'Jua';font-size:12px;background:#ffffff18;border:1.5px solid #ffffff2a;border-radius:99px;padding:2px 10px;color:var(--glow)}
+#partnerDot,#netDot{width:8px;height:8px;border-radius:99px;background:#777;display:inline-block}
 #partnerDot.on{background:var(--ok);box-shadow:0 0 6px var(--ok)}
-#netDot{width:8px;height:8px;border-radius:99px;background:#777;display:inline-block}
 #netDot.on{background:var(--blue);box-shadow:0 0 6px var(--blue)}
 #roomCodeTag{margin-left:auto;opacity:.7;font-family:'Jua';letter-spacing:2px}
 
 #rushBanner{
-  position:absolute;top:52px;left:50%;transform:translateX(-50%) scale(0);
-  background:var(--danger);color:#fff;font-family:'Jua';font-size:15px;
-  padding:6px 18px;border-radius:99px;z-index:9;transition:transform .3s;box-shadow:0 4px 14px #ff5d5d66;
+  position:absolute;top:50px;left:50%;transform:translateX(-50%) scale(0);
+  background:var(--danger);color:#fff;font-family:'Jua';font-size:14px;
+  padding:5px 16px;border-radius:99px;z-index:20;transition:transform .3s;box-shadow:0 4px 14px #ff5d5d66;
 }
 #rushBanner.on{transform:translateX(-50%) scale(1)}
+#comboBadge{
+  position:absolute;top:88px;right:10px;z-index:20;font-family:'Jua';font-size:13px;
+  background:#ff8c2bdd;color:#3a2200;padding:5px 12px;border-radius:99px;
+  transform:scale(0);transition:transform .18s;box-shadow:0 3px 12px #ff8c2b66;pointer-events:none;
+}
+#comboBadge.on{transform:scale(1)}
+#comboBadge.fever{background:linear-gradient(90deg,#ffd93d,#ff6b6b);color:#fff;animation:feverpulse .4s infinite alternate}
+@keyframes feverpulse{to{transform:scale(1.12)}}
 
-/* 손님 줄 */
-#customers{z-index:5;height:118px;display:flex;gap:10px;padding:6px 14px;align-items:flex-end}
-body.role-host.multi #customers{display:none}
-.customer{flex:1;max-width:110px;background:#ffffff10;border:1.5px solid #ffffff22;border-radius:14px;
-  padding:8px 6px 6px;text-align:center;cursor:pointer;animation:walkin .35s ease-out;position:relative}
+/* ── 손님 줄 (항상 표시, 양쪽 모두) ── */
+#customers{
+  z-index:7;position:relative;flex:none;height:112px;min-height:112px;
+  display:flex;gap:8px;padding:6px 12px;align-items:flex-end;
+}
+.customer{
+  flex:1;max-width:104px;background:#232c47f2;border:1.5px solid #ffffff2e;border-radius:14px;
+  padding:7px 5px 5px;text-align:center;cursor:pointer;animation:walkin .35s ease-out;position:relative;
+}
 @keyframes walkin{from{transform:translateX(60px);opacity:0}}
 .customer.leaving{animation:walkout .4s ease-in forwards}
 @keyframes walkout{to{transform:translateX(-60px);opacity:0}}
-.customer .face{font-size:26px;line-height:1}
-.customer .order{margin-top:3px;font-size:13px;background:#fff;color:#333;border-radius:8px;padding:2px 4px;
+.customer.pending{opacity:.55}
+.customer .face{font-size:24px;line-height:1}
+.customer .order{margin-top:3px;font-size:12.5px;background:#fff;color:#333;border-radius:8px;padding:2px 4px;
   font-family:'Jua';display:flex;justify-content:center;gap:5px;flex-wrap:wrap}
 .order span{display:flex;align-items:center;gap:1px}
 .patience{height:5px;background:#ffffff25;border-radius:99px;margin-top:5px;overflow:hidden}
 .patience i{display:block;height:100%;background:var(--ok);border-radius:99px}
 .patience i.low{background:var(--danger)}
 .customer.servable{border-color:var(--ok);box-shadow:0 0 12px #7ee08a55}
+#custEmpty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:12.5px;opacity:.45;pointer-events:none}
+#albaChip{position:absolute;top:6px;left:12px;z-index:8;display:none;font-family:'Jua';font-size:10.5px;
+  background:#4d7bd6dd;color:#fff;padding:3px 10px;border-radius:99px;box-shadow:0 2px 8px #4d7bd666}
+#albaChip.on{display:block}
 
-/* 포장마차 */
-#stall{z-index:5;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;position:relative;padding-top:4px}
-.tarpline{width:92%;height:26px;border-radius:12px 12px 0 0;position:relative;overflow:hidden;
+/* ── 포장마차/화로 ── */
+#stall{z-index:5;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;position:relative;padding-top:2px;overflow:hidden}
+.tarpline{width:92%;height:20px;border-radius:12px 12px 0 0;position:relative;overflow:hidden;flex:none;
   background:repeating-linear-gradient(90deg,var(--tarp) 0 26px,#ffffff 26px 52px);box-shadow:0 4px 10px #0006}
 .tarpline::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#0000 40%,#0004)}
-.stallname{font-family:'Jua';font-size:15px;background:#2a1c12;color:var(--glow);padding:3px 16px;
+.stallname{font-family:'Jua';font-size:13.5px;background:#2a1c12;color:var(--glow);padding:2px 14px;flex:none;
   border-radius:0 0 10px 10px;letter-spacing:1px;border:1.5px solid #ffb34744;border-top:none}
-#griddle{margin-top:10px;width:88%;background:radial-gradient(ellipse at 50% 0%,#3a3f4c,#22242e 70%);
-  border-radius:20px;padding:14px 12px 16px;box-shadow:0 0 34px 4px #ffb34733,inset 0 3px 10px #0009,0 8px 20px #0008;
-  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;position:relative}
-#griddle::before{content:'';position:absolute;inset:-6px;border-radius:24px;z-index:-1;
-  background:radial-gradient(ellipse at 50% 100%,#ff8c2b44,#0000 70%)}
-body.role-guest.multi #griddle{display:none}
-body.role-guest.multi .stallname::after{content:' — 판매대'}
+.panlabel{font-family:'Jua';font-size:11.5px;color:#cfd8ef;opacity:.8;margin:6px 0 3px;flex:none}
+.griddle{
+  width:90%;background:radial-gradient(ellipse at 50% 0%,#3a3f4c,#22242e 70%);
+  border-radius:16px;padding:10px 9px 12px;flex:none;
+  box-shadow:0 0 28px 3px #ffb34733,inset 0 3px 10px #0009,0 6px 16px #0008;
+  display:grid;gap:8px;position:relative;
+}
+#myGriddle{grid-template-columns:repeat(4,1fr)}
+#partnerGriddle{grid-template-columns:repeat(3,1fr);width:74%;transform:scale(.96);opacity:.85;display:none}
+body.multi #partnerGriddle{display:grid}
+body.multi #myGriddle{grid-template-columns:repeat(3,1fr)}
+body.multi #partnerLabel{display:block}
+#partnerLabel{display:none}
 
-#sellerPanel{display:none;margin-top:12px;width:88%;background:#ffffff0d;border:1.5px solid #ffffff1c;
-  border-radius:16px;padding:14px;text-align:center}
-body.role-guest.multi #sellerPanel{display:block}
-#sellerPanel .big{font-family:'Jua';font-size:16px;color:var(--glow);margin-bottom:6px}
-#sellerPanel .sub{font-size:12.5px;opacity:.7;line-height:1.6}
-
-.mold{aspect-ratio:1.5/1;border-radius:12px;background:#181a22;box-shadow:inset 0 2px 8px #000c;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:transform .1s}
-.mold:active{transform:scale(.95)}
+.mold{aspect-ratio:1.55/1;border-radius:11px;background:#181a22;box-shadow:inset 0 2px 8px #000c;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:transform .1s;
+  perspective:340px;touch-action:none;}
+.mold:active{transform:scale(.96)}
 .mold.locked{opacity:.28;cursor:default}
-.mold svg{width:82%;height:auto;filter:drop-shadow(0 2px 3px #0008)}
-.mold .tag{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);font-family:'Jua';font-size:10.5px;
-  padding:1px 8px;border-radius:99px;white-space:nowrap;background:#000a;color:#fff}
+.fishwrap{width:82%;transform-style:preserve-3d;will-change:transform}
+.fishwrap svg{width:100%;height:auto;display:block;filter:drop-shadow(0 2px 3px #0008)}
+.fishwrap.flipping{animation:flip3d .55s cubic-bezier(.34,1.25,.5,1) forwards}
+@keyframes flip3d{
+  0%{transform:translateY(0) rotateX(0) scale(1)}
+  18%{transform:translateY(-10px) rotateX(52deg) scale(1.04)}
+  46%{transform:translateY(-30px) rotateX(180deg) scale(1.1)}
+  74%{transform:translateY(-8px) rotateX(305deg) scale(1.04)}
+  88%{transform:translateY(2px) rotateX(352deg) scale(.98)}
+  100%{transform:translateY(0) rotateX(360deg) scale(1)}
+}
+.mold .tag{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);font-family:'Jua';font-size:9.5px;
+  padding:1px 7px;border-radius:99px;white-space:nowrap;background:#000a;color:#fff;z-index:2}
+.mold .tag.warn{background:var(--danger);animation:pulse .3s infinite alternate}
 .mold.flip .tag{background:var(--glow);color:#3a2200;animation:pulse .5s infinite alternate}
 .mold.perfect .tag{background:var(--ok);color:#0c2f14;animation:pulse .5s infinite alternate}
 .mold.burnt .tag{background:var(--danger)}
+.mold.fire{background:#3a1408}
+.mold.fire .tag{background:var(--danger);animation:pulse .3s infinite alternate}
 @keyframes pulse{to{transform:translateX(-50%) scale(1.12)}}
-.mold.perfect svg{animation:sparkle .6s infinite alternate}
+.mold.perfect .fishwrap svg{animation:sparkle .6s infinite alternate}
 @keyframes sparkle{to{filter:drop-shadow(0 0 8px #ffe08a)}}
-.steam{position:absolute;top:-6px;left:50%;font-size:13px;opacity:0;pointer-events:none;animation:steam 1.6s ease-out infinite}
-@keyframes steam{0%{opacity:.7;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-22px)}}
+.mold.flip .fishwrap{animation:begflip 1s ease-in-out infinite}
+@keyframes begflip{0%,100%{transform:translateY(0) rotateX(0)}50%{transform:translateY(-4px) rotateX(14deg)}}
+.steam{position:absolute;top:-6px;left:50%;font-size:12px;opacity:0;pointer-events:none;animation:steam 1.6s ease-out infinite;z-index:2}
+@keyframes steam{0%{opacity:.7;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-20px)}}
+.fireEmoji{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:24px;animation:firewob .3s infinite alternate;pointer-events:none;z-index:3}
+@keyframes firewob{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.2)}}
+.swipeHint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;pointer-events:none;
+  animation:hintup 1s ease-in-out infinite;z-index:3;text-shadow:0 1px 4px #000}
+@keyframes hintup{0%,100%{transform:translate(-50%,-42%)}50%{transform:translate(-50%,-62%)}}
 
-/* 핑 버튼 */
-#pingRow{display:none;gap:6px;padding:6px 14px 0;z-index:5}
+#extBtn{
+  position:absolute;right:12px;bottom:160px;z-index:25;display:none;
+  font-family:'Jua';font-size:15px;padding:14px 16px;border-radius:99px;border:none;
+  background:var(--danger);color:#fff;box-shadow:0 0 24px #ff5d5daa;animation:feverpulse .35s infinite alternate;
+}
+#extBtn.show{display:block}
+@keyframes shakeX{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#app.shake{animation:shakeX .25s}
+
+#pingRow{display:none;gap:6px;padding:5px 12px 0;z-index:6;flex:none}
 body.multi #pingRow{display:flex}
-.pingbtn{flex:1;font-family:'Jua';font-size:12px;padding:8px 2px;border-radius:10px;border:1.5px solid #ffffff22;
+.pingbtn{flex:1;font-family:'Jua';font-size:11.5px;padding:7px 2px;border-radius:10px;border:1.5px solid #ffffff22;
   background:#ffffff0d;color:var(--ink);cursor:pointer}
 .pingbtn:active{background:#ffffff22}
 
-/* 하단 */
-#bottom{z-index:5;padding:8px 14px calc(12px + env(safe-area-inset-bottom))}
-.fillrow{display:flex;gap:8px;margin-bottom:8px}
-body.role-guest.multi .fillrow{display:none}
-.fillbtn{flex:1;font-family:'Jua';font-size:15px;padding:9px 4px;border-radius:12px;border:2px solid #ffffff22;
+#bottom{z-index:6;padding:6px 12px calc(10px + env(safe-area-inset-bottom));flex:none}
+/* ── 쟁반: 실제 붕어빵이 쌓이는 진열대 ── */
+#trayShelf{
+  display:flex;align-items:center;gap:3px;overflow:hidden;flex:none;z-index:6;
+  background:linear-gradient(180deg,#3a2c1c,#2a1f14);border:1.5px solid #6b4a2a;
+  border-radius:12px;padding:5px 8px;margin:2px 12px 4px;min-height:38px;position:relative;
+}
+#trayShelf .shelfLbl{font-family:'Jua';font-size:11px;color:var(--glow);margin-right:4px;flex:none}
+.minifish{width:34px;flex:none;position:relative;animation:fishpop .3s ease-out}
+@keyframes fishpop{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+.minifish svg{width:100%;height:auto;display:block;filter:drop-shadow(0 1px 2px #0008)}
+.minifish .dot{position:absolute;top:46%;left:52%;transform:translate(-50%,-50%);font-size:9px}
+#trayMore{font-family:'Jua';font-size:12px;color:var(--glow);flex:none;margin-left:2px}
+#trayEmptyLbl{font-size:11.5px;opacity:.45;font-family:'Gowun Dodum'}
+/* 재료 준비 단계 비주얼 */
+.fishwrap.half svg{opacity:.55}
+.fillDot{position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);font-size:15px;z-index:2;
+  animation:fishpop .25s ease-out}
+.fillbtn.batter.sel{border-color:#e8d7ae;background:#e8d7ae22;box-shadow:0 0 10px #e8d7ae33}
+.fillrow{display:flex;gap:8px;margin-bottom:7px}
+.fillbtn{flex:1;font-family:'Jua';font-size:14px;padding:8px 4px;border-radius:12px;border:2px solid #ffffff22;
   background:#ffffff10;color:var(--ink);cursor:pointer}
 .fillbtn.sel{border-color:var(--glow);background:#ffb34722;box-shadow:0 0 10px #ffb34733}
-.fillbtn small{display:block;font-size:11px;font-family:'Gowun Dodum';opacity:.7}
-.trayrow{display:flex;align-items:center;gap:10px;background:#ffffff0d;border:1.5px solid #ffffff1c;border-radius:14px;padding:8px 12px}
-.trayrow .lbl{font-family:'Jua';font-size:14px;color:var(--glow)}
-.traycount{font-family:'Jua';font-size:15px;display:flex;align-items:center;gap:3px}
-#shopBtn{margin-left:auto;font-family:'Jua';font-size:14px;padding:8px 14px;border-radius:12px;border:none;
+.fillbtn small{display:block;font-size:10.5px;font-family:'Gowun Dodum';opacity:.7}
+.trayrow{display:flex;align-items:center;gap:9px;background:#ffffff0d;border:1.5px solid #ffffff1c;border-radius:14px;padding:7px 11px}
+.trayrow .lbl{font-family:'Jua';font-size:13px;color:var(--glow)}
+.traycount{font-family:'Jua';font-size:14px;display:flex;align-items:center;gap:3px}
+#shopBtn{margin-left:auto;font-family:'Jua';font-size:13px;padding:7px 13px;border-radius:12px;border:none;
   background:var(--tarp);color:#fff;cursor:pointer;box-shadow:0 3px 0 #c4531d}
 #shopBtn:active{transform:translateY(2px);box-shadow:0 1px 0 #c4531d}
 
 #toast{position:absolute;bottom:150px;left:50%;transform:translateX(-50%);background:#000c;color:#fff;
-  padding:8px 18px;border-radius:99px;font-size:13.5px;opacity:0;transition:opacity .25s;z-index:40;
+  padding:8px 18px;border-radius:99px;font-size:13px;opacity:0;transition:opacity .25s;z-index:40;
   pointer-events:none;white-space:nowrap;font-family:'Jua'}
 .floatmoney{position:absolute;font-family:'Jua';font-size:16px;color:var(--ok);z-index:15;pointer-events:none;
   animation:floatup 1s ease-out forwards;text-shadow:0 1px 4px #000}
 @keyframes floatup{to{transform:translateY(-46px);opacity:0}}
 
-/* 모달 */
-.modal{position:absolute;inset:0;background:#000a;z-index:30;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px)}
+.modal{position:absolute;inset:0;background:#000b;z-index:30;display:none;align-items:flex-end;justify-content:center}
 .modal.open{display:flex}
 .sheet{width:100%;max-width:430px;background:#20283e;border-radius:22px 22px 0 0;padding:18px 18px calc(20px + env(safe-area-inset-bottom));
   max-height:78dvh;overflow-y:auto;animation:sheetup .28s ease-out;border-top:2px solid #ffffff22}
@@ -151,7 +215,7 @@ body.role-guest.multi .fillrow{display:none}
 
 .center-modal{align-items:center}
 .card{width:88%;max-width:340px;background:#20283e;border-radius:22px;padding:24px 20px;text-align:center;
-  border:2px solid #ffffff22;animation:sheetup .3s ease-out}
+  border:2px solid #ffffff22;animation:sheetup .3s ease-out;max-height:88dvh;overflow-y:auto}
 .card h2{font-family:'Jua';font-size:22px;color:var(--glow);margin-bottom:14px}
 .card .row{display:flex;justify-content:space-between;font-size:15px;padding:7px 6px;border-bottom:1px dashed #ffffff1c}
 .card .row b{font-family:'Jua'}
@@ -173,6 +237,17 @@ body.role-guest.multi .fillrow{display:none}
 .rolecard{display:flex;gap:8px;margin:10px 0 2px}
 .rolecard div{flex:1;background:#ffffff0d;border:1.5px solid #ffffff1c;border-radius:12px;padding:10px 6px;font-size:12px;line-height:1.5}
 .rolecard b{font-family:'Jua';font-size:14px;color:var(--glow);display:block;margin-bottom:2px}
+.diffrow{display:flex;gap:6px;margin:12px 0 2px}
+.diffbtn{flex:1;font-family:'Jua';font-size:11.5px;padding:9px 2px;border-radius:10px;border:2px solid #ffffff22;
+  background:#ffffff0d;color:var(--ink);cursor:pointer;line-height:1.3}
+.diffbtn span{display:block;font-size:15px}
+.diffbtn.sel{border-color:var(--glow);background:#ffb34722;box-shadow:0 0 10px #ffb34733}
+#sumStars{font-size:34px;letter-spacing:6px;margin:-4px 0 10px;animation:sheetup .5s ease-out}
+#dayBanner{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%) scale(0);z-index:26;
+  font-family:'Jua';font-size:26px;color:#fff;background:#000c;padding:14px 30px;border-radius:18px;
+  text-align:center;transition:transform .3s;pointer-events:none;border:2px solid var(--glow)}
+#dayBanner.on{transform:translate(-50%,-50%) scale(1)}
+#dayBanner small{display:block;font-size:13px;color:var(--glow);margin-top:4px}
 </style>
 </head>
 <body>
@@ -180,30 +255,36 @@ body.role-guest.multi .fillrow{display:none}
 
   <header>
     <div class="stat">💰 <span id="money">15,000</span><small>원</small></div>
-    <div class="stat" style="font-size:14px">DAY <span id="day">1</span></div>
+    <div class="stat" style="font-size:13px">DAY <span id="day">1</span></div>
     <div id="dayBar"><div id="dayFill"></div></div>
     <div class="stat" id="rep">❤️ 3.0</div>
+    <button id="muteBtn">🔊</button>
   </header>
+  <div id="goalChip">🎯 오늘 목표 <b id="goalCur">0</b> / <span id="goalTgt">9,000</span>원</div>
 
   <div id="roleBar">
-    <span id="roleBadge">🔥 굽기 담당</span>
+    <span id="roleBadge">👨‍🍳 사장님</span>
     <span><i id="netDot"></i> <span id="netLbl">서버</span></span>
     <span><i id="partnerDot"></i> <span id="partnerLbl">파트너 대기중</span></span>
     <span id="roomCodeTag"></span>
   </div>
 
   <div id="rushBanner">🔥 러시아워! 손님이 몰려와요!</div>
+  <div id="comboBadge">🔥 콤보 x1</div>
+  <div id="dayBanner">DAY 1<small></small></div>
+  <button id="extBtn">🧯 파트너 화로에 불! 연타!</button>
 
-  <div id="customers"></div>
+  <div id="customers"><div id="custEmpty">손님을 기다리는 중…</div><div id="albaChip">🧑‍💼 알바 근무중</div></div>
+
+  <div id="trayShelf"><span class="shelfLbl">쟁반</span><span id="trayEmptyLbl">아직 구운 붕어빵이 없어요</span></div>
 
   <div id="stall">
     <div class="tarpline"></div>
     <div class="stallname">🐟 우리동네 붕어빵</div>
-    <div id="griddle"></div>
-    <div id="sellerPanel">
-      <div class="big">🔥 파트너가 열심히 굽는 중</div>
-      <div class="sub">완성된 붕어빵이 쟁반에 올라오면<br>손님을 탭해서 판매하세요!<br><span id="prodInfo" style="color:var(--glow)"></span></div>
-    </div>
+    <div class="panlabel" id="myLabel">내 화로</div>
+    <div class="griddle" id="myGriddle"></div>
+    <div class="panlabel" id="partnerLabel">파트너 화로 (불나면 탭해서 도와주기!)</div>
+    <div class="griddle" id="partnerGriddle"></div>
   </div>
 
   <div id="pingRow"></div>
@@ -211,10 +292,9 @@ body.role-guest.multi .fillrow{display:none}
   <div id="bottom">
     <div class="fillrow" id="fillrow"></div>
     <div class="trayrow">
-      <span class="lbl">쟁반</span>
-      <span class="traycount">🟤 <span id="trayRed">0</span></span>
-      <span class="traycount" id="trayCreamWrap" style="display:none">🟡 <span id="trayCream">0</span></span>
-      <span class="traycount" style="opacity:.75;font-size:13px">반죽 <span id="batterCnt">10</span></span>
+      <span class="lbl">재고</span>
+      <span id="trayCounts"></span>
+      <span class="traycount" style="opacity:.75;font-size:12px">반죽 <span id="batterCnt">20</span></span>
       <button id="shopBtn">🛒 상점</button>
     </div>
   </div>
@@ -225,14 +305,20 @@ body.role-guest.multi .fillrow{display:none}
   <div class="modal" id="shopModal">
     <div class="sheet">
       <h2>재료 · 업그레이드 <button class="close" id="shopClose">닫기</button></h2>
-      <div class="sect">재료 (누구나 구매 가능 — 공동 금고에서 차감)</div>
-      <div class="item"><div class="info"><div class="name">반죽 10개</div><div class="desc">붕어빵의 기본! 없으면 못 구워요</div></div><button class="buybtn" data-buy="batter">1,000원</button></div>
-      <div class="item"><div class="info"><div class="name">팥 앙금 10개</div><div class="desc">달콤한 국민 필링</div></div><button class="buybtn" data-buy="red">800원</button></div>
-      <div class="item" id="creamBuyRow" style="display:none"><div class="info"><div class="name">슈크림 10개</div><div class="desc">부드럽고 인기 많은 필링</div></div><button class="buybtn" data-buy="cream">1,200원</button></div>
-      <div class="sect" id="upSect">업그레이드 <span id="upNote" style="font-family:'Gowun Dodum';font-size:11px"></span></div>
-      <div class="item up-item"><div class="info"><div class="name">화로 확장 (틀 +1)</div><div class="desc">한 번에 더 많이 구워요 (최대 6칸)</div></div><button class="buybtn" data-buy="mold">8,000원</button></div>
-      <div class="item up-item"><div class="info"><div class="name">두꺼운 장갑</div><div class="desc">노릇노릇 타이밍이 2초 길어져요</div></div><button class="buybtn" data-buy="glove">6,000원</button></div>
-      <div class="item up-item"><div class="info"><div class="name">슈크림 메뉴 개발</div><div class="desc">🟡 슈크림 붕어빵 판매! (개당 1,000원, 즉시 10개 증정)</div></div><button class="buybtn" data-buy="creamMenu">12,000원</button></div>
+      <div class="sect">재료 (공동 금고에서 차감)</div>
+      <div class="item"><div class="info"><div class="name">반죽 20개</div><div class="desc">아래·위 두 번 붓는 공정! 넉넉하게 20개</div></div><button class="buybtn" data-buy="batter">1,000원</button></div>
+      <div class="item"><div class="info"><div class="name">🟤 팥 앙금 10개</div><div class="desc">달콤한 국민 필링 (판매가 700원)</div></div><button class="buybtn" data-buy="red">800원</button></div>
+      <div class="item" id="creamBuyRow" style="display:none"><div class="info"><div class="name">🟡 슈크림 10개</div><div class="desc">부드러운 인기 필링 (판매가 1,000원)</div></div><button class="buybtn" data-buy="cream">1,200원</button></div>
+      <div class="item" id="sweetBuyRow" style="display:none"><div class="info"><div class="name">🍠 고구마 10개</div><div class="desc">포근포근 겨울 필링 (판매가 1,200원)</div></div><button class="buybtn" data-buy="sweet">1,400원</button></div>
+      <div class="item" id="pizzaBuyRow" style="display:none"><div class="info"><div class="name">🍕 피자 앙금 10개</div><div class="desc">짭짤한 별미 필링 (판매가 1,500원)</div></div><button class="buybtn" data-buy="pizza">1,800원</button></div>
+      <div class="sect">메뉴 개발 (공용) — 손님이 요구하기 시작하면 서두르세요!</div>
+      <div class="item"><div class="info"><div class="name">🟡 슈크림 메뉴 개발</div><div class="desc">스테이지 2부터 손님이 찾아요 (즉시 10개 증정)</div></div><button class="buybtn" data-buy="creamMenu">12,000원</button></div>
+      <div class="item"><div class="info"><div class="name">🍠 고구마 메뉴 개발</div><div class="desc">스테이지 4부터 손님이 찾아요 (즉시 10개 증정)</div></div><button class="buybtn" data-buy="sweetMenu">16,000원</button></div>
+      <div class="item"><div class="info"><div class="name">🍕 피자 메뉴 개발</div><div class="desc">스테이지 6부터 손님이 찾아요 (즉시 10개 증정)</div></div><button class="buybtn" data-buy="pizzaMenu">22,000원</button></div>
+      <div class="sect">업그레이드</div>
+      <div class="item"><div class="info"><div class="name">화로 확장 (내 틀 +1)</div><div class="desc" id="moldDesc">한 번에 더 많이 구워요</div></div><button class="buybtn" data-buy="mold">8,000원</button></div>
+      <div class="item"><div class="info"><div class="name">🧑‍💼 알바생 고용 (혼자 하기 전용)</div><div class="desc" id="albaDesc">손님에게 붕어빵을 자동으로 건네줘요. 단, 알바 판매는 팁·콤보 없이 정가만!</div></div><button class="buybtn" data-buy="alba">25,000원</button></div>
+      <div class="item"><div class="info"><div class="name">두꺼운 장갑 (공용)</div><div class="desc">노릇노릇 타이밍이 2초 길어져요</div></div><button class="buybtn" data-buy="glove">6,000원</button></div>
     </div>
   </div>
 
@@ -240,6 +326,8 @@ body.role-guest.multi .fillrow{display:none}
   <div class="modal center-modal" id="dayModal">
     <div class="card">
       <h2>🌙 DAY <span id="sumDay">1</span> 마감!</h2>
+      <div id="sumStars">☆☆☆</div>
+      <div class="row"><span>목표 매출</span><b id="sumGoal">9,000원</b></div>
       <div class="row"><span>오늘 매출</span><b id="sumSales">0원</b></div>
       <div class="row"><span>판매한 붕어빵</span><b id="sumSold">0개</b></div>
       <div class="row"><span>놓친 손님</span><b id="sumMissed">0명</b></div>
@@ -254,28 +342,29 @@ body.role-guest.multi .fillrow{display:none}
   <div class="modal center-modal open" id="startModal">
     <div class="card" id="menuCard">
       <h2>🐟 붕어빵 타이쿤</h2>
-      <p style="font-size:13.5px;line-height:1.7;opacity:.85">친구와 함께 포장마차를 운영하세요!<br>한 명은 굽고, 한 명은 팔고 🔥💰</p>
+      <p style="font-size:13.5px;line-height:1.7;opacity:.85">친구와 함께 포장마차를 운영하세요!<br>같이 굽고, 같이 팔고 🔥💰</p>
       <button class="bigbtn" id="soloBtn">🐟 혼자 하기</button>
-      <button class="bigbtn blue" id="hostBtn">🔥 방 만들기 (굽기 담당)</button>
-      <button class="bigbtn ghost" id="joinBtn">💰 코드로 참가 (판매 담당)</button>
+      <button class="bigbtn blue" id="hostBtn">🔥 방 만들기</button>
+      <button class="bigbtn ghost" id="joinBtn">🤝 코드로 참가</button>
       <p class="tip" id="storageNote">협동 모드는 무료 공개 테스트 서버로 실시간 연결돼요.<br>프로토타입이라 코드를 아는 사람은 누구나 입장할 수 있어요.</p>
     </div>
 
     <div class="card" id="hostCard" style="display:none">
       <h2>🔥 방 만들기</h2>
-      <p style="font-size:13.5px;opacity:.85" id="hostSub">친구에게 이 코드를 알려주세요!</p>
+      <p style="font-size:13.5px;opacity:.85">친구에게 이 코드를 알려주세요!</p>
       <div class="codebox" id="roomCodeBig">----</div>
       <div class="rolecard">
-        <div><b>🔥 나 (굽기)</b>반죽 붓고<br>뒤집고 꺼내기</div>
-        <div><b>💰 친구 (판매)</b>손님 응대<br>주문 판매</div>
+        <div><b>👨‍🍳 둘 다!</b>각자 화로에서<br>스와이프로 굽기</div>
+        <div><b>💰 둘 다!</b>손님 탭해서<br>같이 판매</div>
       </div>
+      <div class="diffrow" id="diffRowHost"></div>
       <p style="font-size:13px;margin-top:10px" id="hostWaitMsg" class="waitdots">파트너 접속 대기중</p>
       <button class="bigbtn" id="hostStartBtn" disabled>장사 시작!</button>
       <button class="bigbtn ghost" id="hostBackBtn">← 뒤로</button>
     </div>
 
     <div class="card" id="joinCard" style="display:none">
-      <h2>💰 코드로 참가</h2>
+      <h2>🤝 코드로 참가</h2>
       <p style="font-size:13.5px;opacity:.85">사장님(친구)에게 받은 4자리 코드 입력</p>
       <input class="codeinput" id="codeInput" maxlength="4" placeholder="ABCD" autocomplete="off">
       <button class="bigbtn blue" id="joinGoBtn">입장하기</button>
@@ -283,19 +372,23 @@ body.role-guest.multi .fillrow{display:none}
     </div>
 
     <div class="card" id="guestWaitCard" style="display:none">
-      <h2>💰 입장 완료!</h2>
-      <p style="font-size:14px;line-height:1.8">당신은 <b style="color:var(--glow)">판매 담당</b>이에요.<br>손님 주문을 받고 붕어빵을 파세요!</p>
+      <h2>🤝 입장 완료!</h2>
+      <p style="font-size:14px;line-height:1.8">함께 굽고 함께 파는 협동 모드!<br>내 화로에서 굽고, 손님도 탭해서 판매하세요.</p>
       <p style="font-size:13px;margin-top:12px" class="waitdots">사장님이 장사를 시작하길 기다리는 중</p>
     </div>
 
     <div class="card" id="soloHelpCard" style="display:none">
-      <h2>🐟 혼자 연습하기</h2>
-      <p style="font-size:14px;line-height:1.7;text-align:left;opacity:.9">
-        ① 빈 틀을 눌러 반죽을 부어요<br>
-        ② <b style="color:var(--glow)">"뒤집어!"</b> 뜨면 바로 탭!<br>
-        ③ <b style="color:var(--ok)">"꺼내!"</b> 타이밍에 탭하면 완성<br>
-        ④ 손님을 눌러 주문대로 판매 💰
+      <h2>🐟 게임 방법</h2>
+      <p style="font-size:14px;line-height:1.75;text-align:left;opacity:.9">
+        ① 🥣 <b>반죽</b> 선택 → 빈 틀 탭 (아래 반죽)<br>
+        ② 🟤 <b>속재료</b> 선택 → 틀 탭 (팥 넣기)<br>
+        ③ 🥣 다시 <b>반죽</b> 선택 → 틀 탭 (덮기) → 굽기 시작!<br>
+        ④ <b style="color:var(--glow)">"뒤집어!"</b> 뜨면 <b>위/아래로 스와이프!</b> ↕️<br>
+        ⑤ <b style="color:var(--ok)">"꺼내!"</b> 타이밍에 탭 → 쟁반에 진열 🐟<br>
+        ⑥ 손님을 눌러 판매 💰 탄 빵 방치 = 화재 🔥<br><br>
+        <b style="color:var(--danger)">날이 갈수록 손님은 급해지고<br>굽기 타이밍은 짧아져요!</b>
       </p>
+      <div class="diffrow" id="diffRowSolo"></div>
       <button class="bigbtn" id="soloStartBtn">장사 시작!</button>
       <button class="bigbtn ghost" id="soloBackBtn">← 뒤로</button>
     </div>
@@ -308,62 +401,148 @@ body.role-guest.multi .fillrow{display:none}
 const $=s=>document.querySelector(s);
 const fmt=n=>Math.round(n).toLocaleString('ko-KR');
 let toastTimer;
-function toast(msg){const t=$('#toast');t.textContent=msg;t.style.opacity=1;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.style.opacity=0,1800);}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.style.opacity=1;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.style.opacity=0,1700);}
 function floatMoney(x,y,txt){const el=document.createElement('div');el.className='floatmoney';el.textContent=txt;el.style.left=x+'px';el.style.top=y+'px';$('#app').appendChild(el);setTimeout(()=>el.remove(),1000);}
-for(let i=0;i<14;i++){const s=document.createElement('div');s.className='snow';s.textContent='❄';
+for(let i=0;i<12;i++){const s=document.createElement('div');s.className='snow';s.textContent='❄';
 s.style.left=Math.random()*100+'%';s.style.animationDuration=(6+Math.random()*7)+'s';
 s.style.animationDelay=(-Math.random()*10)+'s';s.style.fontSize=(7+Math.random()*7)+'px';$('#app').appendChild(s);}
 
-/* ═══════════ 상수 ═══════════ */
-const FILLS={red:{name:'팥',emoji:'🟤',price:700},cream:{name:'슈크림',emoji:'🟡',price:1000}};
-const DAY_LEN=120, START_MONEY=15000, START_BATTER=10, START_RED=10;
-const T={cook1:4,flipWin:3,cook2:4,burnAfterFlipMiss:4};
+/* ═══════════ 효과음 ═══════════ */
+let AC=null,muted=false;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+  if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,vol,when,slide){
+  const a=ac();if(!a||muted)return;
+  type=type||'sine';vol=vol||0.13;when=when||0;
+  const o=a.createOscillator(),g=a.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,a.currentTime+when);
+  if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,f+slide),a.currentTime+when+d);
+  g.gain.setValueAtTime(vol,a.currentTime+when);
+  g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+when+d);
+  o.connect(g);g.connect(a.destination);
+  o.start(a.currentTime+when);o.stop(a.currentTime+when+d+0.03);
+}
+const SFX={
+  pour(){tone(220,0.18,'sine',0.12,0,-90);},
+  flip(){tone(500,0.08,'triangle',0.11,0,300);tone(900,0.1,'triangle',0.1,0.08,200);},
+  land(){tone(180,0.1,'sine',0.13,0,-60);},
+  collect(){tone(880,0.1,'sine',0.14);tone(1318,0.16,'sine',0.11,0.08);},
+  sell(){tone(1046,0.09,'square',0.07);tone(1568,0.2,'square',0.07,0.1);},
+  burnt(){tone(170,0.32,'sawtooth',0.12,0,-70);},
+  angry(){tone(320,0.14,'square',0.1,0,-120);tone(220,0.18,'square',0.09,0.12,-80);},
+  fire(){tone(760,0.11,'square',0.11);tone(540,0.11,'square',0.11,0.13);},
+  ext(){tone(1400,0.06,'triangle',0.1,0,-500);},
+  combo(n){const notes=[523,659,784,1046];notes.slice(0,Math.min(4,1+(n%4))).forEach((f,i)=>tone(f,0.09,'sine',0.11,i*0.06));},
+  fever(){[659,784,988,1318,1568].forEach((f,i)=>tone(f,0.1,'triangle',0.12,i*0.06));},
+  star(){[523,659,784,1046,1318].forEach((f,i)=>tone(f,0.14,'triangle',0.12,i*0.09));},
+};
+['touchstart','mousedown'].forEach(ev=>document.addEventListener(ev,()=>ac(),{once:true,passive:true}));
+$('#muteBtn').onclick=()=>{muted=!muted;$('#muteBtn').textContent=muted?'🔇':'🔊';};
+function shake(){const a=$('#app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake');}
+
+/* ═══════════ 상수 & 난이도 ═══════════ */
+const FILLS={
+  red:{name:'팥',emoji:'🟤',price:700},
+  cream:{name:'슈크림',emoji:'🟡',price:1000},
+  sweet:{name:'고구마',emoji:'🍠',price:1200},
+  pizza:{name:'피자',emoji:'🍕',price:1500},
+};
+const FILL_KEYS=['red','cream','sweet','pizza'];
+const ING_COST={red:800,cream:1200,sweet:1400,pizza:1800};
+const MENU_COST={cream:12000,sweet:16000,pizza:22000};
+const DAY_LEN=120, START_MONEY=15000, START_BATTER=20, START_RED=10;
+const SOLO_START_MOLDS=4, SOLO_MAX_MOLDS=8, MP_START_MOLDS=4, MP_MAX_MOLDS=6;
+/* 난이도 4단계 */
+const DIFFS={
+  easy:{name:'쉬움',emoji:'🌱',spd:0.8,pat:1.3,goal:0.75,ramp:0.7},
+  normal:{name:'보통',emoji:'🙂',spd:1,pat:1,goal:1,ramp:1},
+  hard:{name:'어려움',emoji:'🔥',spd:1.25,pat:0.8,goal:1.3,ramp:1.35},
+  vhard:{name:'매우 어려움',emoji:'💀',spd:1.5,pat:0.62,goal:1.6,ramp:1.7},
+};
+function diffOf(){return DIFFS[S.diff]||DIFFS.normal;}
+function effDay(d){return 1+((d||S.day)-1)*diffOf().ramp;} /* 난이도 반영 유효 스테이지 */
+const goalFor=d=>Math.round(9000*Math.pow(1.32,d-1)*diffOf().goal/100)*100;
+function D(){
+  const c=diffOf(),ed=effDay(S.day);
+  return{
+    spawn:Math.max(1.6,(7-ed*0.5)/c.spd),
+    patience:Math.max(7,(26-ed*1.7)*c.pat),
+    orderMax:Math.min(4,Math.ceil(1+ed*0.45)),
+    cook:Math.max(2.4,4-(ed-1)*0.12),
+    perfect:Math.max(1.8,4-(ed-1)*0.18),
+    flipWin:Math.max(1.4,3-(ed-1)*0.12),
+    burntToFire:Math.max(3,6-(ed-1)*0.3),
+    fireSpread:Math.max(4.5,8-(ed-1)*0.25),
+    rawBurn:Math.max(5,12-(ed-1)*0.5),
+  };
+}
+/* 스테이지별 손님 수요: 개발 여부와 무관하게 손님이 먼저 요구! */
+function demandKinds(d){
+  const ed=effDay(d);
+  const ks=['red'];
+  if(ed>=2)ks.push('cream');
+  if(ed>=4)ks.push('sweet');
+  if(ed>=6)ks.push('pizza');
+  return ks;
+}
+const DEMAND_W={red:3,cream:2,sweet:2,pizza:1};
+const FIRE_HP=5;
+function dayEarned(){return MP.active?(combinedStats().earned-(MP.snap?MP.snap.earned:0)):S.daySales;}
 
 /* ═══════════ 로컬 상태 ═══════════ */
 const S={
-  running:false,paused:false,mode:'solo',
+  running:false,paused:false,mode:'solo',diff:'normal',
   day:1,time:0,
-  money:START_MONEY,rep:3.0,batter:START_BATTER,stock:{red:START_RED,cream:0},
-  creamUnlocked:false,perfectBonus:0,moldCount:3,
-  selFill:'red',tray:{red:0,cream:0},
-  molds:[],customers:[],spawnTimer:3,
+  money:START_MONEY,rep:3.0,batter:START_BATTER,
+  stock:{red:START_RED,cream:0,sweet:0,pizza:0},
+  menus:{red:true,cream:false,sweet:false,pizza:false},
+  perfectBonus:0,moldCount:SOLO_START_MOLDS,
+  selFill:'batter',tray:{red:0,cream:0,sweet:0,pizza:0},
+  molds:[],customers:[],spawnTimer:3,custSeq:1,
   daySales:0,daySold:0,dayMissed:0,dayBurnt:0,
+  combo:0,fireSfxAt:0,lastCustPub:0,
+  alba:false,albaT:0,
 };
-for(let i=0;i<6;i++)S.molds.push({st:'empty',fill:null,t:0});
+for(let i=0;i<SOLO_MAX_MOLDS;i++)S.molds.push({st:'empty',fill:null,t:0,fireHp:0});
 
-/* ═══════════ 멀티플레이: 공개 MQTT 브로커 실시간 동기화 ═══════════ */
-function emptyBlob(){return{prod:{red:0,cream:0},sold:{red:0,cream:0},cons:{batter:0,red:0,cream:0},
-  buy:{batter:0,red:0,cream:0},spend:0,earned:0,burnt:0,missed:0,served:0,
-  up:{mold:3,glove:0,cream:false},ping:null,hb:Date.now()};}
+/* ═══════════ 멀티: MQTT 실시간 동기화 ═══════════ */
+/* 설계: 충돌 방지를 위해 "각자 자기 카운터만 기록"
+   - 양쪽 모두 굽기: 각자 자기 화로(molds)만 시뮬레이션, 상태 스냅샷을 발행해 상대에게 미러 표시
+   - 손님: 사장님(호스트)이 권한자. 스냅샷 발행 → 게스트는 미러 표시 + 판매요청(req) 전송
+   - 판매/콤보/놓침: 전부 호스트 카운터에 기록 (금고는 합산이라 누가 벌든 동일) */
+function zeroFills(){return{red:0,cream:0,sweet:0,pizza:0};}
+function emptyBlob(){return{prod:zeroFills(),cons:{batter:0,red:0,cream:0,sweet:0,pizza:0},
+  buy:{batter:0,red:0,cream:0,sweet:0,pizza:0},spend:0,earned:0,sold:zeroFills(),burnt:0,missed:0,served:0,
+  up:{mold:MP_START_MOLDS,glove:0,cream:false,sweet:false,pizza:false},ping:null,hb:Date.now(),
+  fireN:0,ext:0,moldsSnap:[],cust:[],combo:0,req:[]};}
 const MP={
   active:false,role:null,code:null,
   me:emptyBlob(),other:null,meta:null,
   lastPingSeen:0,lastStartedAt:-1,summaryShownFor:0,snap:null,
+  lastExtApplied:0,lastReqT:0,custMirror:[],
 };
 const BROKERS=[
-  'wss://mqtt.eclipseprojects.io:443/mqtt', /* 443 포트: 어떤 네트워크에서도 잘 뚫림 */
+  'wss://mqtt.eclipseprojects.io:443/mqtt',
   'wss://broker.emqx.io:8084/mqtt',
   'wss://broker.hivemq.com:8884/mqtt',
   'wss://test.mosquitto.org:8081',
 ];
 let client=null,netOn=false;
 const mqttOK=()=>typeof mqtt!=='undefined';
-const TOPIC_ROOT='bungeo-tycoon-v1';
+const TOPIC_ROOT='bungeo-tycoon-v4';
 const tMeta=()=>`${TOPIC_ROOT}/${MP.code}/meta`;
 const tMe=()=>`${TOPIC_ROOT}/${MP.code}/${MP.role}`;
 const tOther=()=>`${TOPIC_ROOT}/${MP.code}/${MP.role==='host'?'guest':'host'}`;
 
 function connectBroker(onReady,onFail){
   if(client){onReady();return;}
-  let idx=0;
-  const tried=[];
+  let idx=0;const tried=[];
   function tryNext(){
     if(idx>=BROKERS.length){onFail('모든 서버 연결 실패 ('+tried.join(', ')+')');return;}
     const url=BROKERS[idx++];
     const shortName=url.replace('wss://','').split(/[:/]/)[0];
     toast(`서버 ${idx}/${BROKERS.length} 연결 시도중: ${shortName}…`);
-    let settled=false;
-    let c;
+    let settled=false,c;
     try{
       c=mqtt.connect(url,{clientId:'bp_'+Math.random().toString(16).slice(2,12),
         keepalive:30,connectTimeout:9000,reconnectPeriod:2500,clean:true});
@@ -375,7 +554,6 @@ function connectBroker(onReady,onFail){
         client=c;netOn=true;renderNet();
         client.on('message',(t,p)=>handleMsg(t,p.toString()));
         client.on('close',()=>{netOn=false;renderNet();});
-        client.on('reconnect',()=>{});
         client.on('connect',()=>{netOn=true;renderNet();resubscribe();});
         onReady();
       }else{netOn=true;renderNet();resubscribe();}
@@ -393,60 +571,78 @@ function handleMsg(topic,payload){
   if(topic===tMeta()){
     MP.meta=obj;onMetaTick();
   }else if(topic===tOther()){
-    MP.other=obj;onPingTick();
-    if(joinWait.active&&MP.role==='guest'){/* no-op */}
+    MP.other=obj;onPingTick();applyRemoteExt();
+    if(MP.role==='host')applyServeReqs();
+    if(MP.role==='guest'&&Array.isArray(obj.cust)){
+      /* 손님 미러 병합: 있던 손님은 값만 갱신 (카드 재생성 방지) */
+      const inc=obj.cust,byId={};inc.forEach(c=>byId[c.i]=c);
+      let membership=false;
+      MP.custMirror=MP.custMirror.filter(c=>{const keep=!!byId[c.i];if(!keep)membership=true;return keep;});
+      inc.forEach(c=>{
+        const ex=MP.custMirror.find(x=>x.i===c.i);
+        if(ex){ex.p=c.p;ex.m=c.m;}
+        else{MP.custMirror.push({...c});membership=true;}
+      });
+      if(membership)renderCustomers();else updateCustomerBars();
+    }
+    renderPartnerPan();renderExtBtn();renderCombo();
   }
   renderPartner();
-  if(!S.running)renderAll();
-  else renderHUD();
+  if(!S.running)renderAll();else renderHUD();
 }
-
-/* 내 상태 발행 (디바운스 + 하트비트) */
 let pubTimer=null;
 function markDirty(){
   if(!MP.active)return;
   if(pubTimer)return;
   pubTimer=setTimeout(()=>{pubTimer=null;pubMe();},350);
 }
+function myMoldCount(){return MP.active?MP.me.up.mold:S.moldCount;}
 function pubMe(){
   if(!client||!MP.active)return;
   MP.me.hb=Date.now();
+  MP.me.moldsSnap=S.molds.slice(0,myMoldCount()).map(m=>({st:m.st,fill:m.fill,hp:m.fireHp||0,w:!!m.warn}));
+  if(MP.role==='host'){
+    MP.me.cust=S.customers.filter(c=>!c.leaving).map(c=>({i:c.i,f:c.face,o:c.order,p:Math.round(c.patience*10)/10,m:c.maxPatience}));
+    MP.me.combo=S.combo;
+  }
   try{client.publish(tMe(),JSON.stringify(MP.me),{retain:true});}catch(e){}
 }
-function pubMeta(){
-  if(!client||!MP.active||MP.role!=='host')return;
-  try{client.publish(tMeta(),JSON.stringify(MP.meta),{retain:true});}catch(e){}
-}
-setInterval(()=>{if(MP.active&&netOn)pubMe();},4000);
+</script>
+<script>
+/* 주기 발행: 플레이 중엔 1초(손님/화로 스냅샷), 대기 중엔 4초 하트비트 */
+setInterval(()=>{ if(MP.active&&netOn){ if(S.running)pubMe(); } },1000);
+setInterval(()=>{ if(MP.active&&netOn&&!S.running)pubMe(); },4000);
 
-/* 파생 경제 상태: 솔로면 S에서, 멀티면 두 블롭 합산 */
+/* ═══════════ 파생 경제 상태 ═══════════ */
 function E(){
   if(!MP.active){
     return{money:S.money,tray:S.tray,batter:S.batter,stock:S.stock,rep:S.rep,
-      up:{mold:S.moldCount,glove:S.perfectBonus,cream:S.creamUnlocked}};
+      up:{glove:S.perfectBonus},menus:S.menus};
   }
   const a=MP.me,b=MP.other||emptyBlob();
-  const up={mold:Math.max(a.up.mold,b.up.mold),glove:Math.max(a.up.glove,b.up.glove),cream:a.up.cream||b.up.cream};
-  const tray={
-    red:Math.max(0,a.prod.red+b.prod.red-a.sold.red-b.sold.red),
-    cream:Math.max(0,a.prod.cream+b.prod.cream-a.sold.cream-b.sold.cream),
-  };
+  const up={glove:Math.max(a.up.glove,b.up.glove)};
+  const menus={red:true};
+  ['cream','sweet','pizza'].forEach(k=>menus[k]=!!(a.up[k]||(b.up&&b.up[k])));
+  const tray={},stock={};
+  FILL_KEYS.forEach(k=>{
+    const prod=(a.prod[k]||0)+((b.prod&&b.prod[k])||0);
+    const sold=(a.sold[k]||0)+((b.sold&&b.sold[k])||0);
+    tray[k]=Math.max(0,prod-sold);
+    const start=k==='red'?START_RED:0;
+    stock[k]=start+((a.buy[k]||0)+((b.buy&&b.buy[k])||0))*10-((a.cons[k]||0)+((b.cons&&b.cons[k])||0));
+  });
   const money=START_MONEY+a.earned+b.earned-a.spend-b.spend;
-  const batter=START_BATTER+(a.buy.batter+b.buy.batter)*10-(a.cons.batter+b.cons.batter);
-  const stock={
-    red:START_RED+(a.buy.red+b.buy.red)*10-(a.cons.red+b.cons.red),
-    cream:(a.buy.cream+b.buy.cream)*10-(a.cons.cream+b.cons.cream),
-  };
+  const batter=START_BATTER+(a.buy.batter+b.buy.batter)*20-(a.cons.batter+b.cons.batter);
   const served=a.served+b.served,missed=a.missed+b.missed;
   const rep=Math.min(5,Math.max(0,3+served*0.1-missed*0.3));
-  return{money,tray,batter,stock,rep,up};
+  return{money,tray,batter,stock,rep,up,menus};
 }
+function menuOn(k){return k==='red'||E().menus[k];}
 function combinedStats(){
   const a=MP.me,b=MP.other||emptyBlob();
   return{earned:a.earned+b.earned,served:a.served+b.served,missed:a.missed+b.missed,
     burnt:a.burnt+b.burnt,soldCnt:a.sold.red+b.sold.red+a.sold.cream+b.sold.cream};
 }
-
 function onMetaTick(){
   const m=MP.meta;if(!m)return;
   if(m.state==='playing'&&m.startedAt!==MP.lastStartedAt){
@@ -475,23 +671,87 @@ function renderPartner(){
       $('#hostWaitMsg').textContent='파트너 접속 완료! 시작하세요 🎉';
       $('#hostWaitMsg').classList.remove('waitdots');}
   }
-  if(MP.role==='guest'&&MP.other){
-    $('#prodInfo').textContent=`지금까지 구운 붕어빵 ${MP.other.prod.red+MP.other.prod.cream}개`;
-  }
 }
 setInterval(()=>{if(MP.active)renderPartner();},2000);
 
-/* 하루 시작(양쪽 공통 로컬 리셋) */
+/* ═══════════ 화재 ═══════════ */
+function fireCount(){return S.molds.slice(0,myMoldCount()).filter(m=>m.st==='fire').length;}
+function syncFireN(){
+  const n=fireCount();
+  if(MP.active&&MP.me.fireN!==n){MP.me.fireN=n;markDirty();}
+  return n;
+}
+function fireActiveTotal(){
+  const mine=fireCount()>0;
+  const theirs=MP.active&&((MP.other&&MP.other.fireN)||0)>0;
+  return mine||theirs;
+}
+function extinguishMold(m,fromRemote){
+  if(!m||m.st!=='fire')return;
+  m.fireHp--;SFX.ext();
+  if(m.fireHp<=0){
+    m.st='empty';m.fill=null;m.t=0;
+    toast(fromRemote?'파트너 도움으로 진화 완료! 🤝':'진화 완료! 🧯');
+    SFX.collect();
+  }
+  syncFireN();renderMyPan();
+}
+function applyRemoteExt(){
+  if(!MP.active||!MP.other)return;
+  const ext=MP.other.ext||0;
+  if(ext<MP.lastExtApplied)MP.lastExtApplied=ext;
+  const d=ext-MP.lastExtApplied;
+  if(d>0){MP.lastExtApplied=ext;
+    for(let i=0;i<d;i++)extinguishMold(S.molds.find(x=>x.st==='fire'),true);}
+}
+function renderExtBtn(){
+  const show=MP.active&&((MP.other&&MP.other.fireN)||0)>0&&S.running;
+  $('#extBtn').classList.toggle('show',!!show);
+}
+$('#extBtn').onclick=()=>{MP.me.ext=(MP.me.ext||0)+1;markDirty();SFX.ext();shake();};
+
+/* ═══════════ 콤보 ═══════════ */
+function comboVal(){return MP.active&&MP.role==='guest'?((MP.other&&MP.other.combo)||0):S.combo;}
+function comboMult(){return S.combo>=5?2:1+0.1*S.combo;}
+function renderCombo(){
+  const v=comboVal();
+  const b=$('#comboBadge');
+  if(v<2){b.classList.remove('on','fever');return;}
+  b.classList.add('on');
+  b.classList.toggle('fever',v>=5);
+  b.textContent=v>=5?'⚡피버! 팁 2배!':'🔥 콤보 x'+v;
+}
+
+/* ═══════════ 하루 시작 ═══════════ */
 function startDayLocal(day){
+  /* 협동: 사장님이 고른 난이도로 동기화 */
+  if(MP.active&&MP.meta&&MP.meta.diff&&DIFFS[MP.meta.diff])S.diff=MP.meta.diff;
   S.day=day;S.time=0;
-  S.customers=[];S.spawnTimer=3;
-  S.molds.forEach(m=>{m.st='empty';m.fill=null;m.t=0;});
+  S.customers=[];S.spawnTimer=2.5;
+  S.combo=0;renderCombo();
+  MP.custMirror=[];
+  S.molds.forEach(m=>{m.st='empty';m.fill=null;m.t=0;m.fireHp=0;m.warn=false;});
+  if(MP.active)MP.me.fireN=0;
   MP.snap=combinedStats();
   MP.summaryShownFor=0;
   $('#dayModal').classList.remove('open');
   $('#startModal').classList.remove('open');
   S.running=true;S.paused=false;
-  renderAll();
+  renderAll();renderExtBtn();
+  /* 스테이지 배너: 새 수요 메뉴 등장 안내 */
+  const e=E();
+  const prev=day>1?demandKinds(day-1):['red'];
+  const news=demandKinds(day).filter(k=>!prev.includes(k));
+  const bn=$('#dayBanner');
+  bn.firstChild.textContent='DAY '+day+' · '+diffOf().emoji+diffOf().name;
+  let sub;
+  if(news.length){
+    const nm=news.map(k=>FILLS[k].emoji+FILLS[k].name).join(', ');
+    sub=`새 메뉴 수요 등장: ${nm}! ${news.some(k=>!e.menus[k])?'상점에서 개발하세요 🛒':''}`;
+  }else sub=day===1?'첫 장사! 화이팅 🐟':'난이도 상승! 손님이 더 급해져요 🔺';
+  bn.querySelector('small').textContent=sub;
+  bn.classList.add('on');
+  setTimeout(()=>bn.classList.remove('on'),news.length?2400:1600);
 }
 
 /* ═══════════ 붕어빵 SVG ═══════════ */
@@ -504,142 +764,327 @@ function fishSVG(color,eye){
     ${eye?'<circle cx="20" cy="24" r="3.4" fill="#3a2410"/>':''}
   </svg>`;
 }
-const COLORS={empty:'#2c2f3a',cook1:'#f2dfb6',flip:'#eecf96',cook2:'#e0b06a',perfect:'#d98a2b',burnt:'#4a2e1c'};
+const COLORS={empty:'#2c2f3a',batter1:'#e8d7ae',filled:'#e8d7ae',cook1:'#f2dfb6',flip:'#eecf96',flipping:'#e6c284',cook2:'#e0b06a',perfect:'#d98a2b',burnt:'#4a2e1c',fire:'#4a2e1c'};
 
 /* ═══════════ 렌더링 ═══════════ */
-function renderGriddle(){
-  if(MP.active&&MP.role==='guest')return;
-  const e=E();
-  const g=$('#griddle');g.innerHTML='';
-  for(let i=0;i<6;i++){
+function moldTag(st,hp,warn){
+  if(warn&&(st==='batter1'||st==='filled'))return'⚠️ 곧 타요! 서둘러!';
+  if(st==='empty')return'🥣 반죽을 부어요';
+  if(st==='batter1')return'속재료를 넣어요! 🟤';
+  if(st==='filled')return'🥣 반죽으로 덮어요!';
+  if(st==='cook1'||st==='cook2')return'굽는 중… 🔥';
+  if(st==='flip')return'↕ 스와이프로 뒤집기!';
+  if(st==='flipping')return'촤악~!';
+  if(st==='perfect')return'꺼내! ✨';
+  if(st==='burnt')return'탔다! 빨리 버려! ⏰';
+  if(st==='fire')return`불이야! 연타! ${FIRE_HP-hp}/${FIRE_HP}`;
+  return'';
+}
+function moldInner(st,fill,hp,warn){
+  const half=st==='batter1'||st==='filled';
+  let h=`<div class="fishwrap${st==='flipping'?' flipping':''}${half?' half':''}">${fishSVG(COLORS[st]||COLORS.empty,st!=='empty'&&st!=='fire'&&!half)}</div>`;
+  if(st==='filled'&&fill)h+=`<div class="fillDot">${FILLS[fill].emoji}</div>`;
+  h+=`<div class="tag${warn&&half?' warn':''}">${moldTag(st,hp,warn)}</div>`;
+  if(st==='fire')h+=`<div class="fireEmoji">🔥</div>`;
+  if(st==='flip')h+=`<div class="swipeHint">↕️</div>`;
+  if(st==='cook1'||st==='cook2'||st==='perfect')h+=`<div class="steam">♨️</div>`;
+  return h;
+}
+function renderMyPan(){
+  const g=$('#myGriddle');g.innerHTML='';
+  const total=MP.active?MP_MAX_MOLDS:SOLO_MAX_MOLDS;
+  const unlocked=myMoldCount();
+  for(let i=0;i<total;i++){
     const m=S.molds[i];
     const d=document.createElement('div');
-    d.className='mold '+(i>=e.up.mold?'locked':m.st);
-    if(i<e.up.mold){
-      d.innerHTML=fishSVG(COLORS[m.st]||COLORS.empty,m.st!=='empty');
-      let tag='';
-      if(m.st==='empty')tag='탭해서 반죽 붓기';
-      else if(m.st==='cook1'||m.st==='cook2')tag='굽는 중… 🔥';
-      else if(m.st==='flip')tag='뒤집어! 👆';
-      else if(m.st==='perfect')tag='꺼내! ✨';
-      else if(m.st==='burnt')tag='탔다… 탭해서 버리기';
-      d.innerHTML+=`<div class="tag">${tag}</div>`;
-      if(m.st==='cook1'||m.st==='cook2'||m.st==='perfect')d.innerHTML+=`<div class="steam">♨️</div>`;
-      d.addEventListener('click',ev=>tapMold(i,ev));
-    }else d.innerHTML='<div style="font-size:20px;opacity:.5">🔒</div>';
+    d.className='mold '+(i>=unlocked?'locked':m.st);
+    if(i<unlocked){
+      d.innerHTML=moldInner(m.st,m.fill,m.fireHp,m.warn);
+      bindMoldEvents(d,i);
+    }else d.innerHTML='<div style="font-size:18px;opacity:.5">🔒</div>';
     g.appendChild(d);
   }
+}
+function renderPartnerPan(){
+  if(!MP.active)return;
+  const g=$('#partnerGriddle');g.innerHTML='';
+  const snap=(MP.other&&MP.other.moldsSnap)||[];
+  if(!snap.length){g.innerHTML='<div style="grid-column:1/-1;font-size:12px;opacity:.5;text-align:center;padding:8px">파트너 화로 대기중…</div>';return;}
+  snap.forEach((sm,i)=>{
+    const d=document.createElement('div');
+    d.className='mold '+sm.st;
+    d.innerHTML=moldInner(sm.st,sm.fill,sm.hp,sm.w);
+    if(sm.st==='fire'){
+      d.addEventListener('click',()=>{MP.me.ext=(MP.me.ext||0)+1;markDirty();SFX.ext();shake();});
+    }
+    g.appendChild(d);
+  });
+}
+function bindMoldEvents(el,i){
+  /* 스와이프 감지(뒤집기) + 탭(그 외 동작) */
+  let sy=null,st=0;
+  el.addEventListener('pointerdown',e=>{sy=e.clientY;st=Date.now();},{passive:true});
+  el.addEventListener('pointerup',e=>{
+    const m=S.molds[i];
+    const dy=sy===null?0:e.clientY-sy;
+    const isSwipe=Math.abs(dy)>=26&&Date.now()-st<600;
+    sy=null;
+    if(m.st==='flip'){
+      if(isSwipe)doFlip(i);
+      else{toast('↕ 위나 아래로 스와이프해서 뒤집어요!');SFX.land();}
+      return;
+    }
+    if(isSwipe)return; /* 다른 상태에선 스와이프 무시 */
+    tapMold(i);
+  });
+}
+function doFlip(i){
+  const m=S.molds[i];
+  if(m.st!=='flip')return;
+  m.st='flipping';m.t=0;
+  SFX.flip();
+  renderMyPan();markDirty();
+  setTimeout(()=>{
+    if(m.st!=='flipping')return;
+    m.st='cook2';m.t=0;
+    SFX.land();
+    toast('촤악~ 완벽한 뒤집기! 🐟');
+    renderMyPan();markDirty();
+  },560);
 }
 function renderFills(){
   const e=E();
   const row=$('#fillrow');row.innerHTML='';
-  ['red','cream'].forEach(k=>{
-    if(k==='cream'&&!e.up.cream)return;
+  const bb=document.createElement('button');
+  bb.className='fillbtn batter'+(S.selFill==='batter'?' sel':'');
+  bb.innerHTML=`🥣 반죽<small>재고 ${e.batter}</small>`;
+  bb.onclick=()=>{S.selFill='batter';renderFills();};
+  row.appendChild(bb);
+  FILL_KEYS.forEach(k=>{
+    if(!e.menus[k])return;
     const f=FILLS[k];
     const b=document.createElement('button');
     b.className='fillbtn'+(S.selFill===k?' sel':'');
-    b.innerHTML=`${f.emoji} ${f.name}<small>재고 ${e.stock[k]} · ${fmt(f.price)}원</small>`;
+    b.innerHTML=`${f.emoji} ${f.name}<small>재고 ${e.stock[k]}</small>`;
     b.onclick=()=>{S.selFill=k;renderFills();};
     row.appendChild(b);
   });
+}
+function renderTray(){
+  const e=E();
+  const shelf=$('#trayShelf');
+  const total=FILL_KEYS.reduce((s,k)=>s+e.tray[k],0);
+  let h='<span class="shelfLbl">쟁반</span>';
+  if(total===0){
+    h+='<span id="trayEmptyLbl">아직 구운 붕어빵이 없어요</span>';
+  }else{
+    const MAXSHOW=9;
+    const items=[];
+    FILL_KEYS.forEach(k=>{for(let i=0;i<e.tray[k]&&items.length<MAXSHOW;i++)items.push(k);});
+    items.forEach(k=>{
+      h+=`<div class="minifish">${fishSVG('#d98a2b',true)}<div class="dot">${FILLS[k].emoji}</div></div>`;
+    });
+    if(total>MAXSHOW)h+=`<span id="trayMore">+${total-MAXSHOW}</span>`;
+  }
+  shelf.innerHTML=h;
 }
 function renderHUD(){
   const e=E();
   $('#money').textContent=fmt(e.money);
   $('#day').textContent=S.day;
   $('#rep').textContent='❤️ '+e.rep.toFixed(1);
-  $('#trayRed').textContent=e.tray.red;
-  $('#trayCream').textContent=e.tray.cream;
-  $('#trayCreamWrap').style.display=e.up.cream?'flex':'none';
   $('#batterCnt').textContent=e.batter;
-  $('#dayFill').style.width=Math.min(100,S.time/DAY_LEN*100)+'%';
+  $('#dayFill').style.width=Math.min(100,Math.max(0,S.time/DAY_LEN*100))+'%';
+  $('#goalCur').textContent=fmt(dayEarned());
+  $('#goalTgt').textContent=fmt(goalFor(S.day));
+  /* 재고 카운트: 개발된 메뉴만 표시 */
+  const cKey=FILL_KEYS.map(k=>(e.menus[k]?e.tray[k]:'-')).join('_');
+  if(renderHUD._c!==cKey){
+    renderHUD._c=cKey;
+    $('#trayCounts').innerHTML=FILL_KEYS.filter(k=>e.menus[k])
+      .map(k=>`<span class="traycount">${FILLS[k].emoji} ${e.tray[k]}</span>`).join('');
+  }
+  /* 쟁반 비주얼: 개수 변할 때만 다시 그림 */
+  const tKey=FILL_KEYS.map(k=>e.tray[k]).join('_');
+  if(renderHUD._t!==tKey){renderHUD._t=tKey;renderTray();}
 }
+function custList(){return(MP.active&&MP.role==='guest')?MP.custMirror:S.customers;}
+function custEl(id){return document.querySelector(`.customer[data-cid="${id}"]`);}
+/* 전체 재구성: 손님이 새로 오거나 떠날 때만 호출 (매 프레임 호출 금지!) */
 function renderCustomers(){
-  if(MP.active&&MP.role==='host')return;
   const e=E();
-  const c=$('#customers');c.innerHTML='';
-  S.customers.forEach((cu,idx)=>{
+  const c=$('#customers');
+  const list=custList().filter(cu=>!cu.leaving);
+  const albaHtml=`<div id="albaChip" class="${(!MP.active&&S.alba)?'on':''}">🧑‍💼 알바 근무중</div>`;
+  c.innerHTML=albaHtml+(list.length?'':'<div id="custEmpty">손님을 기다리는 중…</div>');
+  list.forEach(cu=>{
+    const order=cu.order||cu.o, pat=cu.patience!==undefined?cu.patience:cu.p, maxP=cu.maxPatience||cu.m||1, face=cu.face||cu.f;
     const d=document.createElement('div');
-    const canServe=Object.keys(cu.order).every(k=>e.tray[k]>=cu.order[k]);
-    d.className='customer'+(canServe?' servable':'');
-    const orderHtml=Object.keys(cu.order).map(k=>`<span>${FILLS[k].emoji}×${cu.order[k]}</span>`).join('');
-    const pct=cu.patience/cu.maxPatience*100;
-    d.innerHTML=`<div class="face">${cu.face}</div><div class="order">${orderHtml}</div>
+    d.dataset.cid=cu.i;
+    const canServe=Object.keys(order).every(k=>e.tray[k]>=order[k]);
+    d.className='customer'+(canServe?' servable':'')+(cu.pending?' pending':'');
+    const orderHtml=Object.keys(order).map(k=>{
+      const lk=!e.menus[k]&&k!=='red';
+      return`<span style="${lk?'opacity:.55':''}">${lk?'🔒':''}${FILLS[k].emoji}×${order[k]}</span>`;
+    }).join('');
+    const pct=Math.max(0,pat/maxP*100);
+    d.innerHTML=`<div class="face">${face}</div><div class="order">${orderHtml}</div>
       <div class="patience"><i class="${pct<35?'low':''}" style="width:${pct}%"></i></div>`;
-    d.addEventListener('click',ev=>serveCustomer(idx,ev));
+    d.addEventListener('click',ev=>onCustomerTap(cu,ev));
     c.appendChild(d);
+  });
+}
+/* 매 프레임: 기존 DOM은 그대로 두고 게이지/상태 클래스만 갱신 */
+function updateCustomerBars(){
+  const e=E();
+  custList().forEach(cu=>{
+    if(cu.leaving)return;
+    const el=custEl(cu.i);if(!el)return;
+    const order=cu.order||cu.o, pat=cu.patience!==undefined?cu.patience:cu.p, maxP=cu.maxPatience||cu.m||1;
+    const bar=el.querySelector('.patience i');
+    if(bar){
+      const pct=Math.max(0,pat/maxP*100);
+      bar.style.width=pct+'%';
+      bar.classList.toggle('low',pct<35);
+    }
+    el.classList.toggle('servable',Object.keys(order).every(k=>e.tray[k]>=order[k]));
+    el.classList.toggle('pending',!!cu.pending);
   });
 }
 function renderPings(){
   const row=$('#pingRow');row.innerHTML='';
   if(!MP.active)return;
-  const msgs=MP.role==='host'
-    ?['✨ 붕어빵 나왔어!','🆘 재료 좀 사줘!','🔥 러시아워 힘내!']
-    :['🙏 붕어빵 더 줘!','💰 방금 팔았어!','👍 잘하고 있어!'];
-  msgs.forEach(m=>{
+  ['🙏 붕어빵 더 줘!','🆘 재료 좀 사줘!','👍 잘하고 있어!'].forEach(m=>{
     const b=document.createElement('button');b.className='pingbtn';b.textContent=m;
     b.onclick=()=>{MP.me.ping={msg:m,ts:Date.now()};markDirty();toast('전송! 📢');};
     row.appendChild(b);
   });
 }
-function renderAll(){renderGriddle();renderFills();renderHUD();renderCustomers();}
+function renderAll(){renderMyPan();renderPartnerPan();renderFills();renderHUD();renderCustomers();}
+function renderAlbaChip(){const el=$('#albaChip');if(el)el.classList.toggle('on',!MP.active&&S.alba);}
 
-/* ═══════════ 상호작용 ═══════════ */
-function tapMold(i,ev){
-  if(MP.active&&MP.role!=='host')return;
+/* ═══════════ 굽기 상호작용 ═══════════ */
+function tapMold(i){
   const m=S.molds[i];const e=E();
+  const sel=S.selFill;
   if(m.st==='empty'){
+    if(sel!=='batter'){toast('먼저 🥣 반죽부터 부어야 해요!');SFX.land();return;}
     if(e.batter<=0){toast('반죽이 없어요! 🛒 상점에서 구매');return;}
-    if(e.stock[S.selFill]<=0){toast(FILLS[S.selFill].name+' 재고가 없어요!');return;}
-    if(MP.active){MP.me.cons.batter++;MP.me.cons[S.selFill]++;markDirty();}
-    else{S.batter--;S.stock[S.selFill]--;}
-    m.st='cook1';m.fill=S.selFill;m.t=0;
+    if(MP.active)MP.me.cons.batter++;else S.batter--;
+    m.st='batter1';m.fill=null;m.t=0;
+    SFX.pour();
     renderFills();
-  }else if(m.st==='flip'){m.st='cook2';m.t=0;toast('촤악~ 잘 뒤집었어요! 🐟');}
-  else if(m.st==='perfect'){
-    if(MP.active){MP.me.prod[m.fill]++;markDirty();}
-    else S.tray[m.fill]++;
-    m.st='empty';m.fill=null;m.t=0;toast('노릇노릇 완성! ✨');
-  }else if(m.st==='burnt'){
-    if(MP.active){MP.me.burnt++;markDirty();}
-    m.st='empty';m.fill=null;m.t=0;S.dayBurnt++;toast('까맣게 탔어요… 🥲');
   }
-  renderGriddle();renderHUD();
+  else if(m.st==='batter1'){
+    if(sel==='batter'){toast('이제 속재료를 넣을 차례예요! 🟤');SFX.land();return;}
+    if(e.stock[sel]<=0){toast(FILLS[sel].name+' 재고가 없어요!');return;}
+    if(MP.active)MP.me.cons[sel]++;else S.stock[sel]--;
+    m.st='filled';m.fill=sel;
+    SFX.collect();
+    renderFills();
+  }
+  else if(m.st==='filled'){
+    if(sel!=='batter'){toast('🥣 반죽으로 덮어야 구울 수 있어요!');SFX.land();return;}
+    if(e.batter<=0){toast('반죽이 없어요! 🛒 상점에서 구매');return;}
+    if(MP.active)MP.me.cons.batter++;else S.batter--;
+    m.st='cook1';m.t=0;
+    SFX.pour();
+    toast('지글지글~ 굽기 시작! 🔥');
+    renderFills();
+  }
+  else if(m.st==='perfect'){
+    if(MP.active)MP.me.prod[m.fill]++;
+    else S.tray[m.fill]++;
+    m.st='empty';m.fill=null;m.t=0;SFX.collect();toast('노릇노릇 완성! ✨');
+  }else if(m.st==='burnt'){
+    if(MP.active)MP.me.burnt++;
+    m.st='empty';m.fill=null;m.t=0;S.dayBurnt++;SFX.burnt();toast('까맣게 탔어요… 🥲');
+  }else if(m.st==='fire'){
+    extinguishMold(m,false);
+  }
+  if(MP.active)markDirty();
+  renderMyPan();renderHUD();
 }
-function serveCustomer(idx,ev){
-  if(MP.active&&MP.role!=='guest')return;
-  const cu=S.customers[idx];if(!cu||cu.leaving)return;
+
+/* ═══════════ 판매 ═══════════ */
+function onCustomerTap(cu,ev){
+  if(MP.active&&MP.role==='guest'){guestServeReq(cu);return;}
+  serveLocal(cu,ev);
+}
+function serveLocal(cu,ev,byAlba){
+  if(!cu||cu.leaving)return;
   const e=E();
+  const lockedK=Object.keys(cu.order).find(k=>k!=='red'&&!e.menus[k]);
+  if(lockedK){if(!byAlba)toast(`🔒 ${FILLS[lockedK].name} 메뉴 미개발! 상점에서 개발하세요`);return;}
   const can=Object.keys(cu.order).every(k=>e.tray[k]>=cu.order[k]);
-  if(!can){toast('붕어빵이 모자라요!');return;}
+  if(!can){if(!byAlba)toast('붕어빵이 모자라요!');return;}
   let pay=0,cnt=0;
   Object.keys(cu.order).forEach(k=>{
     if(MP.active)MP.me.sold[k]+=cu.order[k];
     else S.tray[k]-=cu.order[k];
     pay+=FILLS[k].price*cu.order[k];cnt+=cu.order[k];
   });
-  if(cu.patience/cu.maxPatience>0.6)pay=Math.round(pay*1.2);
+  if(byAlba){
+    /* 알바 판매: 팁·콤보 배율 없이 정가만 */
+    SFX.sell();
+  }else{
+    if(cu.patience/cu.maxPatience>0.6)pay=Math.round(pay*1.2);
+    S.combo=Math.min(10,S.combo+1);
+    pay=Math.round(pay*comboMult());
+    if(S.combo===5)SFX.fever();else SFX.combo(S.combo);
+    renderCombo();SFX.sell();
+  }
   if(MP.active){MP.me.earned+=pay;MP.me.served++;markDirty();}
   else{S.money+=pay;S.rep=Math.min(5,S.rep+0.1);}
   S.daySales+=pay;S.daySold+=cnt;
   cu.leaving=true;
-  const r=ev.currentTarget.getBoundingClientRect(),a=$('#app').getBoundingClientRect();
-  floatMoney(r.left-a.left+r.width/2-20,r.top-a.top,'+'+fmt(pay)+'원');
-  renderCustomers();renderHUD();
-  setTimeout(()=>{S.customers.splice(S.customers.indexOf(cu),1);renderCustomers();},380);
+  const lel=custEl(cu.i);if(lel)lel.classList.add('leaving');
+  if(ev&&ev.currentTarget){
+    const r=ev.currentTarget.getBoundingClientRect(),a=$('#app').getBoundingClientRect();
+    floatMoney(r.left-a.left+r.width/2-20,r.top-a.top,'+'+fmt(pay)+'원');
+  }else if(byAlba){
+    const lel2=custEl(cu.i);
+    if(lel2){const r=lel2.getBoundingClientRect(),a=$('#app').getBoundingClientRect();
+      floatMoney(r.left-a.left+r.width/2-24,r.top-a.top,'🧑‍💼+'+fmt(pay)+'원');}
+  }
+  renderHUD();
+  setTimeout(()=>{const idx=S.customers.indexOf(cu);if(idx>=0)S.customers.splice(idx,1);renderCustomers();},380);
+}
+function guestServeReq(cu){
+  if(cu.pending)return;
+  const e=E();
+  const order=cu.o||cu.order;
+  const can=Object.keys(order).every(k=>e.tray[k]>=order[k]);
+  if(!can){toast('붕어빵이 모자라요!');return;}
+  cu.pending=true;
+  MP.me.req=((MP.me.req||[]).slice(-5)).concat([{i:cu.i,t:Date.now()}]);
+  markDirty();
+  SFX.sell();
+  updateCustomerBars();
+}
+function applyServeReqs(){
+  if(!MP.other||!Array.isArray(MP.other.req))return;
+  MP.other.req.forEach(r=>{
+    if(r.t<=MP.lastReqT)return;
+    MP.lastReqT=r.t;
+    const cu=S.customers.find(c=>c.i===r.i&&!c.leaving);
+    if(cu)serveLocal(cu,null);
+  });
 }
 
-/* ═══════════ 손님 ═══════════ */
+/* ═══════════ 손님 생성 ═══════════ */
 const FACES=['🧑','👵','👦','👩','🧔','👧','🧓','👨‍🦰','🙎‍♀️','👶'];
 function spawnCustomer(){
-  if(S.customers.length>=3)return;
-  const e=E();
-  const kinds=e.up.cream?['red','cream']:['red'];
+  if(S.customers.filter(c=>!c.leaving).length>=3)return;
+  const dd=D();
+  /* 개발 여부와 무관! 스테이지가 되면 손님이 먼저 새 메뉴를 요구한다 */
+  const pool=[];
+  demandKinds(S.day).forEach(k=>{for(let i=0;i<(DEMAND_W[k]||1);i++)pool.push(k);});
   const order={};
-  const n=1+Math.floor(Math.random()*Math.min(3,1+S.day*0.5));
-  for(let i=0;i<n;i++){const k=kinds[Math.floor(Math.random()*kinds.length)];order[k]=(order[k]||0)+1;}
-  const maxP=Math.max(14,26-S.day*1.5);
-  S.customers.push({face:FACES[Math.floor(Math.random()*FACES.length)],order,patience:maxP,maxPatience:maxP,leaving:false});
+  const n=1+Math.floor(Math.random()*dd.orderMax);
+  for(let i=0;i<n;i++){const k=pool[Math.floor(Math.random()*pool.length)];order[k]=(order[k]||0)+1;}
+  S.customers.push({i:S.custSeq++,face:FACES[Math.floor(Math.random()*FACES.length)],order,
+    patience:dd.patience,maxPatience:dd.patience,leaving:false});
   renderCustomers();
 }
 
@@ -649,6 +1094,7 @@ function loop(ts){
   requestAnimationFrame(loop);
   if(!S.running||S.paused){last=ts;return;}
   const dt=Math.min(0.25,(ts-last)/1000||0);last=ts;
+  const dd=D();
 
   if(MP.active&&MP.meta&&MP.meta.state!=='waiting'){
     S.time=(Date.now()-MP.meta.startedAt)/1000;
@@ -657,72 +1103,135 @@ function loop(ts){
   const rush=S.time>DAY_LEN*0.5&&S.time<DAY_LEN*0.75;
   $('#rushBanner').classList.toggle('on',rush);
 
-  const isSeller=!MP.active||MP.role==='guest';
-  const isBaker=!MP.active||MP.role==='host';
-
-  if(isSeller){
+  /* ── 손님 시뮬레이션: 솔로 or 사장님(호스트) ── */
+  const custAuthority=!MP.active||MP.role==='host';
+  if(custAuthority){
     const e=E();
     S.spawnTimer-=dt*(rush?2.2:1)*(1+(e.rep-3)*0.15);
-    if(S.spawnTimer<=0){spawnCustomer();S.spawnTimer=Math.max(2.5,7-S.day*0.4)+Math.random()*3;}
-    let dirtyC=false;
+    if(S.spawnTimer<=0){spawnCustomer();S.spawnTimer=dd.spawn*(0.7+Math.random()*0.6);}
+    const fMult=fireActiveTotal()?1.6:1;
     S.customers.forEach(cu=>{
       if(cu.leaving)return;
-      cu.patience-=dt;dirtyC=true;
+      cu.patience-=dt*fMult;
       if(cu.patience<=0){
         cu.leaving=true;S.dayMissed++;
+        S.combo=0;renderCombo();
+        SFX.angry();shake();
+        const el=custEl(cu.i);if(el)el.classList.add('leaving');
         if(MP.active){MP.me.missed++;markDirty();}
         else S.rep=Math.max(0,S.rep-0.3);
         toast('손님이 화나서 떠났어요… 💢');
-        setTimeout(()=>{S.customers.splice(S.customers.indexOf(cu),1);renderCustomers();},380);
+        setTimeout(()=>{const idx=S.customers.indexOf(cu);if(idx>=0)S.customers.splice(idx,1);renderCustomers();},380);
       }
     });
-    if(dirtyC)renderCustomers();
+    updateCustomerBars();
+    /* 🧑‍💼 알바 자동 서빙 (혼자 하기 전용): 1.8초에 한 명씩, 쟁반이 되는 손님부터 */
+    if(!MP.active&&S.alba){
+      S.albaT+=dt;
+      if(S.albaT>=1.8){
+        S.albaT=0;
+        const e2s=E();
+        const target=S.customers.find(cu=>!cu.leaving
+          &&!Object.keys(cu.order).some(k=>k!=='red'&&!e2s.menus[k])
+          &&Object.keys(cu.order).every(k=>e2s.tray[k]>=cu.order[k]));
+        if(target)serveLocal(target,null,true);
+      }
+    }
+  }else{
+    /* 게스트: 미러 손님의 인내심을 로컬에서도 부드럽게 감소 */
+    const fMult=fireActiveTotal()?1.6:1;
+    MP.custMirror.forEach(c=>{if(c.p>0)c.p-=dt*fMult;});
+    updateCustomerBars();
   }
 
-  if(isBaker){
-    const e=E();
-    let dirtyM=false;
-    S.molds.forEach((m,i)=>{
-      if(i>=e.up.mold)return;
-      if(m.st==='cook1'){m.t+=dt;if(m.t>=T.cook1){m.st='flip';m.t=0;dirtyM=true;}}
-      else if(m.st==='flip'){m.t+=dt;if(m.t>=T.flipWin+T.burnAfterFlipMiss){m.st='burnt';m.t=0;dirtyM=true;}}
-      else if(m.st==='cook2'){m.t+=dt;if(m.t>=T.cook2){m.st='perfect';m.t=0;dirtyM=true;}}
-      else if(m.st==='perfect'){m.t+=dt;if(m.t>=4+e.up.glove){m.st='burnt';m.t=0;dirtyM=true;}}
-    });
-    if(dirtyM)renderGriddle();
-  }
+  /* ── 내 화로 시뮬레이션 (모두) ── */
+  let dirtyM=false;
+  const e2=E();
+  const perfWin=dd.perfect+e2.up.glove;
+  S.molds.slice(0,myMoldCount()).forEach(m=>{
+    if(m.st==='batter1'||m.st==='filled'){
+      m.t+=dt;
+      if(!m.warn&&m.t>=dd.rawBurn-4){m.warn=true;dirtyM=true;SFX.land();} /* 타기 4초 전 경고 */
+      if(m.t>=dd.rawBurn){ /* 뜨거운 틀 위에 방치 → 그대로 타버림 */
+        m.st='burnt';m.t=0;m.warn=false;dirtyM=true;SFX.burnt();
+        toast('앗, 준비만 하다가 타버렸어요! 🥲');
+      }
+    }
+    else if(m.st==='cook1'){m.t+=dt;if(m.t>=dd.cook){m.st='flip';m.t=0;dirtyM=true;}}
+    else if(m.st==='flip'){m.t+=dt;if(m.t>=dd.flipWin+4){m.st='burnt';m.t=0;dirtyM=true;SFX.burnt();}}
+    else if(m.st==='cook2'){m.t+=dt;if(m.t>=dd.cook){m.st='perfect';m.t=0;dirtyM=true;}}
+    else if(m.st==='perfect'){m.t+=dt;if(m.t>=perfWin){m.st='burnt';m.t=0;dirtyM=true;SFX.burnt();}}
+    else if(m.st==='burnt'){
+      m.t+=dt;
+      if(m.t>=dd.burntToFire){
+        m.st='fire';m.t=0;m.fireHp=FIRE_HP;dirtyM=true;
+        S.dayBurnt++;
+        if(MP.active)MP.me.burnt++;
+        toast('🚨 불이야!! 연타해서 꺼주세요!');
+        SFX.fire();shake();syncFireN();
+      }
+    }
+    else if(m.st==='fire'){
+      m.t+=dt;
+      if(m.t>=dd.fireSpread){
+        m.t=0;
+        const unlocked=myMoldCount();
+        const target=S.molds.slice(0,unlocked).find(x=>x.st!=='fire'&&x.st!=='empty');
+        if(target){
+          target.st='fire';target.t=0;target.fireHp=FIRE_HP;
+          toast('🔥 불이 옆 틀로 번졌어요!!');
+          SFX.fire();shake();syncFireN();dirtyM=true;
+        }
+      }
+    }
+  });
+  if(fireCount()>0&&ts-S.fireSfxAt>1300){S.fireSfxAt=ts;SFX.fire();}
+  if(dirtyM){renderMyPan();if(MP.active)markDirty();}
 
   renderHUD();
-
   if(S.time>=DAY_LEN)endDay();
 }
 requestAnimationFrame(loop);
 
 /* ═══════════ 하루 결산 ═══════════ */
+function starsFor(earned,goal){return earned>=goal*1.8?3:earned>=goal*1.4?2:earned>=goal?1:0;}
+function showStars(earned,goal){
+  const n=starsFor(earned,goal);
+  $('#sumStars').textContent='⭐'.repeat(n)+'☆'.repeat(3-n);
+  $('#sumGoal').textContent=fmt(goal)+'원';
+  if(n>0)setTimeout(()=>SFX.star(),350);
+  return n;
+}
 function endDay(){
+  const goal=goalFor(S.day);
   if(MP.active){
     if(MP.summaryShownFor===S.day)return;
     MP.summaryShownFor=S.day;
     S.running=false;
     $('#rushBanner').classList.remove('on');
+    $('#extBtn').classList.remove('show');
     if(MP.role==='host'&&MP.meta&&MP.meta.state==='playing'){
       MP.meta.state='summary';pubMeta();
     }
     const cur=combinedStats(),sn=MP.snap||{earned:0,served:0,missed:0,burnt:0,soldCnt:0};
     const e=E();
+    const earned=cur.earned-sn.earned;
+    const n=showStars(earned,goal);
     $('#sumDay').textContent=S.day;
-    $('#sumSales').textContent=fmt(cur.earned-sn.earned)+'원';
+    $('#sumSales').textContent=fmt(earned)+'원';
     $('#sumSold').textContent=(cur.soldCnt-sn.soldCnt)+'개';
     $('#sumMissed').textContent=(cur.missed-sn.missed)+'명';
     $('#sumBurnt').textContent=(cur.burnt-sn.burnt)+'개';
     $('#sumRep').textContent='❤️ '+e.rep.toFixed(1);
-    $('#sumTip').textContent=MP.role==='guest'?'사장님이 다음 날을 시작하길 기다리는 중…':'준비되면 다음 날을 시작하세요!';
+    const base=n===3?'완벽한 하루! 별 3개 달성 🏆':n>0?'목표 달성! 내일은 별 '+(n+1)+'개에 도전!':'목표 미달… 내일은 할 수 있어요!';
+    $('#sumTip').textContent=base+(MP.role==='guest'?' (사장님이 다음 날을 시작하길 기다리는 중…)':'');
     $('#nextDayBtn').style.display=MP.role==='host'?'block':'none';
     $('#dayModal').classList.add('open');
     return;
   }
   S.running=false;
   $('#rushBanner').classList.remove('on');
+  const n=showStars(S.daySales,goal);
   $('#sumDay').textContent=S.day;
   $('#sumSales').textContent=fmt(S.daySales)+'원';
   $('#sumSold').textContent=S.daySold+'개';
@@ -730,8 +1239,12 @@ function endDay(){
   $('#sumBurnt').textContent=S.dayBurnt+'개';
   $('#sumRep').textContent='❤️ '+S.rep.toFixed(1);
   const tips=[];
-  if(S.dayBurnt>2)tips.push('타이밍을 놓치면 재료가 아까워요!');
-  if(S.dayMissed>2)tips.push('손님을 놓치면 평판이 떨어져요. 미리 구워두세요!');
+  const eEnd=E();
+  const lockedDemand=demandKinds(S.day+1).filter(k=>k!=='red'&&!eEnd.menus[k]);
+  if(lockedDemand.length)tips.push(`⚠️ 내일 손님이 ${lockedDemand.map(k=>FILLS[k].emoji+FILLS[k].name).join(', ')}을(를) 찾아요! 개발을 서두르세요`);
+  if(n===3)tips.push('완벽한 하루! 별 3개 달성 🏆');
+  if(S.dayBurnt>2)tips.push('탄 붕어빵을 방치하면 불이 나요! 빨리 버리세요.');
+  if(S.dayMissed>2)tips.push('손님을 놓치면 콤보가 끊겨요. 미리 구워두세요!');
   if(S.money>=8000)tips.push('화로를 확장하면 러시아워가 수월해져요.');
   $('#sumTip').textContent=tips[0]||'내일도 노릇노릇하게! 🐟';
   $('#nextDayBtn').style.display='block';
@@ -740,58 +1253,88 @@ function endDay(){
 $('#nextDayBtn').onclick=()=>{
   if(MP.active){
     if(MP.role!=='host')return;
-    MP.meta={day:S.day+1,state:'playing',startedAt:Date.now()};
+    MP.meta={day:S.day+1,state:'playing',startedAt:Date.now(),diff:S.diff};
     pubMeta();
     MP.lastStartedAt=MP.meta.startedAt;
     startDayLocal(MP.meta.day);
     return;
   }
-  S.day++;S.time=0;S.daySales=0;S.daySold=0;S.dayMissed=0;S.dayBurnt=0;
-  S.customers=[];S.spawnTimer=3;
-  S.molds.forEach(m=>{m.st='empty';m.fill=null;m.t=0;});
+  S.daySales=0;S.daySold=0;S.dayMissed=0;S.dayBurnt=0;
   $('#dayModal').classList.remove('open');
-  renderAll();S.running=true;
+  startDayLocal(S.day+1);
 };
+function pubMeta(){
+  if(!client||!MP.active||MP.role!=='host')return;
+  try{client.publish(tMeta(),JSON.stringify(MP.meta),{retain:true});}catch(e){}
+}
 
 /* ═══════════ 상점 ═══════════ */
 $('#shopBtn').onclick=()=>{
   if(!MP.active)S.paused=true;
   const e=E();
-  $('#creamBuyRow').style.display=e.up.cream?'flex':'none';
-  const sellerLock=MP.active&&MP.role==='guest';
-  document.querySelectorAll('.up-item').forEach(el=>el.style.opacity=sellerLock?.45:1);
-  $('#upNote').textContent=sellerLock?'(굽기 담당만 구매 가능)':'';
+  $('#creamBuyRow').style.display=e.menus.cream?'flex':'none';
+  $('#sweetBuyRow').style.display=e.menus.sweet?'flex':'none';
+  $('#pizzaBuyRow').style.display=e.menus.pizza?'flex':'none';
+  $('#moldDesc').textContent=MP.active
+    ?`내 화로 ${myMoldCount()}칸 → 최대 ${MP_MAX_MOLDS}칸`
+    :`화로 ${S.moldCount}칸 → 최대 ${SOLO_MAX_MOLDS}칸`;
   updateShopBtns();
   $('#shopModal').classList.add('open');
 };
 $('#shopClose').onclick=()=>{S.paused=false;$('#shopModal').classList.remove('open');};
 function updateShopBtns(){
   const e=E();
-  const sellerLock=MP.active&&MP.role==='guest';
+  const moldMax=MP.active?MP_MAX_MOLDS:SOLO_MAX_MOLDS;
   document.querySelectorAll('[data-buy]').forEach(b=>{
     const k=b.dataset.buy;
-    if(k==='mold'){b.disabled=sellerLock||e.up.mold>=6||e.money<8000;if(e.up.mold>=6)b.textContent='최대!';}
-    else if(k==='glove'){b.disabled=sellerLock||e.up.glove>0||e.money<6000;if(e.up.glove>0)b.textContent='보유중';}
-    else if(k==='creamMenu'){b.disabled=sellerLock||e.up.cream||e.money<12000;if(e.up.cream)b.textContent='보유중';}
+    if(k==='mold'){b.disabled=myMoldCount()>=moldMax||e.money<8000;b.textContent=myMoldCount()>=moldMax?'최대!':'8,000원';}
+    else if(k==='alba'){
+      if(MP.active){b.disabled=true;b.textContent='협동 불가';}
+      else if(S.alba){b.disabled=true;b.textContent='근무중';}
+      else{b.disabled=e.money<25000;b.textContent='25,000원';}
+    }
+    else if(k==='glove'){b.disabled=e.up.glove>0||e.money<6000;if(e.up.glove>0)b.textContent='보유중';}
     else if(k==='batter')b.disabled=e.money<1000;
-    else if(k==='red')b.disabled=e.money<800;
-    else if(k==='cream')b.disabled=e.money<1200;
+    else if(FILL_KEYS.includes(k))b.disabled=e.money<ING_COST[k];
+    else if(k.endsWith('Menu')){
+      const fk=k.replace('Menu','');
+      b.disabled=e.menus[fk]||e.money<MENU_COST[fk];
+      b.textContent=e.menus[fk]?'개발 완료':fmt(MENU_COST[fk])+'원';
+    }
   });
 }
 document.querySelectorAll('[data-buy]').forEach(b=>{
   b.addEventListener('click',()=>{
     const k=b.dataset.buy;const e=E();
+    const moldMax=MP.active?MP_MAX_MOLDS:SOLO_MAX_MOLDS;
     const pay=(cost)=>{if(e.money<cost){toast('돈이 부족해요!');return false;}
       if(MP.active){MP.me.spend+=cost;}else S.money-=cost;return true;};
-    if(k==='batter'&&pay(1000)){MP.active?MP.me.buy.batter++:S.batter+=10;toast('반죽 +10 🥣');}
-    if(k==='red'&&pay(800)){MP.active?MP.me.buy.red++:S.stock.red+=10;toast('팥 +10 🟤');}
-    if(k==='cream'&&pay(1200)){MP.active?MP.me.buy.cream++:S.stock.cream+=10;toast('슈크림 +10 🟡');}
-    if(k==='mold'&&e.up.mold<6&&pay(8000)){MP.active?MP.me.up.mold++:S.moldCount++;toast('화로 확장! 🔥');}
-    if(k==='glove'&&!e.up.glove&&pay(6000)){MP.active?MP.me.up.glove=2:S.perfectBonus=2;toast('장갑 장착! 🧤');}
-    if(k==='creamMenu'&&!e.up.cream&&pay(12000)){
-      if(MP.active){MP.me.up.cream=true;MP.me.buy.cream++;}
-      else{S.creamUnlocked=true;S.stock.cream+=10;}
-      toast('슈크림 메뉴 개발 완료! 🟡');
+    if(k==='batter'&&pay(1000)){MP.active?MP.me.buy.batter++:S.batter+=20;toast('반죽 +20 🥣');}
+    else if(FILL_KEYS.includes(k)&&pay(ING_COST[k])){
+      MP.active?MP.me.buy[k]++:S.stock[k]+=10;
+      toast(`${FILLS[k].name} +10 ${FILLS[k].emoji}`);
+    }
+    else if(k==='mold'&&myMoldCount()<moldMax&&pay(8000)){
+      if(MP.active)MP.me.up.mold++;else S.moldCount++;
+      toast('화로 확장! 틀 +1 🔥');
+    }
+    else if(k==='alba'&&!MP.active&&!S.alba&&pay(25000)){
+      S.alba=true;S.albaT=0;
+      toast('🧑‍💼 알바생 출근! 이제 판매를 도와드려요');
+      SFX.star();renderAlbaChip();
+    }
+    else if(k==='glove'&&!e.up.glove&&pay(6000)){MP.active?MP.me.up.glove=2:S.perfectBonus=2;toast('장갑 장착! 🧤');}
+    else if(k.endsWith('Menu')){
+      const fk=k.replace('Menu','');
+      if(!e.menus[fk]&&pay(MENU_COST[fk])){
+        if(MP.active){MP.me.up[fk]=true;MP.me.buy[fk]++;}
+        else{S.menus[fk]=true;S.stock[fk]+=10;}
+        toast(`${FILLS[fk].emoji} ${FILLS[fk].name} 메뉴 개발 완료!`);
+        SFX.star();
+        $('#creamBuyRow').style.display=E().menus.cream?'flex':'none';
+        $('#sweetBuyRow').style.display=E().menus.sweet?'flex':'none';
+        $('#pizzaBuyRow').style.display=E().menus.pizza?'flex':'none';
+      }
     }
     if(MP.active)markDirty();
     renderAll();updateShopBtns();
@@ -802,21 +1345,40 @@ document.querySelectorAll('[data-buy]').forEach(b=>{
 function showCard(id){
   ['menuCard','hostCard','joinCard','guestWaitCard','soloHelpCard'].forEach(c=>$('#'+c).style.display=c===id?'block':'none');
 }
+/* 난이도 선택 칩 */
+function renderDiffRows(){
+  ['diffRowSolo','diffRowHost'].forEach(id=>{
+    const row=$('#'+id);if(!row)return;
+    row.innerHTML='';
+    Object.keys(DIFFS).forEach(k=>{
+      const d=DIFFS[k];
+      const b=document.createElement('button');
+      b.className='diffbtn'+(S.diff===k?' sel':'');
+      b.innerHTML=`<span>${d.emoji}</span>${d.name}`;
+      b.onclick=()=>{S.diff=k;renderDiffRows();};
+      row.appendChild(b);
+    });
+  });
+}
+renderDiffRows();
 $('#soloBtn').onclick=()=>showCard('soloHelpCard');
 $('#soloBackBtn').onclick=()=>showCard('menuCard');
-$('#soloStartBtn').onclick=()=>{S.mode='solo';$('#startModal').classList.remove('open');S.running=true;};
+$('#soloStartBtn').onclick=()=>{
+  S.mode='solo';
+  $('#startModal').classList.remove('open');
+  startDayLocal(1);
+};
 
 const CODE_CHARS='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const genCode=()=>Array.from({length:4},()=>CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]).join('');
 
-/* 방 만들기 */
 $('#hostBtn').onclick=()=>{
   if(!mqttOK()){toast('네트워크 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인하세요.');return;}
   MP.code=genCode();MP.role='host';MP.active=true;MP.me=emptyBlob();
   MP.other=null;MP.meta={day:1,state:'waiting',startedAt:0};MP.lastStartedAt=-1;
-  document.body.classList.add('multi','role-host');
-  document.body.classList.remove('role-guest');
-  $('#roleBadge').textContent='🔥 굽기 담당';
+  MP.lastExtApplied=0;MP.lastReqT=0;MP.custMirror=[];
+  document.body.classList.add('multi');
+  $('#roleBadge').textContent='👨‍🍳 사장님';
   $('#roomCodeTag').textContent='#'+MP.code;
   $('#roomCodeBig').textContent='접속중…';
   $('#hostStartBtn').disabled=true;
@@ -830,23 +1392,22 @@ $('#hostBtn').onclick=()=>{
     toast('서버 연결 완료! 친구에게 코드를 알려주세요 📡');
   },err=>{
     toast('서버 연결 실패: '+err);
-    MP.active=false;document.body.classList.remove('multi','role-host');
+    MP.active=false;document.body.classList.remove('multi');
     showCard('menuCard');
   });
 };
 $('#hostBackBtn').onclick=()=>{
   unsubscribeRoom();MP.active=false;
-  document.body.classList.remove('multi','role-host');
+  document.body.classList.remove('multi');
   showCard('menuCard');
 };
 $('#hostStartBtn').onclick=()=>{
-  MP.meta={day:1,state:'playing',startedAt:Date.now()};
+  MP.meta={day:1,state:'playing',startedAt:Date.now(),diff:S.diff};
   pubMeta();
   MP.lastStartedAt=MP.meta.startedAt;
   S.mode='host';startDayLocal(1);
 };
 
-/* 코드로 참가 */
 const joinWait={active:false,timer:null};
 $('#joinBtn').onclick=()=>{
   if(!mqttOK()){toast('네트워크 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인하세요.');return;}
@@ -855,7 +1416,7 @@ $('#joinBtn').onclick=()=>{
 $('#joinBackBtn').onclick=()=>{
   if(joinWait.timer){clearTimeout(joinWait.timer);joinWait.timer=null;}
   joinWait.active=false;
-  if(MP.active){unsubscribeRoom();MP.active=false;document.body.classList.remove('multi','role-guest');}
+  if(MP.active){unsubscribeRoom();MP.active=false;document.body.classList.remove('multi');}
   showCard('menuCard');
 };
 $('#joinGoBtn').onclick=()=>{
@@ -863,11 +1424,11 @@ $('#joinGoBtn').onclick=()=>{
   if(code.length!==4){toast('4자리 코드를 입력하세요');return;}
   $('#joinGoBtn').disabled=true;
   MP.code=code;MP.role='guest';MP.me=emptyBlob();MP.other=null;MP.meta=null;MP.lastStartedAt=-1;
+  MP.lastExtApplied=0;MP.custMirror=[];
   connectBroker(()=>{
     MP.active=true;
     subscribeRoom();
     joinWait.active=true;
-    /* 방(호스트의 retained meta)이 오는지 4초 대기 */
     joinWait.timer=setTimeout(()=>{
       joinWait.timer=null;joinWait.active=false;
       $('#joinGoBtn').disabled=false;
@@ -878,7 +1439,6 @@ $('#joinGoBtn').onclick=()=>{
       }
       enterAsGuest();
     },4000);
-    /* meta가 즉시 도착하면 빨리 입장 */
     const quick=setInterval(()=>{
       if(MP.meta&&joinWait.active){
         clearInterval(quick);
@@ -893,9 +1453,8 @@ $('#joinGoBtn').onclick=()=>{
   });
 };
 function enterAsGuest(){
-  document.body.classList.add('multi','role-guest');
-  document.body.classList.remove('role-host');
-  $('#roleBadge').textContent='💰 판매 담당';
+  document.body.classList.add('multi');
+  $('#roleBadge').textContent='🤝 파트너';
   $('#roomCodeTag').textContent='#'+MP.code;
   S.mode='guest';
   renderPings();renderNet();
@@ -906,10 +1465,9 @@ function enterAsGuest(){
   }else{
     showCard('guestWaitCard');
   }
-  toast('입장 완료! 💰');
+  toast('입장 완료! 🤝');
 }
 
-/* 초기 렌더 */
 window.addEventListener('load',()=>{
   if(!mqttOK())$('#storageNote').innerHTML='⚠️ 네트워크 라이브러리 로드 실패.<br>인터넷 연결 후 새로고침 해주세요.';
 });
