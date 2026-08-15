@@ -452,6 +452,7 @@ body.multi #pingRow{display:flex}
       <div class="item"><div class="info"><div class="name">화로 확장 (내 틀 +1)</div><div class="desc" id="moldDesc">한 번에 더 많이 구워요</div></div><button class="buybtn" data-buy="mold">8,000원</button></div>
       <div class="item"><div class="info"><div class="name">🧑‍💼 알바생 고용 (혼자 하기 전용)</div><div class="desc" id="albaDesc">손님에게 붕어빵을 자동으로 건네줘요. 단, 알바 판매는 팁·콤보 없이 정가만!</div></div><button class="buybtn" data-buy="alba">25,000원</button></div>
       <div class="item"><div class="info"><div class="name">두꺼운 장갑 (공용)</div><div class="desc">노릇노릇 타이밍이 2초 길어져요</div></div><button class="buybtn" data-buy="glove">6,000원</button></div>
+      <div class="item"><div class="info"><div class="name">🔥 화로 연료 업그레이드 (공용)</div><div class="desc" id="fuelDesc">참숯으로 교체! 굽는 시간 -15%</div></div><button class="buybtn" data-buy="fuel">7,000원</button></div>
       <p class="tip" style="text-align:center">🎪 꾸미기 상점은 로비에서 이용할 수 있어요</p>
     </div>
   </div>
@@ -850,7 +851,7 @@ function D(){
     spawn:Math.max(1.6,(7-ed*0.5)/c.spd),
     patience:Math.max(7,(26-ed*1.7)*c.pat)*(1+FXC.pat),
     orderMax:Math.min(4,Math.ceil(1+ed*0.45)),
-    cook:Math.max(2.4,(4-(ed-1)*0.12))*(1-FXC.cook),
+    cook:Math.max(2.4,(4-(ed-1)*0.12))*(1-FXC.cook)*(1-COOK_CUT[cookLvNow()]),
     perfect:Math.max(1.8,4-(ed-1)*0.18),
     flipWin:Math.max(1.4,3-(ed-1)*0.12),
     burntToFire:Math.max(3,(6-(ed-1)*0.3))*(1+FXC.fire),
@@ -896,7 +897,7 @@ for(let i=0;i<SOLO_MAX_MOLDS;i++)S.molds.push({st:'empty',fill:null,t:0,fireHp:0
 function zeroFills(){return{red:0,cream:0,sweet:0,pizza:0};}
 function emptyBlob(){return{prod:zeroFills(),cons:{batter:0,red:0,cream:0,sweet:0,pizza:0},
   buy:{batter:0,red:0,cream:0,sweet:0,pizza:0},spend:0,earned:0,sold:zeroFills(),burnt:0,missed:0,served:0,
-  up:{mold:MP_START_MOLDS,glove:0,cream:false,sweet:false,pizza:false},ping:null,hb:Date.now(),
+  up:{mold:MP_START_MOLDS,glove:0,cookLv:0,cream:false,sweet:false,pizza:false},ping:null,hb:Date.now(),
   fireN:0,ext:0,moldsSnap:[],cust:[],combo:0,req:[]};}
 const MP={
   active:false,role:null,code:null,vs:false,vsSel:'coop',
@@ -913,6 +914,8 @@ const BROKERS=[
 let client=null,netOn=false;
 const mqttOK=()=>typeof mqtt!=='undefined';
 const isCoop=()=>MP.active&&!MP.vs; /* 경제 공유는 협동에서만 */
+const COOK_CUT=[0,0.15,0.25];
+function cookLvNow(){if(isCoop()){const a=MP.me.up.cookLv||0,b=(MP.other&&MP.other.up&&MP.other.up.cookLv)||0;return Math.max(a,b);}return S.cookLv||0;}
 const TOPIC_ROOT='bungeo-tycoon-v4';
 const tMeta=()=>`${TOPIC_ROOT}/${MP.code}/meta`;
 const tMe=()=>`${TOPIC_ROOT}/${MP.code}/${MP.role}`;
@@ -1859,6 +1862,13 @@ function updateShopBtns(){
       else{b.disabled=e.money<25000;b.textContent='25,000원';}
     }
     else if(k==='glove'){b.disabled=e.up.glove>0||e.money<6000;if(e.up.glove>0)b.textContent='보유중';}
+    else if(k==='fuel'){
+      const lv=cookLvNow();
+      const fd=$('#fuelDesc');
+      if(lv>=2){b.disabled=true;b.textContent='최대!';if(fd)fd.textContent='최고급 백탄 장착 완료 · 굽기 -25%';}
+      else if(lv===1){b.disabled=e.money<12000;b.textContent='12,000원';if(fd)fd.textContent='백탄으로 업그레이드! 굽기 -25% (누적)';}
+      else{b.disabled=e.money<7000;b.textContent='7,000원';if(fd)fd.textContent='참숯으로 교체! 굽는 시간 -15%';}
+    }
     else if(k==='batter')b.disabled=e.money<1000;
     else if(FILL_KEYS.includes(k))b.disabled=e.money<ING_COST[k];
     else if(k.endsWith('Menu')){
@@ -1889,6 +1899,16 @@ document.querySelectorAll('[data-buy]').forEach(b=>{
       SFX.star();renderAlbaChip();
     }
     else if(k==='glove'&&!e.up.glove&&pay(6000)){isCoop()?MP.me.up.glove=2:S.perfectBonus=2;toast('장갑 장착! 🧤');}
+    else if(k==='fuel'){
+      const lv=cookLvNow();
+      if(lv<2){
+        const cost=lv===0?7000:12000;
+        if(pay(cost)){
+          if(isCoop())MP.me.up.cookLv=lv+1;else S.cookLv=lv+1;
+          toast(lv===0?'🔥 참숯 장착! 굽기 -15%':'🔥 백탄 장착! 굽기 -25%');SFX.star();
+        }
+      }
+    }
     else if(k.endsWith('Menu')){
       const fk=k.replace('Menu','');
       if(!e.menus[fk]&&pay(MENU_COST[fk])){
@@ -1915,7 +1935,7 @@ function resetRun(){
   S.day=1;S.time=0;S.money=START_MONEY;S.rep=3.0;
   S.batter=START_BATTER;
   FILL_KEYS.forEach(k=>{S.stock[k]=k==='red'?START_RED:0;S.tray[k]=0;S.menus[k]=(k==='red');});
-  S.moldCount=SOLO_START_MOLDS;S.perfectBonus=0;
+  S.moldCount=SOLO_START_MOLDS;S.perfectBonus=0;S.cookLv=0;
   S.runEarned=0;S.runFires=0;S.storyLv=0;S.reviewBoost=0;S.pendingReview=0;
   S.alba=false;S.albaT=0;S.combo=0;
   S.daySales=0;S.daySold=0;S.dayMissed=0;S.dayBurnt=0;
