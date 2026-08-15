@@ -33,6 +33,10 @@ header{z-index:8;padding:8px 14px 4px;display:flex;align-items:center;justify-co
 #dayFill{height:100%;width:0%;background:linear-gradient(90deg,#5a7bd8,var(--glow));border-radius:99px;transition:width .3s linear}
 #muteBtn{background:none;border:none;font-size:17px;cursor:pointer;padding:0 2px}
 #quitBtn{background:none;border:none;font-size:17px;cursor:pointer;padding:0 2px;display:none}
+#speedBtn{display:none;background:#ffffff14;border:1.5px solid #ffffff2c;border-radius:99px;
+  font-family:'Jua';font-size:10.5px;color:var(--ink);padding:3px 8px;cursor:pointer}
+body.playing #speedBtn{display:block}
+#speedBtn.fast{border-color:var(--glow);color:var(--glow);background:#ffb34718}
 body.playing #quitBtn{display:block}
 #goalChip{z-index:8;text-align:center;font-family:'Jua';font-size:12px;color:#cfd8ef;padding:0 14px 2px;flex:none}
 #goalChip b{color:var(--glow)}
@@ -129,10 +133,27 @@ body.eq-sign_wood .stallname{color:#f2dfb6;background:#4a3520;border-color:#8a6a
 body.eq-sign_neon .stallname{color:#6ef3ff;background:#101828;border-color:#6ef3ff88;
   text-shadow:0 0 8px #6ef3ff;box-shadow:0 0 16px #6ef3ff44;animation:neonflick 2.2s infinite}
 @keyframes neonflick{0%,92%,96%,100%{opacity:1}94%{opacity:.55}}
-/* 꾸미기: 붕어빵 틀 스킨 */
-body.eq-mold_copper .mold{background:#2e2016;box-shadow:inset 0 2px 8px #000c,0 0 0 1.5px #c9803f66}
-body.eq-mold_sakura .mold{background:#2e1c26;box-shadow:inset 0 2px 8px #000c,0 0 0 1.5px #ff9fc466}
-body.eq-mold_dark .mold{background:#0d0d12;box-shadow:inset 0 2px 10px #000,0 0 0 1.5px #8a7ab866}
+/* 꾸미기: 붕어빵 틀 스킨 — 재질 표현 */
+body.eq-mold_default .mold,body.eq-mold_default .pv-mold,body.eq-mold_default .sc-mold{
+  background:radial-gradient(120% 110% at 50% 18%,#2c3040 0%,#181a22 55%,#101218 100%);
+  box-shadow:inset 0 2px 8px #000d,inset 0 -1px 2px #ffffff10,0 0 0 1.5px #3a3f4d}
+body.eq-mold_copper .mold,body.eq-mold_copper .pv-mold,body.eq-mold_copper .sc-mold{
+  background:linear-gradient(135deg,#00000000 42%,#ffdda833 47%,#00000000 55%),
+    radial-gradient(120% 110% at 50% 18%,#5c3a1e 0%,#3a2413 55%,#28180c 100%);
+  box-shadow:inset 0 2px 8px #000c,inset 0 -1px 3px #ffb86c33,0 0 0 1.8px #c9803f,0 0 10px #c9803f44}
+body.eq-mold_sakura .mold,body.eq-mold_sakura .pv-mold,body.eq-mold_sakura .sc-mold{
+  background:radial-gradient(circle 3px at 22% 30%,#ff9fc455 3px,transparent 3.6px),
+    radial-gradient(circle 2.5px at 74% 62%,#ff9fc44a 2.5px,transparent 3px),
+    radial-gradient(circle 2px at 52% 22%,#ffc9dd44 2px,transparent 2.5px),
+    radial-gradient(120% 110% at 50% 18%,#4a2c3c 0%,#2e1c26 55%,#21141c 100%);
+  box-shadow:inset 0 2px 8px #000c,0 0 0 1.8px #ff9fc4,0 0 12px #ff9fc455}
+body.eq-mold_dark .mold,body.eq-mold_dark .pv-mold,body.eq-mold_dark .sc-mold{
+  background:radial-gradient(circle 1.6px at 28% 34%,#c9baf066 1.6px,transparent 2px),
+    radial-gradient(circle 1.4px at 66% 58%,#c9baf055 1.4px,transparent 1.8px),
+    radial-gradient(circle 1.4px at 48% 74%,#c9baf04d 1.4px,transparent 1.8px),
+    linear-gradient(135deg,#0000 40%,#8a7ab826 50%,#0000 60%),
+    radial-gradient(120% 110% at 50% 18%,#1c1a26 0%,#0d0d12 60%,#060608 100%);
+  box-shadow:inset 0 2px 10px #000,0 0 0 1.8px #8a7ab8,0 0 12px #8a7ab84d}
 /* 꾸미기: 소품 */
 #catMascot{display:none;position:absolute;bottom:2px;left:8px;font-size:24px;z-index:4;
   animation:cattail 2.4s ease-in-out infinite;pointer-events:none}
@@ -152,6 +173,31 @@ body.deco-plant #plantDeco{display:block}
 @keyframes avpop{0%{transform:scale(1)}40%{transform:scale(1.35) rotate(-8deg)}100%{transform:scale(1)}}
 #lobbyAvatarWrap{margin:2px 0 8px}
 #lobbyAvatar{font-size:44px;line-height:1.2;animation:avbob 2s ease-in-out infinite;display:inline-block}
+#lobbyAvatar.eggwiggle{animation:eggwig .25s ease-out}
+@keyframes eggwig{0%{transform:scale(1) rotate(0)}40%{transform:scale(1.15) rotate(-7deg)}70%{transform:scale(1.08) rotate(6deg)}100%{transform:scale(1)}}
+#lobbyAvatar.eggparty{animation:eggparty 1.5s ease-in-out}
+#devChip{font-family:'Jua';font-size:10px;background:#e05d5d;color:#fff;border:none;border-radius:99px;
+  padding:3px 10px;margin-top:5px;cursor:pointer;box-shadow:0 2px 8px #e05d5d66;animation:pulse2 1.4s infinite alternate}
+@keyframes pulse2{to{box-shadow:0 2px 14px #e05d5daa}}
+.devgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.devbtn{font-family:'Jua';font-size:13px;padding:12px 4px;border-radius:10px;border:1.5px solid #ffffff2c;
+  background:#ffffff10;color:var(--ink);cursor:pointer}
+.devbtn:active{transform:scale(.96)}
+.devbtn.danger{border-color:#e05d5d66;color:#ff8a8a;background:#e05d5d14}
+/* 구경/친구 */
+.socrow{display:flex;align-items:center;gap:9px;padding:8px 6px;border-bottom:1px dashed #ffffff1c;cursor:pointer}
+.socav{flex:none;display:flex}
+.socname{font-family:'Jua';font-size:13.5px;flex:1;text-align:left;overflow:hidden}
+.socname small{display:block;font-family:'Gowun Dodum';font-size:10.5px;opacity:.65}
+.socgo{font-size:12px;color:#8fd3ff;flex:none}
+.socbtn{font-family:'Jua';font-size:11px;border:1.5px solid #ffffff2c;background:#ffffff10;color:var(--ink);
+  border-radius:8px;padding:6px 10px;cursor:pointer;flex:none}
+.socbtn.del{border-color:#e05d5d44;color:#ff8a8a}
+#socBody{max-height:34dvh;overflow-y:auto;min-height:80px}
+@keyframes eggparty{0%,100%{transform:scale(1) rotate(0);filter:none}
+  25%{transform:scale(1.4) rotate(-12deg);filter:drop-shadow(0 0 14px #ffd94d)}
+  50%{transform:scale(1.25) rotate(12deg);filter:drop-shadow(0 0 20px #8fd3ff)}
+  75%{transform:scale(1.35) rotate(-8deg);filter:drop-shadow(0 0 14px #ff6fa5)}}
 #lobbyAvName{font-family:'Jua';font-size:12px;color:var(--glow);opacity:.9}
 .avPreview{background:#ffffff0a;border:1.5px solid #ffffff1c;border-radius:14px;padding:12px;margin-bottom:10px;text-align:center}
 .avPreview .big{font-size:52px;line-height:1.2;animation:avbob 2s ease-in-out infinite;display:inline-block}
@@ -159,12 +205,10 @@ body.deco-plant #plantDeco{display:block}
 /* ── 미니 포장마차 미리보기 ── */
 #stallPreview{background:linear-gradient(180deg,#0d1322,#1a2238);border:1.5px solid #ffffff1c;
   border-radius:14px;padding:8px 10px 8px;margin-bottom:10px;position:relative;overflow:hidden}
-.pv-tarp{height:13px;border-radius:8px 8px 0 0;
-  background:repeating-linear-gradient(90deg,var(--tarp) 0 18px,#ffffff 18px 36px)}
-body.eq-tarp_blue .pv-tarp{background:repeating-linear-gradient(90deg,#4d7bd6 0 18px,#ffffff 18px 36px)}
-body.eq-tarp_pink .pv-tarp{background:repeating-linear-gradient(90deg,#ff6fa5 0 18px,#ffffff 18px 36px)}
-body.eq-tarp_mint .pv-tarp{background:repeating-linear-gradient(90deg,#3ec9a7 0 18px,#ffffff 18px 36px)}
-body.eq-tarp_night .pv-tarp{background:repeating-linear-gradient(90deg,#2a3160 0 18px,#8a93c9 18px 36px)}
+.pv-tarp{height:13px;border-radius:8px 8px 0 0;position:relative;
+  background:repeating-linear-gradient(90deg,var(--tA) 0 18px,var(--tB) 18px 36px)}
+.pv-tarp::after{content:'';position:absolute;left:0;right:0;bottom:-5px;height:6px;
+  background:radial-gradient(circle 9px at 9px -3px,var(--tA) 8px,transparent 8.6px) repeat-x;background-size:18px 6px}
 .pv-lights{display:none;justify-content:center;gap:9px;font-size:7px;margin-top:1px}
 body.deco-lights .pv-lights{display:flex}
 .pv-lights span{animation:twinkle 1.2s ease-in-out infinite}
@@ -180,9 +224,6 @@ body.eq-sign_neon .pv-sign{color:#6ef3ff;background:#101828;border-color:#6ef3ff
 .pv-molds{display:flex;gap:6px}
 .pv-mold{width:50px;aspect-ratio:1.55/1;border-radius:8px;background:#181a22;
   box-shadow:inset 0 2px 5px #000c;display:flex;align-items:center;justify-content:center}
-body.eq-mold_copper .pv-mold{background:#2e2016;box-shadow:inset 0 2px 5px #000c,0 0 0 1.5px #c9803f66}
-body.eq-mold_sakura .pv-mold{background:#2e1c26;box-shadow:inset 0 2px 5px #000c,0 0 0 1.5px #ff9fc466}
-body.eq-mold_dark .pv-mold{background:#0d0d12;box-shadow:inset 0 2px 6px #000,0 0 0 1.5px #8a7ab866}
 .pv-mold svg{width:78%;height:auto}
 .pv-props{text-align:center;min-height:20px;font-size:15px;display:flex;justify-content:center;gap:14px}
 .pv-prop{display:none}
@@ -194,25 +235,111 @@ body.deco-snowman .pv-snow{display:inline;animation:snowbob 2.6s ease-in-out inf
 .dectab{flex:1 0 auto;font-family:'Jua';font-size:12px;padding:8px 10px;border-radius:99px;
   border:1.5px solid #ffffff22;background:#ffffff0d;color:var(--ink);cursor:pointer;white-space:nowrap}
 .dectab.sel{border-color:var(--glow);background:#ffb34722;color:var(--glow)}
-.gemshoprow{display:flex;gap:8px}
+.gemshoprow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gempack{position:relative;overflow:visible}
+.gempack.best{border-color:#ffd94d;background:#ffd94d18;box-shadow:0 0 12px #ffd94d33}
+.fbadge{position:absolute;top:-8px;right:-4px;font-family:'Jua';font-size:9px;
+  background:#e05d5d;color:#fff;padding:2px 7px;border-radius:99px;box-shadow:0 2px 6px #0006}
 .gempack{flex:1;font-family:'Jua';font-size:15px;padding:12px 4px;border-radius:12px;
   border:1.5px solid #8fd3ff44;background:#8fd3ff12;color:#8fd3ff;cursor:pointer;line-height:1.5}
 .gempack small{display:block;font-size:10.5px;font-family:'Gowun Dodum';opacity:.75;color:var(--ink)}
 #lightsRow{display:none;gap:14px;justify-content:center;width:88%;margin-top:-2px;flex:none}
 body.deco-lights #lightsRow{display:flex}
-#lightsRow span{font-size:9px;animation:twinkle 1.2s ease-in-out infinite}
+#lightsRow span{width:6px;height:6px;border-radius:50%;background:#ffd94d;box-shadow:0 0 8px 2px #ffd94d88;animation:twinkle 1.2s ease-in-out infinite}
 #lightsRow span:nth-child(2n){animation-delay:.4s}
 #lightsRow span:nth-child(3n){animation-delay:.8s}
 @keyframes twinkle{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
 .menusubrow{display:flex;gap:6px;margin-top:10px}
-.menusub{flex:1;font-family:'Jua';font-size:12.5px;padding:10px 2px;border-radius:10px;border:1.5px solid #ffffff22;
+.menusub{flex:1 0 45%;font-family:'Jua';font-size:12.5px;padding:10px 2px;border-radius:10px;border:1.5px solid #ffffff22;
   background:#ffffff0d;color:var(--ink);cursor:pointer}
+.menusubrow{flex-wrap:wrap}
+#lobbyMeta{font-family:'Jua';font-size:11.5px;margin-top:4px;opacity:.95}
+.xpbar{width:150px;height:5px;background:#ffffff18;border-radius:99px;margin:4px auto 0;overflow:hidden}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,#ffb347,#ffd94d);border-radius:99px}
+.qrow{border:1.5px solid #ffffff1c;border-radius:12px;padding:9px 11px;margin-bottom:8px;text-align:left}
+.qrow.qdone{opacity:.55;border-color:#7ee08a55}
+.qtxt{font-family:'Jua';font-size:13px;display:flex;justify-content:space-between}
+.qrw{color:#8fd3ff;font-size:12px}
+.qbar{height:6px;background:#ffffff14;border-radius:99px;margin:6px 0 3px;overflow:hidden}
+.qbar i{display:block;height:100%;background:linear-gradient(90deg,#4d7bd6,#8fd3ff);border-radius:99px}
+.qnum{font-size:10.5px;opacity:.65;text-align:right}
+#dexGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.dexcell{background:#ffffff0a;border:1.5px solid #ffffff1c;border-radius:10px;padding:7px 2px;text-align:center}
+.dexcell.dexlock{opacity:.4}
+.dexcell .de{font-size:20px}
+.dexcell .dn{font-family:'Jua';font-size:9.5px;margin-top:2px}
+.dexcell .dv{font-size:11px;color:var(--glow);font-family:'Jua'}
+.ctbadge.ct-mystery{background:#1a1a1a;color:#ffd94d;border:1px solid #ffd94d88}
+.customer.ct-mystery{border-color:#ffd94d88;box-shadow:0 0 10px #ffd94d33}
+/* ── 내 가게 전경 씬 ── */
+#shopScene{position:relative;border-radius:16px;overflow:hidden;height:256px;
+  background:radial-gradient(140% 70% at 50% 108%,#3d3350 0%,#0000 55%),
+    linear-gradient(180deg,#070d1e 0%,#131c38 58%,#1a2440 100%);border:1.5px solid #ffffff1c}
+#shopScene::before{content:'';position:absolute;top:14px;right:20px;width:30px;height:30px;border-radius:50%;
+  background:radial-gradient(circle at 36% 34%,#fffbe8,#ffe9a8 55%,#e8c968);box-shadow:0 0 26px 8px #ffe9a855}
+#shopScene::after{content:'';position:absolute;top:19px;right:25px;width:7px;height:7px;border-radius:50%;background:#e0c47f66}
+.sc-sky i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.8;animation:twinkle 2s infinite}
+.sc-sky i:nth-child(1){top:12px;left:12%}.sc-sky i:nth-child(2){top:30px;left:30%;animation-delay:.5s}
+.sc-sky i:nth-child(3){top:10px;left:55%;animation-delay:1s}.sc-sky i:nth-child(4){top:26px;left:75%;animation-delay:.3s}
+.sc-sky i:nth-child(5){top:44px;left:88%;animation-delay:.8s}.sc-sky i:nth-child(6){top:48px;left:8%;animation-delay:1.3s}
+.sc-stallwrap{position:absolute;left:50%;transform:translateX(-50%);bottom:34px;width:86%;max-width:320px}
+.sc-tarp{height:22px;border-radius:12px 12px 0 0;box-shadow:0 3px 8px #0006;position:relative;z-index:2;
+  background:repeating-linear-gradient(90deg,var(--tA) 0 26px,var(--tB) 26px 52px)}
+.sc-tarp::before{content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(180deg,#ffffff30,#0000 45%,#00000040)}
+.sc-tarp::after{content:'';position:absolute;left:0;right:0;bottom:-8px;height:9px;
+  background:radial-gradient(circle 13px at 13px -4px,var(--tA) 12px,transparent 12.8px) repeat-x;
+  background-size:26px 9px;filter:drop-shadow(0 2px 2px #0005)}
+.sc-lights{display:none;justify-content:space-around;padding:0 14px;margin-top:2px}
+body.deco-lights .sc-lights{display:flex}
+.sc-lights span{width:7px;height:7px;border-radius:50%;background:#ffd94d;box-shadow:0 0 9px 3px #ffd94d88;animation:twinkle 1.2s infinite}
+.sc-lights span:nth-child(2n){animation-delay:.4s}.sc-lights span:nth-child(3n){animation-delay:.8s}
+.sc-signrow{text-align:center;margin-top:3px}
+.sc-sign{font-family:'Jua';font-size:13px;display:inline-block;padding:2px 14px;background:#2a1c12;
+  color:var(--glow);border-radius:0 0 10px 10px;border:1.5px solid #ffb34744;border-top:none}
+body.eq-sign_gold .sc-sign{color:#ffe08a;border-color:#ffd94d99;background:#3a2a10;box-shadow:0 0 10px #ffd94d55;letter-spacing:1px}
+body.eq-sign_wood .sc-sign{color:#f2dfb6;background:#4a3520;border-color:#8a6a3a;border-radius:0 0 5px 5px}
+body.eq-sign_neon .sc-sign{color:#6ef3ff;background:#101828;border-color:#6ef3ff88;text-shadow:0 0 6px #6ef3ff;box-shadow:0 0 10px #6ef3ff44;animation:neonflick 2.2s infinite}
+.sc-body{position:relative;height:96px;border:2px solid #55412c;border-top:none;
+  background:radial-gradient(90% 80% at 50% 30%,#ffb34722 0%,#0000 70%),
+    repeating-linear-gradient(90deg,#3e3023 0 34px,#352818 34px 36px),
+    linear-gradient(180deg,#3a2d20,#282014);
+  border-radius:0 0 6px 6px;display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 6px 14px #0007}
+.sc-steam{position:absolute;top:-4px;font-size:11px;opacity:0;animation:scsteam 2.6s ease-out infinite;pointer-events:none}
+@keyframes scsteam{0%{opacity:0;transform:translateY(6px) scale(.8)}30%{opacity:.7}100%{opacity:0;transform:translateY(-16px) scale(1.25)}}
+.sc-avatar{position:absolute;left:10px;bottom:6px;filter:drop-shadow(0 3px 4px #0008);animation:avbob 2s ease-in-out infinite}
+.sc-molds{display:flex;gap:7px;margin-left:44px}
+.sc-mold{width:52px;aspect-ratio:1.5/1;border-radius:9px;background:#181a22;box-shadow:inset 0 2px 6px #000d;
+  display:flex;align-items:center;justify-content:center}
+.sc-mold svg{width:76%;height:auto}
+.sc-propL{position:absolute;left:-26px;bottom:0;display:flex;gap:4px;align-items:flex-end}
+.sc-propR{position:absolute;right:-24px;bottom:0}
+.sc-counter{height:9px;background:linear-gradient(180deg,#55412c,#3a2d20);border-radius:0 0 8px 8px}
+.sc-ground{position:absolute;left:0;right:0;bottom:0;height:36px;
+  background:radial-gradient(circle 2px at 20% 40%,#ffffffcc 2px,transparent 2.6px),
+    radial-gradient(circle 1.6px at 62% 62%,#ffffffb3 1.6px,transparent 2.2px),
+    radial-gradient(circle 2px at 84% 34%,#ffffffcc 2px,transparent 2.6px),
+    linear-gradient(180deg,#eef3fb,#c9d4e8);
+  box-shadow:inset 0 4px 8px #0002}
+.sc-ground::before{content:'';position:absolute;left:50%;transform:translateX(-50%);top:2px;width:70%;height:9px;
+  border-radius:50%;background:#0003;filter:blur(3px)}
+#scStats{margin:10px 0 4px}
 
 /* ── 포장마차/화로 ── */
 #stall{z-index:5;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;position:relative;padding-top:2px;overflow:hidden}
-.tarpline{width:92%;height:20px;border-radius:12px 12px 0 0;position:relative;overflow:hidden;flex:none;
-  background:repeating-linear-gradient(90deg,var(--tarp) 0 26px,#ffffff 26px 52px);box-shadow:0 4px 10px #0006}
-.tarpline::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#0000 40%,#0004)}
+body{--tA:var(--tarp);--tB:#ffffff}
+body.eq-tarp_blue{--tA:#4d7bd6;--tB:#ffffff}
+body.eq-tarp_pink{--tA:#ff6fa5;--tB:#ffffff}
+body.eq-tarp_mint{--tA:#3ec9a7;--tB:#ffffff}
+body.eq-tarp_night{--tA:#2a3160;--tB:#8a93c9}
+.tarpline{width:92%;height:20px;border-radius:12px 12px 0 0;position:relative;flex:none;
+  background:repeating-linear-gradient(90deg,var(--tA) 0 26px,var(--tB) 26px 52px);box-shadow:0 4px 10px #0006}
+.tarpline::before{content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(180deg,#ffffff2e,#0000 45%,#00000042)}
+.tarpline::after{content:'';position:absolute;left:0;right:0;bottom:-8px;height:9px;
+  background:radial-gradient(circle 13px at 13px -4px,var(--tA) 12px,transparent 12.8px) repeat-x;
+  background-size:26px 9px;filter:drop-shadow(0 2px 2px #0005)}
 .stallname{font-family:'Jua';font-size:13.5px;background:#2a1c12;color:var(--glow);padding:2px 14px;flex:none;
   border-radius:0 0 10px 10px;letter-spacing:1px;border:1.5px solid #ffb34744;border-top:none}
 .panlabel{font-family:'Jua';font-size:11.5px;color:#cfd8ef;opacity:.8;margin:6px 0 3px;flex:none}
@@ -402,6 +529,7 @@ body.multi #pingRow{display:flex}
     <div id="dayBar"><div id="dayFill"></div></div>
     <div class="stat" id="rep">❤️ 3.0</div>
     <button id="muteBtn">🔊</button>
+    <button id="speedBtn">▶1x</button>
     <button id="quitBtn">🚪</button>
   </header>
   <div id="goalChip">🎯 오늘 목표 <b id="goalCur">0</b> / <span id="goalTgt">9,000</span>원 · <span style="color:#8fd3ff">💎 <span id="gemCnt">0</span></span></div>
@@ -425,7 +553,7 @@ body.multi #pingRow{display:flex}
   <div id="stall">
     <div class="tarpline"></div>
     <div class="stallname">🛒 손수레 붕어빵</div>
-    <div id="lightsRow"><span>💡</span><span>✨</span><span>💡</span><span>✨</span><span>💡</span><span>✨</span><span>💡</span></div>
+    <div id="lightsRow"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
     <div class="panlabel" id="myLabel">내 화로</div>
     <div class="griddle" id="myGriddle"></div>
     <div class="panlabel" id="partnerLabel">파트너 화로 (불나면 탭해서 도와주기!)</div>
@@ -501,10 +629,12 @@ body.multi #pingRow{display:flex}
       <div class="dectabs" id="decTabs"></div>
       <div id="decorShopBody"></div>
       <div class="sect">💳 보석 충전 (준비 중)</div>
+      <p class="tip" style="margin:0 0 6px;text-align:center;color:#ffd94d">🎁 생애 첫 구매 시 보석 2배 지급!</p>
       <div class="gemshoprow">
-        <button class="gempack" data-gempack="10">💎 10<small>₩1,000</small></button>
-        <button class="gempack" data-gempack="55">💎 55<small>₩4,900</small></button>
-        <button class="gempack" data-gempack="120">💎 120<small>₩9,900</small></button>
+        <button class="gempack" data-gempack="10"><span class="fbadge">첫구매 2배</span>💎 10<small>₩2,500</small></button>
+        <button class="gempack" data-gempack="25"><span class="fbadge">첫구매 2배</span>💎 25<small>₩4,900<br>개당 22%↓</small></button>
+        <button class="gempack" data-gempack="60"><span class="fbadge">첫구매 2배</span>💎 60<small>₩9,900<br>개당 34%↓</small></button>
+        <button class="gempack best" data-gempack="140"><span class="fbadge">첫구매 2배</span>💎 140<small>₩14,900<br>개당 57%↓ 🔥</small></button>
       </div>
     </div>
   </div>
@@ -513,8 +643,97 @@ body.multi #pingRow{display:flex}
   <div class="modal center-modal top" id="achModal">
     <div class="card">
       <h2>🏅 업적</h2>
-      <div id="achList" style="max-height:50dvh;overflow-y:auto"></div>
+      <div id="achList" style="max-height:34dvh;overflow-y:auto"></div>
+      <div class="sect" style="text-align:left">📖 도감</div>
+      <div id="dexGrid"></div>
       <button class="bigbtn ghost" id="achClose">닫기</button>
+    </div>
+  </div>
+
+  <!-- 👤 최초 닉네임 설정 -->
+  <div class="modal center-modal top" id="nickModal">
+    <div class="card">
+      <h2>👤 사장님 이름 정하기</h2>
+      <div style="font-size:40px;margin:4px 0">🐟</div>
+      <p style="font-size:13.5px;line-height:1.7">붕어빵 가게 사장님의 닉네임을 정해주세요!<br>랭킹과 친구 코드에 사용돼요.</p>
+      <div class="nickrow" style="margin-top:12px">
+        <input class="nickinput" id="firstNickInput" maxlength="10" placeholder="닉네임 (2~10자)">
+      </div>
+      <p class="tip" style="color:#ffd94d">⚠️ 닉네임은 나중에 딱 1번만 바꿀 수 있어요!</p>
+      <button class="bigbtn" id="firstNickBtn">이 이름으로 시작!</button>
+    </div>
+  </div>
+
+  <!-- 🔭 구경·친구 -->
+  <div class="modal top" id="socialModal">
+    <div class="sheet" id="socialSheet">
+      <div class="grabbar"></div>
+      <h2>🔭 이웃 가게 <button class="close" id="socialClose">닫기</button></h2>
+      <div class="dectabs">
+        <button class="dectab sel" data-soctab="browse">🔭 둘러보기</button>
+        <button class="dectab" data-soctab="friends">👥 친구</button>
+      </div>
+      <div id="socBody"></div>
+      <div class="sect">👥 친구 추가</div>
+      <div style="font-size:12px;margin-bottom:6px">내 친구 코드: <b id="myCode" style="color:var(--glow);font-family:'Jua'">-</b>
+        <button class="socbtn" id="copyCode">복사</button></div>
+      <div class="nickrow" style="margin-top:4px">
+        <input class="nickinput" id="friendCodeInput" placeholder="친구 코드 (예: 붕어킹#p1a2b3c4)">
+        <button class="nicksave" id="friendAddBtn">추가</button>
+      </div>
+      <p class="tip">서로 코드를 추가하면 언제든 가게를 구경할 수 있어요</p>
+    </div>
+  </div>
+
+  <!-- 🛠 개발자 패널 -->
+  <div class="modal center-modal top" id="devModal">
+    <div class="card">
+      <h2>🛠 개발자 패널</h2>
+      <p class="tip" style="margin-top:0">테스트용 치트 · 아바타 20연타로 ON/OFF</p>
+      <div class="devgrid">
+        <button class="devbtn" data-dev="g100">💎 +100</button>
+        <button class="devbtn" data-dev="g1000">💎 +1,000</button>
+        <button class="devbtn" data-dev="xp500">⭐ XP +500</button>
+        <button class="devbtn" data-dev="quest">📋 도전 완료</button>
+      </div>
+      <button class="devbtn danger" data-dev="wipe" style="width:100%;margin-top:8px">🗑 저장 데이터 전체 초기화</button>
+      <button class="bigbtn ghost" id="devClose">닫기</button>
+    </div>
+  </div>
+
+  <!-- 내 가게 전경 -->
+  <div class="modal center-modal top" id="myShopModal">
+    <div class="card" style="max-width:390px">
+      <h2 id="myShopTitle">🏠 내 가게</h2>
+      <div id="shopScene">
+        <div class="sc-sky"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="sc-stallwrap">
+          <div class="sc-tarp"></div>
+          <div class="sc-lights"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="sc-signrow"><span class="sc-sign" id="scSign">🐟 우리동네 붕어빵</span></div>
+          <div class="sc-body">
+            <div class="sc-avatar" id="scAvatar"></div>
+            <div class="sc-molds" id="scMolds"></div>
+            <div class="sc-propL" id="scPropL"></div>
+            <div class="sc-propR" id="scPropR"></div>
+          </div>
+          <div class="sc-counter"></div>
+        </div>
+        <div class="sc-ground"></div>
+      </div>
+      <div id="scStats"></div>
+      <button class="bigbtn blue" id="visitAddFriend" style="display:none">👥 친구 추가</button>
+      <button class="bigbtn ghost" id="myShopClose">닫기</button>
+    </div>
+  </div>
+
+  <!-- 오늘의 도전 -->
+  <div class="modal center-modal top" id="questModal">
+    <div class="card">
+      <h2>📋 오늘의 도전</h2>
+      <p class="tip" style="margin-top:0">매일 자정에 새 도전 3개! 완료하면 💎</p>
+      <div id="questList"></div>
+      <button class="bigbtn ghost" id="questClose">닫기</button>
     </div>
   </div>
 
@@ -522,12 +741,14 @@ body.multi #pingRow{display:flex}
   <div class="modal center-modal top" id="lbModal">
     <div class="card">
       <h2>🏆 온라인 랭킹</h2>
+      <div style="font-size:11px;color:#8fd3ff;font-family:'Jua'">📅 <span id="lbWeekLbl"></span> 주간 리그 · 매주 초기화!</div>
       <div class="diffrow" id="lbDiffChips"></div>
       <div id="lbList" style="max-height:38dvh;overflow-y:auto"></div>
       <div class="nickrow">
         <input class="nickinput" id="nickInput" maxlength="10" placeholder="닉네임 (최대 10자)">
         <button class="nicksave" id="nickSave">저장</button>
       </div>
+      <p class="tip" id="nickNote"></p>
       <p class="tip">하루를 마감할 때마다 최고 기록이 자동 제출돼요 (난이도별)</p>
       <button class="bigbtn ghost" id="lbClose">닫기</button>
     </div>
@@ -579,7 +800,9 @@ body.multi #pingRow{display:flex}
       <div class="row"><span>놓친 손님</span><b id="sumMissed">0명</b></div>
       <div class="row"><span>태운 붕어빵</span><b id="sumBurnt">0개</b></div>
       <div class="row"><span>평판</span><b id="sumRep">❤️ 3.0</b></div>
+      <p id="forecastLine" style="font-family:'Jua';font-size:12.5px;color:#8fd3ff;margin:8px 0 2px"></p>
       <button class="bigbtn" id="nextDayBtn">다음 날 장사 시작 →</button>
+      <button class="bigbtn ghost" id="shareBtn" style="margin-top:6px">📤 결과 카드 공유</button>
       <p class="tip" id="sumTip"></p>
     </div>
   </div>
@@ -588,7 +811,7 @@ body.multi #pingRow{display:flex}
   <div class="modal center-modal open" id="startModal">
     <div class="card" id="menuCard">
       <h2>🐟 붕어빵 타이쿤</h2>
-      <div id="lobbyAvatarWrap"><div id="lobbyAvatar">🧑‍🍳</div><div id="lobbyAvName">기본 사장님</div></div>
+      <div id="lobbyAvatarWrap"><div id="lobbyAvatar">🧑‍🍳</div><div id="lobbyAvName">기본 사장님</div><div id="lobbyMeta"></div><button id="devChip" style="display:none">🛠 DEV</button></div>
       <p style="font-size:13.5px;line-height:1.7;opacity:.85">친구와 함께 포장마차를 운영하세요!<br>같이 굽고, 같이 팔고 🔥💰</p>
       <button class="bigbtn" id="soloBtn">🐟 혼자 하기</button>
       <button class="bigbtn blue" id="hostBtn">🔥 방 만들기</button>
@@ -597,6 +820,9 @@ body.multi #pingRow{display:flex}
         <button class="menusub" id="achBtn">🏅 업적</button>
         <button class="menusub" id="lbBtn">🏆 랭킹</button>
         <button class="menusub" id="decorBtn">🎪 꾸미기</button>
+        <button class="menusub" id="questBtn">📋 도전</button>
+        <button class="menusub" id="myShopBtn">🏠 내 가게</button>
+        <button class="menusub" id="socialBtn">🔭 구경·친구</button>
       </div>
       <p class="tip" id="storageNote">코드를 아는 사람은 누구나 입장할 수 있어요.</p>
     </div>
@@ -738,40 +964,171 @@ function addGem(n,x,y){
   const g=$('#gemCnt');if(g)g.textContent=GEMS;
 }
 
+
+/* ═══════════ 메타 진행: 레벨·스트릭·도전·도감·예고 ═══════════ */
+const LV_TITLES=[[20,'붕어빵의 신'],[16,'전설의 사장'],[12,'붕어빵 달인'],[8,'거리의 스타'],[5,'골목의 장인'],[3,'동네 명물'],[1,'붕어빵 견습생']];
+let XP=lsGet('bp_xp',0);
+function lvOf(xp){let lv=1,acc=0;while(true){const need=Math.round(100*Math.pow(lv,1.3));if(xp<acc+need)return{lv,cur:xp-acc,need};acc+=need;lv++;}}
+function lvTitle(lv){for(const[t,n]of LV_TITLES)if(lv>=t)return n;return'붕어빵 견습생';}
+function addXP(n){
+  const before=lvOf(XP).lv;XP+=n;lsSet('bp_xp',XP);
+  const after=lvOf(XP).lv;
+  if(after>before){setTimeout(()=>{addGem(after);toast(`🎉 레벨 업! Lv.${after} ${lvTitle(after)}`);SFX.star();},600);}
+  renderLobbyMeta();
+}
+let STREAK=lsGet('bp_streak',{n:0,last:''});
+setTimeout(()=>{
+  const today=new Date().toISOString().slice(0,10);
+  if(STREAK.last===today)return;
+  const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
+  STREAK.n=(STREAK.last===y)?STREAK.n+1:1;
+  STREAK.last=today;lsSet('bp_streak',STREAK);
+  const reward=Math.min(5,Math.ceil(STREAK.n/2));
+  addGem(reward);toast(`🔥 ${STREAK.n}일 연속 출석! 💎+${reward}`);
+  renderLobbyMeta();
+},1200);
+let DEX=lsGet('bp_dex',{golden:0,mystery:0,jinsang:0,group:0,reviewer:0,sold:0});
+function dexAdd(k,n){
+  const first=!DEX[k]&&n>0;DEX[k]=(DEX[k]||0)+n;lsSet('bp_dex',DEX);
+  if(first&&k!=='sold'){setTimeout(()=>{addGem(1);toast('📖 도감에 새 기록! 💎+1');},900);}
+}
+const QDEFS=[
+ {id:'q_any',txt:g=>`붕어빵 ${g}개 직접 판매`,goals:[20,28],ev:'sell',mode:'add'},
+ {id:'q_red',txt:g=>`팥 붕어빵 ${g}개 판매`,goals:[10,14],ev:'sell_red',mode:'add'},
+ {id:'q_earn',txt:g=>`하루 매출 ${g.toLocaleString()}원 달성`,goals:[15000,25000],ev:'earn',mode:'max'},
+ {id:'q_group',txt:g=>`단체 손님 ${g}팀 응대`,goals:[2,3],ev:'group',mode:'add'},
+ {id:'q_fever',txt:g=>`피버 ${g}번 발동`,goals:[1,2],ev:'fever',mode:'add'},
+ {id:'q_gold',txt:g=>`황금 붕어빵 ${g}개 발견`,goals:[1,1],ev:'gold',mode:'add'},
+ {id:'q_combo',txt:g=>`콤보 ${g} 달성`,goals:[7,9],ev:'combo',mode:'max'},
+ {id:'q_star',txt:g=>`별 ${g}개로 하루 마감`,goals:[2,3],ev:'star',mode:'max'},
+];
+function todayStr(){return new Date().toISOString().slice(0,10);}
+let DAILY=lsGet('bp_daily',null);
+function ensureDaily(){
+  const t=todayStr();
+  if(DAILY&&DAILY.date===t)return;
+  let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))>>>0;
+  const idx=[...Array(QDEFS.length).keys()];
+  for(let i=idx.length-1;i>0;i--){h=(h*1664525+1013904223)>>>0;const j=h%(i+1);const tmp=idx[i];idx[i]=idx[j];idx[j]=tmp;}
+  DAILY={date:t,q:idx.slice(0,3).map((pi,k)=>{const d=QDEFS[pi];const g=d.goals[(h>>k)%d.goals.length];
+    return{id:d.id,g,prog:0,done:false};}),bonus:false};
+  lsSet('bp_daily',DAILY);
+}
+ensureDaily();
+function qEvent(ev,val){
+  ensureDaily();
+  let ch=false;
+  DAILY.q.forEach(q=>{
+    const d=QDEFS.find(x=>x.id===q.id);if(!d||d.ev!==ev||q.done)return;
+    q.prog=d.mode==='max'?Math.max(q.prog,val):q.prog+val;ch=true;
+    if(q.prog>=q.g){q.done=true;setTimeout(()=>{addGem(2);toast(`📋 도전 완료! 💎+2`);},300);addXP(10);}
+  });
+  if(ch){
+    if(!DAILY.bonus&&DAILY.q.every(q=>q.done)){DAILY.bonus=true;setTimeout(()=>{addGem(3);toast('🏅 오늘의 도전 올클리어! 보너스 💎+3');SFX.fever();},1000);}
+    lsSet('bp_daily',DAILY);
+  }
+}
+const FORECASTS=[
+ {id:'group2x',txt:'단체 손님 대량 방문 예약! (단체 등장 2배)'},
+ {id:'tip15',txt:'인심 좋은 날 (팁 1.5배)'},
+ {id:'rain',txt:'비 예보 ☔ (손님 -20%, 인내심 +20%)'},
+ {id:'gemday',txt:'💎 보석의 날! (드랍 확률 2배)'},
+];
+function evIs(id){return S.dayEvent&&S.dayEvent.id===id;}
+function pickForecast(){return Math.random()<0.65?FORECASTS[Math.floor(Math.random()*FORECASTS.length)]:null;}
+function metaOnServe(cu,pay,cnt){
+  const ty=cu.ty||'normal';
+  qEvent('sell',cnt);
+  if(cu.order.red)qEvent('sell_red',cu.order.red);
+  qEvent('earn',S.daySales);
+  qEvent('combo',S.combo);
+  if(ty==='group'){qEvent('group',1);dexAdd('group',1);}
+  if(ty==='jinsang')dexAdd('jinsang',1);
+  if(ty==='reviewer')dexAdd('reviewer',1);
+  if(ty==='mystery'){dexAdd('mystery',1);addXP(20);}
+  dexAdd('sold',cnt);
+  addXP(2);
+}
+function renderLobbyMeta(){
+  const el=$('#lobbyMeta');if(!el)return;
+  const L=lvOf(XP);
+  el.innerHTML=`🔥 연속 ${STREAK.n}일 · <b style="color:var(--glow)">Lv.${L.lv} ${lvTitle(L.lv)}</b>
+   <div class="xpbar"><i style="width:${Math.min(100,Math.round(L.cur/L.need*100))}%"></i></div>`;
+}
+function renderQuests(){
+  ensureDaily();
+  $('#questList').innerHTML=DAILY.q.map(q=>{
+    const d=QDEFS.find(x=>x.id===q.id);
+    const pct=Math.min(100,Math.round(q.prog/q.g*100));
+    return`<div class="qrow ${q.done?'qdone':''}"><div class="qtxt">${q.done?'✅':'▫️'} ${d.txt(q.g)}<span class="qrw">💎2</span></div>
+      <div class="qbar"><i style="width:${pct}%"></i></div>
+      <div class="qnum">${Math.min(q.prog,q.g).toLocaleString()} / ${q.g.toLocaleString()}</div></div>`;
+  }).join('')+`<div class="qrow ${DAILY.bonus?'qdone':''}" style="border-color:#ffd94d44"><div class="qtxt">${DAILY.bonus?'✅':'🎁'} 3개 모두 완료 보너스<span class="qrw">💎3</span></div></div>`;
+}
+function shareCard(){
+  const sum=window.__lastSum||{earned:S.daySales,goal:goalFor(S.day),n:0};
+  const c=document.createElement('canvas');c.width=520;c.height=640;
+  const x=c.getContext('2d');
+  const gr=x.createLinearGradient(0,0,0,640);gr.addColorStop(0,'#131a2e');gr.addColorStop(1,'#25335c');
+  x.fillStyle=gr;x.fillRect(0,0,520,640);
+  x.textAlign='center';
+  const avImg=new Image();
+  avImg.src='data:image/svg+xml;utf8,'+encodeURIComponent(avatarSVG(DECOR.equip.avatar,120));
+  x.fillStyle='#ffb347';x.font='bold 42px sans-serif';x.fillText('붕어빵 타이쿤',260,225);
+  const L=lvOf(XP);
+  x.fillStyle='#8fd3ff';x.font='23px sans-serif';x.fillText(`Lv.${L.lv} ${lvTitle(L.lv)} · ${PROFILE.nick||'무명 사장'}`,260,268);
+  x.fillStyle='#ffffff';x.font='bold 56px sans-serif';x.fillText(`DAY ${S.day}`,260,360);
+  x.fillStyle='#ffd94d';x.font='bold 46px sans-serif';x.fillText(sum.earned.toLocaleString()+'원',260,430);
+  x.font='42px serif';x.fillText('⭐'.repeat(sum.n)+'☆'.repeat(3-sum.n),260,495);
+  x.fillStyle='#aab6d8';x.font='19px sans-serif';x.fillText('🐟 picasso5536.github.io/tycoon-b',260,595);
+  const finish=()=>c.toBlob(async b=>{
+    if(!b){toast('카드 생성 실패 😢');return;}
+    const file=new File([b],'bungeo-tycoon.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:'붕어빵 타이쿤'});return;}catch(e){}
+    }
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bungeo-tycoon.png';a.click();
+    toast('결과 카드를 저장했어요! 📤');
+  },'image/png');
+  let fin=false;const F=()=>{if(fin)return;fin=true;finish();};
+  avImg.onload=()=>{x.drawImage(avImg,200,48,120,116);F();};
+  setTimeout(F,450);
+}
+
 /* ═══════════ 포장마차 꾸미기 🎪 (카테고리형 카탈로그, 💎 결제) ═══════════ */
 const DECOR_CATS=[
   {id:'avatar',name:'🧑‍🍳 아바타',type:'equip',items:[
     {id:'av_chef',name:'기본 사장님',emoji:'🧑‍🍳',gem:0,eff:{}},
-    {id:'av_bear',name:'곰돌이 사장',emoji:'🐻',gem:8,eff:{pat:0.03}},
-    {id:'av_peng',name:'펭귄 사장',emoji:'🐧',gem:8,eff:{fire:0.05}},
-    {id:'av_fox',name:'여우 사장',emoji:'🦊',gem:10,eff:{tip:0.03}},
-    {id:'av_tiger',name:'호랑이 사장',emoji:'🐯',gem:12,eff:{cook:0.03}},
-    {id:'av_robot',name:'로봇 사장',emoji:'🤖',gem:15,eff:{perf:0.3}},
+    {id:'av_bear',name:'곰돌이 사장',emoji:'🐻',gem:15,eff:{pat:0.03}},
+    {id:'av_peng',name:'펭귄 사장',emoji:'🐧',gem:15,eff:{fire:0.05}},
+    {id:'av_fox',name:'여우 사장',emoji:'🦊',gem:20,eff:{tip:0.03}},
+    {id:'av_tiger',name:'호랑이 사장',emoji:'🐯',gem:25,eff:{cook:0.03}},
+    {id:'av_robot',name:'로봇 사장',emoji:'🤖',gem:30,eff:{perf:0.3}},
   ]},
   {id:'tarp',name:'⛺ 천막',type:'equip',items:[
     {id:'tarp_default',name:'기본 주황',emoji:'🟧',gem:0,eff:{}},
-    {id:'tarp_blue',name:'파랑 천막',emoji:'🟦',gem:3,eff:{pat:0.02}},
-    {id:'tarp_pink',name:'분홍 천막',emoji:'🌸',gem:3,eff:{spawn:0.02}},
-    {id:'tarp_mint',name:'민트 천막',emoji:'🍃',gem:4,eff:{fire:0.04}},
-    {id:'tarp_night',name:'밤하늘 천막',emoji:'🌙',gem:6,eff:{gem:0.01}},
+    {id:'tarp_blue',name:'파랑 천막',emoji:'🟦',gem:6,eff:{pat:0.02}},
+    {id:'tarp_pink',name:'분홍 천막',emoji:'🌸',gem:6,eff:{spawn:0.02}},
+    {id:'tarp_mint',name:'민트 천막',emoji:'🍃',gem:8,eff:{fire:0.04}},
+    {id:'tarp_night',name:'밤하늘 천막',emoji:'🌙',gem:12,eff:{gem:0.01}},
   ]},
   {id:'sign',name:'🪧 간판',type:'equip',items:[
     {id:'sign_default',name:'기본 간판',emoji:'🪧',gem:0,eff:{}},
-    {id:'sign_wood',name:'레트로 나무 간판',emoji:'🪵',gem:6,eff:{pat:0.02}},
-    {id:'sign_gold',name:'황금 간판',emoji:'✨',gem:8,eff:{tip:0.02}},
-    {id:'sign_neon',name:'네온 간판',emoji:'🌈',gem:10,eff:{spawn:0.03}},
+    {id:'sign_wood',name:'레트로 나무 간판',emoji:'🪵',gem:12,eff:{pat:0.02}},
+    {id:'sign_gold',name:'황금 간판',emoji:'✨',gem:16,eff:{tip:0.02}},
+    {id:'sign_neon',name:'네온 간판',emoji:'🌈',gem:20,eff:{spawn:0.03}},
   ]},
   {id:'mold',name:'🐟 붕어빵 틀',type:'equip',items:[
     {id:'mold_default',name:'기본 무쇠 틀',emoji:'⬛',gem:0,eff:{}},
-    {id:'mold_copper',name:'구리 틀',emoji:'🟠',gem:5,eff:{cook:0.02}},
-    {id:'mold_sakura',name:'벚꽃 틀',emoji:'🌸',gem:7,eff:{gold:0.01}},
-    {id:'mold_dark',name:'흑임자 틀',emoji:'🖤',gem:7,eff:{perf:0.2}},
+    {id:'mold_copper',name:'구리 틀',emoji:'🟠',gem:10,eff:{cook:0.02}},
+    {id:'mold_sakura',name:'벚꽃 틀',emoji:'🌸',gem:14,eff:{gold:0.01}},
+    {id:'mold_dark',name:'흑임자 틀',emoji:'🖤',gem:14,eff:{perf:0.2}},
   ]},
   {id:'props',name:'🧸 장식 소품',type:'toggle',items:[
-    {id:'plant',name:'꽃 화분',emoji:'🌷',gem:4,eff:{pat:0.01}},
-    {id:'lights',name:'꼬마전구 장식',emoji:'💡',gem:5,eff:{spawn:0.02}},
-    {id:'snowman',name:'눈사람 친구',emoji:'⛄',gem:6,eff:{fire:0.03}},
-    {id:'cat',name:'고양이 마스코트',emoji:'🐱',gem:10,eff:{gem:0.01}},
+    {id:'plant',name:'꽃 화분',emoji:'🌷',gem:8,eff:{pat:0.01}},
+    {id:'lights',name:'꼬마전구 장식',emoji:'💡',gem:10,eff:{spawn:0.02}},
+    {id:'snowman',name:'눈사람 친구',emoji:'⛄',gem:12,eff:{fire:0.03}},
+    {id:'cat',name:'고양이 마스코트',emoji:'🐱',gem:20,eff:{gem:0.01}},
   ]},
 ];
 /* 효과 집계: 장착형은 장착템만, 토글형은 켠 것만 */
@@ -810,6 +1167,86 @@ function avItem(id){
   return cat.items.find(i=>i.id===id)||cat.items[0];
 }
 function myAvatar(){return avItem(DECOR.equip.avatar);}
+
+/* ═══════════ 자체 디자인 SVG 아트 (아바타·소품) ═══════════ */
+/* ═══════════ 고퀄리티 SVG 아바타 (음영·하이라이트·디테일) ═══════════ */
+function avatarSVG(id,size){
+  size=size||40;
+  const P=id.replace(/\W/g,'');
+  const defs=`<defs>
+    <radialGradient id="${P}fc" cx="42%" cy="32%" r="75%"><stop offset="0%" stop-color="#fff" stop-opacity=".35"/><stop offset="55%" stop-color="#fff" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".18"/></radialGradient>
+    <linearGradient id="${P}bd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fff" stop-opacity=".22"/><stop offset="100%" stop-color="#000" stop-opacity=".22"/></linearGradient>
+    <radialGradient id="${P}mt" cx="35%" cy="25%" r="90%"><stop offset="0%" stop-color="#d9e0f5"/><stop offset="55%" stop-color="#9aa3cc"/><stop offset="100%" stop-color="#5c6490"/></radialGradient>
+  </defs>`;
+  const eye=(x,y)=>`<ellipse cx="${x}" cy="${y}" rx="2.6" ry="3.1" fill="#241a12"/><circle cx="${x+1}" cy="${y-1.1}" r="1" fill="#fff"/>`;
+  const blush=(x,y)=>`<ellipse cx="${x}" cy="${y}" rx="3" ry="2" fill="#ff8f8f" opacity=".55"/>`;
+  const shadow=`<ellipse cx="32" cy="61" rx="17" ry="2.6" fill="#000" opacity=".28"/>`;
+  const smile=`<path d="M28.5 26 q3.5 3 7 0" stroke="#241a12" stroke-width="1.7" fill="none" stroke-linecap="round"/>`;
+  let body='';
+  if(id==='av_robot'){
+    body=`${shadow}
+    <rect x="15" y="7" width="34" height="28" rx="9" fill="url(#${P}mt)" stroke="#3d456e" stroke-width="1.4"/>
+    <rect x="19" y="12" width="26" height="15" rx="6" fill="#101828" stroke="#2a3355" stroke-width="1"/>
+    <circle cx="27" cy="19.5" r="3.2" fill="#6ef3ff"/><circle cx="37" cy="19.5" r="3.2" fill="#6ef3ff"/>
+    <circle cx="27" cy="19.5" r="1.1" fill="#eafcff"/><circle cx="37" cy="19.5" r="1.1" fill="#eafcff"/>
+    <path d="M28 24.5 h8" stroke="#6ef3ff" stroke-width="1.6" stroke-linecap="round"/>
+    <rect x="30.3" y="0" width="3.4" height="7" rx="1.7" fill="#7c86b5"/><circle cx="32" cy="1.6" r="2.7" fill="#ff5d5d"/><circle cx="31" cy=".8" r=".9" fill="#ffd0d0"/>
+    <circle cx="17.5" cy="10.5" r="1.1" fill="#c9d2f0"/><circle cx="46.5" cy="10.5" r="1.1" fill="#c9d2f0"/>
+    <rect x="17" y="36" width="30" height="22" rx="9" fill="url(#${P}mt)" stroke="#3d456e" stroke-width="1.4"/>
+    <rect x="17" y="36" width="30" height="22" rx="9" fill="url(#${P}bd)"/>
+    <rect x="23" y="40" width="18" height="12" rx="4" fill="#1a2238"/>
+    <circle cx="32" cy="46" r="3.6" fill="none" stroke="#ffd94d" stroke-width="1.6" stroke-dasharray="14 9"/>
+    <circle cx="32" cy="46" r="1.4" fill="#ffd94d"/>
+    <rect x="10" y="40" width="6" height="10" rx="3" fill="#7c86b5"/><rect x="48" y="40" width="6" height="10" rx="3" fill="#7c86b5"/>`;
+  }else{
+    const C={
+     av_chef:{skin:'#ffd9b3',dark:'#e8b088',body:'#f7f7f7',ap:'#e05d5d',apD:'#b23c3c'},
+     av_bear:{skin:'#b5854f',dark:'#8a5f33',body:'#8a5f33',ap:'#ffd94d',apD:'#d9a92a',muz:'#ecd0a8'},
+     av_peng:{skin:'#323a5e',dark:'#242b48',body:'#323a5e',ap:null,belly:'#f5f8ff',beak:'#ffab3d'},
+     av_fox:{skin:'#f5993f',dark:'#d97b22',body:'#e07b2a',ap:'#fff4e0',apD:'#e8cfa0',muz:'#fff6ea',tail:1},
+     av_tiger:{skin:'#f5a83f',dark:'#d9852a',body:'#e08a2a',ap:'#ffffff',apD:'#d9d9d9',stripes:1},
+    }[id]||{skin:'#ffd9b3',dark:'#e8b088',body:'#f7f7f7',ap:'#e05d5d',apD:'#b23c3c'};
+    const ear=(id==='av_bear'||id==='av_tiger')
+      ?`<circle cx="17" cy="8.5" r="7" fill="${C.dark}"/><circle cx="17" cy="9" r="3.6" fill="#00000030"/>
+        <circle cx="47" cy="8.5" r="7" fill="${C.dark}"/><circle cx="47" cy="9" r="3.6" fill="#00000030"/>`
+      :id==='av_fox'
+      ?`<path d="M11 17 L16 0 L27 11 Z" fill="${C.dark}"/><path d="M14.5 13 L16.5 5 L22 10.5 Z" fill="#fff" opacity=".85"/>
+        <path d="M53 17 L48 0 L37 11 Z" fill="${C.dark}"/><path d="M49.5 13 L47.5 5 L42 10.5 Z" fill="#fff" opacity=".85"/>`:'';
+    const tail=C.tail?`<path d="M49 50 q11 -2 9 -13 q-2 5 -7 6 q4 -7 -1 -11 q1 9 -6 12 Z" fill="${C.dark}"/><path d="M55 40 q3 -2 3 -5 q2 4 -1 7 Z" fill="#fff"/>`:'';
+    const hat=id==='av_chef'
+      ?`<circle cx="23" cy="6.5" r="5.5" fill="#fff"/><circle cx="32" cy="4.5" r="6" fill="#fff"/><circle cx="41" cy="6.5" r="5.5" fill="#fff"/>
+        <rect x="19" y="6" width="26" height="8" rx="3" fill="#fdfdfd"/><rect x="19" y="12" width="26" height="3.6" rx="1.8" fill="#dcdcdc"/>`:'';
+    const stripes=C.stripes?`<path d="M19 12 q4 3 1 7 M45 12 q-4 3 -1 7 M32 6 v5" stroke="#4a2c0c" stroke-width="2.6" fill="none" stroke-linecap="round"/>`:'';
+    const muzzle=C.muz?`<ellipse cx="32" cy="25.5" rx="8.5" ry="6.2" fill="${C.muz}"/><ellipse cx="32" cy="21.8" rx="2.6" ry="2" fill="#4a2c18"/>`:'';
+    const beak=C.beak?`<path d="M26.5 22.5 L37.5 22.5 L32 29.5 Z" fill="${C.beak}"/><path d="M26.5 22.5 L37.5 22.5 L32 25 Z" fill="#ffcb7a"/>`:'';
+    const cheeks=id==='av_peng'?`<circle cx="20" cy="21" r="5.4" fill="#f5f8ff"/><circle cx="44" cy="21" r="5.4" fill="#f5f8ff"/>`:'';
+    const belly=C.belly?`<ellipse cx="32" cy="47" rx="11.5" ry="10.5" fill="${C.belly}"/><ellipse cx="32" cy="47" rx="11.5" ry="10.5" fill="url(#${P}fc)"/>`:'';
+    const wings=id==='av_peng'?`<path d="M14 40 q-5 6 -1 12 q5 -1 6 -8 Z" fill="${C.dark}"/><path d="M50 40 q5 6 1 12 q-5 -1 -6 -8 Z" fill="${C.dark}"/>`
+      :`<circle cx="14.5" cy="44" r="4.8" fill="${C.skin}"/><circle cx="14.5" cy="44" r="4.8" fill="url(#${P}fc)"/>
+        <circle cx="49.5" cy="44" r="4.8" fill="${C.skin}"/><circle cx="49.5" cy="44" r="4.8" fill="url(#${P}fc)"/>`;
+    const apron=C.ap?`<path d="M23 41 L25.5 37 h13 L41 41 Z" fill="${C.apD}"/>
+      <rect x="21.5" y="41" width="21" height="15.5" rx="4.5" fill="${C.ap}"/>
+      <rect x="21.5" y="41" width="21" height="15.5" rx="4.5" fill="url(#${P}bd)" opacity=".5"/>
+      <rect x="27" y="46" width="10" height="6" rx="2" fill="${C.apD}" opacity=".6"/>`:'';
+    const mouth=C.beak?'':C.muz?`<path d="M32 24 q0 3 0 3 M28.7 28.4 q3.3 2.4 6.6 0" stroke="#4a2c18" stroke-width="1.5" fill="none" stroke-linecap="round"/>`:smile;
+    body=`${shadow}${tail}${ear}
+    <circle cx="32" cy="20" r="15.5" fill="${C.skin}"/><circle cx="32" cy="20" r="15.5" fill="url(#${P}fc)"/>
+    ${hat}${stripes}${cheeks}${muzzle}${beak}
+    ${eye(25.5,18.5)}${eye(38.5,18.5)}
+    ${id==='av_peng'?'':blush(21,24)+blush(43,24)}
+    ${mouth}
+    <rect x="17" y="34.5" width="30" height="23.5" rx="10.5" fill="${C.body}"/>
+    <rect x="17" y="34.5" width="30" height="23.5" rx="10.5" fill="url(#${P}bd)"/>
+    ${belly}${apron}${wings}`;
+  }
+  return `<svg viewBox="0 0 64 64" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">${defs}${body}</svg>`;
+}
+
+function plantSVG(sz){return `<svg viewBox="0 0 40 44" width="${sz}" height="${Math.round(sz*1.1)}"><path d="M20 26 V12" stroke="#4a8c3f" stroke-width="3"/><ellipse cx="20" cy="9" rx="6" ry="7" fill="#ff6fa5"/><circle cx="20" cy="9" r="2.4" fill="#ffd94d"/><path d="M20 20 q-7 -2 -9 -8 q8 0 9 8 M20 22 q7 -2 9 -8 q-8 0 -9 8" fill="#5ca84f"/><path d="M11 27 h18 l-2.5 14 h-13 Z" fill="#b5651d"/><path d="M11 27 h18 l-.8 4 h-16.4 Z" fill="#8a4a12"/></svg>`;}
+function catSVG(sz){return `<svg viewBox="0 0 44 40" width="${sz}" height="${Math.round(sz*0.9)}"><path d="M10 12 L13 2 L20 9 Z" fill="#3a3f4d"/><path d="M34 12 L31 2 L24 9 Z" fill="#3a3f4d"/><circle cx="22" cy="17" r="12" fill="#3a3f4d"/><ellipse cx="22" cy="32" rx="13" ry="8" fill="#3a3f4d"/><circle cx="17.5" cy="16" r="2" fill="#ffd94d"/><circle cx="26.5" cy="16" r="2" fill="#ffd94d"/><path d="M20 21 q2 1.6 4 0" stroke="#ffd94d" stroke-width="1.4" fill="none"/><path d="M35 30 q7 -1 6 -9" stroke="#3a3f4d" stroke-width="3.4" fill="none" stroke-linecap="round"/></svg>`;}
+function snowSVG(sz){return `<svg viewBox="0 0 40 46" width="${sz}" height="${Math.round(sz*1.15)}"><circle cx="20" cy="32" r="12" fill="#f4f8ff"/><circle cx="20" cy="15" r="8.5" fill="#f4f8ff"/><circle cx="17" cy="13.5" r="1.4" fill="#2b3350"/><circle cx="23" cy="13.5" r="1.4" fill="#2b3350"/><path d="M20 16 L25 17.5 L20 19 Z" fill="#ff8a3d"/><rect x="12" y="4" width="16" height="4" rx="2" fill="#e05d5d"/><rect x="15" y="-1" width="10" height="7" rx="2" fill="#e05d5d"/><circle cx="20" cy="29" r="1.4" fill="#2b3350"/><circle cx="20" cy="35" r="1.4" fill="#2b3350"/></svg>`;}
+
+
 function applyDecor(){
   DECOR_CATS.filter(c=>c.type==='equip').forEach(c=>{
     c.items.forEach(it=>document.body.classList.remove('eq-'+it.id));
@@ -818,16 +1255,21 @@ function applyDecor(){
   Object.keys(DECOR.tg).forEach(k=>document.body.classList.toggle('deco-'+k,!!DECOR.tg[k]));
   /* 아바타: 로비 + 인게임 캐릭터 + 미리보기 반영 */
   const av=myAvatar();
-  const ac=$('#avatarChar');if(ac)ac.textContent=av.emoji;
-  const la=$('#lobbyAvatar');if(la)la.textContent=av.emoji;
+  const avId=DECOR.equip.avatar;
+  const ac=$('#avatarChar');if(ac)ac.innerHTML=avatarSVG(avId,36);
+  const la=$('#lobbyAvatar');if(la)la.innerHTML=avatarSVG(avId,62);
   const ln=$('#lobbyAvName');if(ln)ln.textContent=av.name;
-  const ml=$('#myLabel');if(ml)ml.textContent='내 화로 · '+av.emoji;
-  const pv=$('#stallPreview .pv-avatar');if(pv)pv.textContent=av.emoji;
+  const ml=$('#myLabel');if(ml)ml.innerHTML='내 화로 · '+avatarSVG(avId,15);
+  const pv=$('#stallPreview .pv-avatar');if(pv)pv.innerHTML=avatarSVG(avId,32);
+  const cm=$('#catMascot');if(cm&&!cm.dataset.svg){cm.innerHTML=catSVG(26);cm.dataset.svg=1;}
+  const sd=$('#snowmanDeco');if(sd&&!sd.dataset.svg){sd.innerHTML=snowSVG(24);sd.dataset.svg=1;}
+  const pd=$('#plantDeco');if(pd&&!pd.dataset.svg){pd.innerHTML=plantSVG(20);pd.dataset.svg=1;}
   document.querySelectorAll('#stallPreview .pv-mold').forEach(el=>{
     if(!el.innerHTML)el.innerHTML=fishSVG('#d98a2b',true);
   });
   lsSet('bp_decor2',DECOR);
   recalcFX();
+  if(typeof pubShopCard==='function')pubShopCard();
   if(MP.active){MP.me.av=DECOR.equip.avatar;markDirty();}
 }
 
@@ -866,7 +1308,7 @@ function D(){
   const c=diffOf(),ed=effDay(S.day);
   return{
     spawn:Math.max(1.6,(7-ed*0.5)/c.spd),
-    patience:Math.max(7,(26-ed*1.7)*c.pat)*(1+FXC.pat),
+    patience:Math.max(7,(26-ed*1.7)*c.pat)*(1+FXC.pat)*(evIs('rain')?1.2:1),
     orderMax:Math.min(4,Math.ceil(1+ed*0.45)),
     cook:Math.max(2.4,(4-(ed-1)*0.12))*(1-FXC.cook)*(1-COOK_CUT[cookLvNow()]),
     perfect:Math.max(1.8,4-(ed-1)*0.18),
@@ -903,6 +1345,7 @@ const S={
   combo:0,fireSfxAt:0,lastCustPub:0,
   alba:false,albaT:0,
   gameMode:'story',storyLv:0,runEarned:0,runFires:0,reviewBoost:0,
+  speed:parseFloat(lsGet('bp_speed',1))||1,
 };
 for(let i=0;i<SOLO_MAX_MOLDS;i++)S.molds.push({st:'empty',fill:null,t:0,fireHp:0});
 
@@ -972,7 +1415,8 @@ function unsubscribeRoom(){if(client&&MP.code)try{client.unsubscribe([tMeta(),tO
 
 function handleMsg(topic,payload){
   let obj=null;try{obj=JSON.parse(payload);}catch(e){return;}
-  if(topic.startsWith('bungeo-lb-v1/')){lbHandle(topic,obj);return;}
+  if(topic.startsWith('bungeo-lb-')){lbHandle(topic,obj);return;}
+  if(topic.startsWith('bungeo-shop-v1/')){socHandle(topic,obj);return;}
   if(topic===tMeta()){
     MP.meta=obj;onMetaTick();
   }else if(topic===tOther()){
@@ -1086,7 +1530,7 @@ function renderPartner(){
   /* 파트너 아바타 표시 */
   if(MP.other&&MP.other.av){
     const pa=avItem(MP.other.av);
-    $('#partnerLabel').textContent=`파트너 화로 · ${pa.emoji} ${pa.name} (불나면 탭!)`;
+    $('#partnerLabel').innerHTML=`파트너 화로 · ${avatarSVG(MP.other.av,14)} ${pa.name} (불나면 탭!)`;
   }
 }
 setInterval(()=>{if(MP.active)renderPartner();},2000);
@@ -1147,7 +1591,9 @@ function startDayLocal(day){
   S.day=day;S.time=0;
   S.customers=[];S.spawnTimer=2.5;
   S.combo=0;renderCombo();
-  S.reviewBoost=S.pendingReview||0;S.pendingReview=0; /* 리뷰어 홍보는 다음 날 적용 */
+  S.reviewBoost=S.pendingReview||0;S.pendingReview=0;
+  S.dayEvent=S.nextEvent||null;S.nextEvent=null;
+  if(S.dayEvent)setTimeout(()=>toast('📢 오늘 이벤트: '+S.dayEvent.txt),1800); /* 리뷰어 홍보는 다음 날 적용 */
   MP.custMirror=[];
   S.molds.forEach(m=>{m.st='empty';m.fill=null;m.t=0;m.fireHp=0;m.warn=false;});
   if(MP.active)MP.me.fireN=0;
@@ -1496,7 +1942,7 @@ function tapMold(i){
       const bonus=FILLS[m.fill].price*3;
       if(isCoop()){MP.me.earned+=bonus;}else S.money+=bonus;
       S.daySales+=bonus;S.runEarned+=bonus;
-      ach('golden');SFX.star();
+      ach('golden');SFX.star();dexAdd('golden',1);qEvent('gold',1);addXP(10);
       toast(`🌟 황금 붕어빵!! +${fmt(bonus)}원 대박!`);
       checkStory();
     }else{
@@ -1536,16 +1982,18 @@ function serveLocal(cu,ev,byAlba){
     SFX.sell();
   }else{
     const ty=cu.ty||'normal';
-    if(ty!=='jinsang'&&cu.patience/cu.maxPatience>0.6)pay=Math.round(pay*1.2); /* 진상은 팁 없음 */
+    if(ty!=='jinsang'&&cu.patience/cu.maxPatience>0.6)pay=Math.round(pay*(evIs('tip15')?1.5:1.2)); /* 진상은 팁 없음 */
     if(ty==='group'){pay=Math.round(pay*1.3);ach('group_serve');} /* 단체 보너스 */
+    if(ty==='mystery'){pay=Math.round(pay*3);toast('🕶️ 미스터리 손님의 통 큰 결제!! 3배!');SFX.fever();}
     if(ty==='reviewer'){S.pendingReview=Math.min(0.45,(S.pendingReview||0)+0.15);toast('📸 리뷰어가 홍보해줬어요! 내일 손님 증가!');}
     S.combo=Math.min(10,S.combo+1);
     pay=Math.round(pay*comboMult()*(1+FXC.tip));
-    if(S.combo===5){SFX.fever();ach('fever');}else SFX.combo(S.combo);
+    if(S.combo===5){SFX.fever();ach('fever');qEvent('fever',1);}else SFX.combo(S.combo);
     if(S.combo>=10)ach('combo10');
     renderCombo();SFX.sell();
     (function(){const a=$('#avatarChar');if(a){a.classList.remove('pop');void a.offsetWidth;a.classList.add('pop');}})();
   }
+  if(!byAlba)metaOnServe(cu,pay,cnt);
   ach('first_sale');
   if(isCoop()){MP.me.earned+=pay;MP.me.served++;markDirty();}
   else{S.money+=pay;S.rep=Math.min(5,S.rep+0.1);}
@@ -1557,7 +2005,7 @@ function serveLocal(cu,ev,byAlba){
   const lel=custEl(cu.i);if(lel)lel.classList.add('leaving');
   /* 💎 보석: 직접 서빙에서만 간헐 획득 (알바 X). 단체 손님은 확정 1개 */
   if(!byAlba&&ev){
-    const gemGet=(cu.ty==='group')||Math.random()<0.12+FXC.gem;
+    const gemGet=(cu.ty==='group')||Math.random()<(0.12+FXC.gem)*(evIs('gemday')?2:1);
     if(gemGet){
       const r=ev.currentTarget.getBoundingClientRect(),a=$('#app').getBoundingClientRect();
       setTimeout(()=>addGem(1,r.left-a.left+r.width/2-16,r.top-a.top-24),300);
@@ -1585,7 +2033,7 @@ function guestServeReq(cu){
   markDirty();
   SFX.sell();
   /* 💎 파트너도 직접 서빙하면 보석 기회 (내 기기에 적립) */
-  if((cu.y||cu.ty)==='group'||Math.random()<0.12+FXC.gem)setTimeout(()=>addGem(1),400);
+  if((cu.y||cu.ty)==='group'||Math.random()<(0.12+FXC.gem)*(evIs('gemday')?2:1))setTimeout(()=>addGem(1),400);
   updateCustomerBars();
 }
 function applyServeReqs(){
@@ -1605,11 +2053,13 @@ const CTYPES={
   jinsang:{face:'😤',badge:'진상',patM:0.55},
   group:{face:'🧑‍🤝‍🧑',badge:'단체',patM:1.6},
   reviewer:{face:'📸',badge:'리뷰어',patM:0.8},
+  mystery:{face:'🕶️',badge:'???',patM:0.9},
 };
 function pickCType(){
   const d=S.day,r=Math.random();
+  if(d>=2&&r<0.015)return'mystery';
   if(d>=2&&r<0.12)return'jinsang';
-  if(d>=3&&r<0.20)return'group';
+  if(d>=3&&r<(evIs('group2x')?0.28:0.20))return'group';
   if(d>=2&&r<0.27)return'reviewer';
   return'normal';
 }
@@ -1635,7 +2085,8 @@ let last=0;
 function loop(ts){
   requestAnimationFrame(loop);
   if(!S.running||S.paused){last=ts;return;}
-  const dt=Math.min(0.25,(ts-last)/1000||0);last=ts;
+  let dt=Math.min(0.25,(ts-last)/1000||0);last=ts;
+  if(!MP.active)dt*=S.speed||1; /* 배속 (혼자 하기 전용) */
   const dd=D();
 
   if(MP.active&&MP.meta&&MP.meta.state!=='waiting'){
@@ -1650,7 +2101,7 @@ function loop(ts){
   const custAuthority=!coop||MP.role==='host';
   if(custAuthority){
     const e=E();
-    S.spawnTimer-=dt*(rush?2.2:1)*(1+(e.rep-3)*0.15)*(1+S.reviewBoost)*(1+FXC.spawn);
+    S.spawnTimer-=dt*(rush?2.2:1)*(1+(e.rep-3)*0.15)*(1+S.reviewBoost)*(1+FXC.spawn)*(evIs('rain')?0.8:1);
     if(S.spawnTimer<=0){spawnCustomer();S.spawnTimer=dd.spawn*(0.7+Math.random()*0.6);}
     const fMult=fireActiveTotal()?1.6:1;
     S.customers.forEach(cu=>{
@@ -1776,14 +2227,17 @@ requestAnimationFrame(loop);
 
 /* ═══════════ 온라인 랭킹 🏆 (MQTT retained 기반) ═══════════ */
 const LB={map:{},open:false,diff:'normal',subT:null};
-const lbSub=d=>`bungeo-lb-v1/${d}/+`;
-const lbMy=d=>`bungeo-lb-v1/${d}/${PROFILE.pid}`;
+function lbWk(off){const d=new Date(Date.now()+(off||0)*864e5*7);const on=new Date(d.getFullYear(),0,1);
+  const wk=Math.ceil((((d-on)/864e5)+on.getDay()+1)/7);return d.getFullYear()+'-W'+wk;}
+const lbSub=d=>`bungeo-lb-v2/${lbWk()}/${d}/+`;
+const lbMy=d=>`bungeo-lb-v2/${lbWk()}/${d}/${PROFILE.pid}`;
+const lbSubPrev=d=>`bungeo-lb-v2/${lbWk(-1)}/${d}/+`;
 function lbSubmit(){
   if(MP.vs)return; /* 대결 기록은 별도 */
   /* 하루 마감마다 최고 기록 갱신 시 제출 */
   const score=MP.active?combinedStats().earned:S.runEarned;
-  const rec={n:(PROFILE.nick||'무명 사장').slice(0,10),d:S.day,s:score,m:MP.active?1:0,ts:Date.now()};
-  const bestKey='bp_best_'+S.diff;
+  const rec={n:(PROFILE.nick||'무명 사장').slice(0,10),d:S.day,s:score,m:MP.active?1:0,lv:lvOf(XP).lv,ts:Date.now()};
+  const bestKey='bp_best_'+lbWk()+'_'+S.diff;
   const best=lsGet(bestKey,{d:0,s:0});
   if(rec.d<best.d||(rec.d===best.d&&rec.s<=best.s))return;
   lsSet(bestKey,{d:rec.d,s:rec.s});
@@ -1797,6 +2251,8 @@ function lbHandle(topic,obj){
 }
 function openLB(){
   $('#lbModal').classList.add('open');LB.open=true;
+  const wl=$('#lbWeekLbl');if(wl)wl.textContent=lbWk();
+  claimPrevWeek();
   if(!S.running)renderDiffChipsLB();
   fetchLB(LB.diff);
 }
@@ -1814,14 +2270,31 @@ function fetchLB(diff){
   else $('#lbList').innerHTML='<div style="opacity:.6;padding:20px;text-align:center">오프라인 상태예요</div>';
 }
 function renderLB(){
-  const rows=Object.values(LB.map)
+  const rows=Object.entries(LB.map).filter(([k])=>k.includes('/'+lbWk()+'/')).map(([,v])=>v)
     .filter(r=>r&&r.n!==undefined)
     .sort((a,b)=>b.d-a.d||b.s-a.s).slice(0,10);
   if(!rows.length){$('#lbList').innerHTML='<div style="opacity:.6;padding:20px;text-align:center">아직 기록이 없어요. 1등을 노려보세요!</div>';return;}
   $('#lbList').innerHTML=rows.map((r,i)=>
     `<div class="lbrow"><span class="lbrank">${['🥇','🥈','🥉'][i]||(i+1)}</span>
-     <span class="lbname">${r.n}${r.m?' 🤝':''}</span>
+     <span class="lbname">${r.n}${r.lv?` <small style='color:#8fd3ff'>Lv.${r.lv}</small>`:''}${r.m?' 🤝':''}</span>
      <span class="lbscore">DAY ${r.d} · ${fmt(r.s)}원</span></div>`).join('');
+}
+function claimPrevWeek(){
+  if(lsGet('bp_wkclaim','')===lbWk())return;
+  const doIt=()=>{
+    try{client.subscribe(lbSubPrev(LB.diff));}catch(e){return;}
+    setTimeout(()=>{
+      try{client.unsubscribe(lbSubPrev(LB.diff));}catch(e){}
+      const prev=Object.entries(LB.map).filter(([k])=>k.includes('/'+lbWk(-1)+'/'))
+        .map(([k,v])=>({k,...v})).sort((a,b)=>b.d-a.d||b.s-a.s);
+      const myI=prev.findIndex(r=>r.k.endsWith('/'+PROFILE.pid));
+      lsSet('bp_wkclaim',lbWk());
+      if(myI<0)return;
+      const rw=myI===0?10:myI===1?7:myI===2?5:myI<10?3:0;
+      if(rw>0){addGem(rw);toast(`🏆 지난주 리그 ${myI+1}위! 보상 💎+${rw}`);SFX.star();}
+    },2200);
+  };
+  if(client&&netOn)doIt();
 }
 function renderDiffChipsLB(){
   $('#lbDiffChips').innerHTML=Object.keys(DIFFS).map(k=>
@@ -1860,6 +2333,11 @@ function showStars(earned,goal){
   $('#sumGoal').textContent=fmt(goal)+'원';
   if(n>0)setTimeout(()=>SFX.star(),350);
   if(n>=3)ach('star3');
+  qEvent('star',n);addXP(15*n);
+  window.__lastSum={earned,goal,n};
+  S.nextEvent=pickForecast();
+  const fl=$('#forecastLine');
+  if(fl)fl.textContent=S.nextEvent?'📢 내일 예고: '+S.nextEvent.txt:'📢 내일은 평범한 하루일 것 같아요';
   if(S.day>=3)ach('day3');
   if(S.day>=7)ach('day7');
   lbSubmit();
@@ -2085,10 +2563,27 @@ function quitToLobby(silentMsg){
   $('#extBtn').classList.remove('show');
   $('.stallname').textContent='🐟 우리동네 붕어빵';
   showCard('menuCard');
+  renderLobbyMeta();
   $('#startModal').classList.add('open');
   if(silentMsg)toast(silentMsg);
   else toast('🚪 기록이 랭킹에 제출됐어요!');
 }
+/* ▶ 배속 (출시 후 유료 예정 · 현재 무료 개방, 혼자 하기 전용) */
+function renderSpeedBtn(){
+  const b=$('#speedBtn');if(!b)return;
+  b.textContent='▶'+(S.speed===1?'1x':S.speed===1.5?'1.5x':'2x');
+  b.classList.toggle('fast',S.speed>1);
+}
+$('#speedBtn').onclick=()=>{
+  if(MP.active){toast('배속은 혼자 하기에서만 쓸 수 있어요!');return;}
+  S.speed=S.speed===1?1.5:S.speed===1.5?2:1;
+  lsSet('bp_speed',S.speed);
+  renderSpeedBtn();
+  if(!lsGet('bp_speed_seen',false)&&S.speed>1){lsSet('bp_speed_seen',true);toast('💨 배속 기능! (출시 후 유료 예정 · 지금은 무료 체험)');}
+  else toast('💨 게임 속도 '+S.speed+'배!');
+  SFX.land();
+};
+renderSpeedBtn();
 $('#quitBtn').onclick=()=>{
   const score=MP.active?combinedStats().earned:S.runEarned;
   $('#quitStats').innerHTML=`현재 <b style="color:var(--glow)">DAY ${S.day}</b> · 누적 매출 <b style="color:var(--glow)">${fmt(score)}원</b>`;
@@ -2114,13 +2609,12 @@ function endVsRound(){
   pubMe();
   setTimeout(()=>{
     const my=S.daySales,opp=(MP.other&&MP.other.vsScore)||0;
-    const myAv=myAvatar().emoji,oppAv=MP.other&&MP.other.av?avItem(MP.other.av).emoji:'❓';
-    $('#vsMyName').textContent=`${myAv} 나`;
-    $('#vsOppName').textContent=`${oppAv} 상대`;
+    $('#vsMyName').innerHTML=`${avatarSVG(DECOR.equip.avatar,18)} 나`;
+    $('#vsOppName').innerHTML=MP.other&&MP.other.av?`${avatarSVG(MP.other.av,18)} 상대`:'❓ 상대';
     $('#vsMyScore').textContent=fmt(my)+'원';
     $('#vsOppScore').textContent=fmt(opp)+'원';
     let t,e;
-    if(my>opp){t='🏆 승리!';e='🎉';SFX.star();}
+    if(my>opp){t='🏆 승리!';e='🎉';SFX.star();addXP(30);}
     else if(my<opp){t='😢 패배…';e='🥲';SFX.angry();}
     else{t='🤝 무승부!';e='⚖️';}
     $('#vsResultTitle').textContent=t;
@@ -2147,7 +2641,217 @@ document.querySelectorAll('#modeRow .modebtn').forEach(b=>{
     document.querySelectorAll('#modeRow .modebtn').forEach(x=>x.classList.toggle('sel',x===b));
   };
 });
+/* ═══════════ 가게 카드 & 구경/친구 시스템 ═══════════ */
+function myCardData(){
+  return{n:PROFILE.nick||'무명 사장',av:DECOR.equip.avatar,eq:DECOR.equip,tg:DECOR.tg,
+    lv:lvOf(XP).lv,sold:DEX.sold||0,st:STREAK.n,ts:Date.now()};
+}
+const shopTopic=pid=>`bungeo-shop-v1/${pid}`;
+function pubShopCard(){
+  if(!client||!netOn)return;
+  try{client.publish(shopTopic(PROFILE.pid),JSON.stringify(myCardData()),{retain:true});}catch(e){}
+}
+/* 임의 카드의 장착을 body 클래스에 임시 적용 (닫을 때 applyDecor()로 복원) */
+function applyCardDecor(card){
+  DECOR_CATS.filter(c=>c.type==='equip').forEach(c=>{
+    c.items.forEach(it=>document.body.classList.remove('eq-'+it.id));
+    const eqId=(card.eq&&card.eq[c.id])||c.items[0].id;
+    document.body.classList.add('eq-'+(c.items.some(i=>i.id===eqId)?eqId:c.items[0].id));
+  });
+  Object.keys(DECOR.tg).forEach(k=>document.body.classList.toggle('deco-'+k,!!(card.tg&&card.tg[k])));
+}
+function renderShopScene(card,isMine){
+  $('#myShopTitle').textContent=isMine?'🏠 내 가게':'🔭 '+card.n+'의 가게';
+  $('#scSign').textContent='🐟 '+(card.n&&card.n!=='무명 사장'?card.n+'의 붕어빵':'우리동네 붕어빵');
+  $('#scAvatar').innerHTML=avatarSVG(card.av||'av_chef',54);
+  $('#scMolds').innerHTML=[0,1,2,3].map(i=>`<div class="sc-mold" style="position:relative">${fishSVG('#d98a2b',true)}<span class="sc-steam" style="left:${30+i*8}%;animation-delay:${i*0.6}s">♨️</span></div>`).join('');
+  $('#scPropL').innerHTML=((card.tg&&card.tg.plant)?plantSVG(26):'')+((card.tg&&card.tg.cat)?catSVG(30):'');
+  $('#scPropR').innerHTML=(card.tg&&card.tg.snowman)?snowSVG(28):'';
+  let rows=`<div class="row"><span>사장</span><b>${card.n} · Lv.${card.lv||1} ${lvTitle(card.lv||1)}</b></div>
+    <div class="row"><span>누적 판매</span><b>🐟 ${(card.sold||0).toLocaleString()}개</b></div>
+    <div class="row"><span>연속 출석</span><b>🔥 ${card.st||0}일</b></div>`;
+  if(isMine)rows=`<div class="row"><span>사장</span><b>${card.n} · Lv.${card.lv} ${lvTitle(card.lv)}</b></div>
+    <div class="row"><span>보유 보석</span><b>💎 ${GEMS}</b></div>
+    <div class="row"><span>누적 판매</span><b>🐟 ${(card.sold||0).toLocaleString()}개</b></div>
+    <div class="row"><span>연속 출석</span><b>🔥 ${card.st}일</b></div>`;
+  $('#scStats').innerHTML=rows;
+  const fb=$('#visitAddFriend');
+  if(isMine){fb.style.display='none';}
+  else{
+    const isFriend=FRIENDS.some(x=>x.pid===SOC.viewPid);
+    fb.style.display=isFriend?'none':'block';
+  }
+}
+function renderMyShop(){applyDecor();SOC.viewPid=null;renderShopScene(myCardData(),true);}
+/* ── 구경/친구 상태 ── */
+const SOC={map:{},open:false,tab:'browse',viewPid:null,subT:null};
+let FRIENDS=lsGet('bp_friends',[]);
+function socHandle(topic,obj){SOC.map[topic]=obj;if(SOC.open)renderSocial();}
+function openSocial(){
+  $('#socialModal').classList.add('open');SOC.open=true;
+  $('#myCode').textContent=(PROFILE.nick||'무명')+'#'+PROFILE.pid;
+  renderSocial();
+  const go=()=>{
+    pubShopCard();
+    try{client.subscribe('bungeo-shop-v1/+');}catch(e){}
+    clearTimeout(SOC.subT);
+    SOC.subT=setTimeout(()=>{renderSocial();try{client.unsubscribe('bungeo-shop-v1/+');}catch(e){}},2600);
+  };
+  if(client&&netOn)go();
+  else if(typeof mqtt!=='undefined')connectBroker(go,()=>{if(SOC.tab==='browse')$('#socBody').innerHTML='<div style="opacity:.6;padding:18px;text-align:center">서버 연결 실패 😢</div>';});
+}
+function shopRow(pid,c,isFriend){
+  return`<div class="socrow" data-visit="${pid}">
+    <span class="socav">${avatarSVG(c.av||'av_chef',30)}</span>
+    <span class="socname">${c.n||'무명 사장'}${isFriend?' 💛':''}<small>Lv.${c.lv||1} · 🐟 ${(c.sold||0).toLocaleString()}</small></span>
+    <span class="socgo">구경 ›</span></div>`;
+}
+function renderSocial(){
+  document.querySelectorAll('[data-soctab]').forEach(b=>b.classList.toggle('sel',b.dataset.soctab===SOC.tab));
+  const body=$('#socBody');
+  if(SOC.tab==='browse'){
+    const rows=Object.entries(SOC.map)
+      .map(([k,v])=>({pid:k.split('/').pop(),...v}))
+      .filter(r=>r.pid!==PROFILE.pid)
+      .sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,30);
+    body.innerHTML=rows.length
+      ?rows.map(r=>shopRow(r.pid,r,FRIENDS.some(f=>f.pid===r.pid))).join('')
+      :'<div style="opacity:.6;padding:18px;text-align:center">가게를 불러오는 중…<br><small>다른 사장님이 접속한 적이 있어야 보여요</small></div>';
+  }else{
+    body.innerHTML=(FRIENDS.length?FRIENDS.map(fr=>{
+      const c=SOC.map[shopTopic(fr.pid)]||{n:fr.nick,av:'av_chef',lv:1,sold:0};
+      return`<div class="socrow"><span class="socav">${avatarSVG(c.av||'av_chef',30)}</span>
+        <span class="socname">${c.n||fr.nick}<small>Lv.${c.lv||1} · 🐟 ${(c.sold||0).toLocaleString()}</small></span>
+        <button class="socbtn" data-visit="${fr.pid}">구경</button>
+        <button class="socbtn del" data-unfriend="${fr.pid}">✕</button></div>`;
+    }).join(''):'<div style="opacity:.6;padding:14px;text-align:center">아직 친구가 없어요.<br>친구 코드를 교환해보세요!</div>');
+  }
+  body.querySelectorAll('[data-visit]').forEach(el=>el.onclick=()=>visitShop(el.dataset.visit));
+  body.querySelectorAll('[data-unfriend]').forEach(el=>el.onclick=ev=>{
+    ev.stopPropagation();
+    FRIENDS=FRIENDS.filter(x=>x.pid!==el.dataset.unfriend);
+    lsSet('bp_friends',FRIENDS);renderSocial();toast('친구를 삭제했어요');
+  });
+}
+function visitShop(pid){
+  const doShow=()=>{
+    const c=SOC.map[shopTopic(pid)];
+    if(!c){toast('아직 가게 정보가 없어요 (상대가 한 번 접속해야 해요)');return;}
+    SOC.viewPid=pid;
+    applyCardDecor(c);
+    renderShopScene(c,false);
+    $('#myShopModal').classList.add('open');
+  };
+  if(SOC.map[shopTopic(pid)])return doShow();
+  const go=()=>{
+    try{client.subscribe(shopTopic(pid));}catch(e){}
+    setTimeout(()=>{try{client.unsubscribe(shopTopic(pid));}catch(e){}doShow();},1800);
+    toast('가게를 찾는 중… 🔭');
+  };
+  if(client&&netOn)go();
+  else if(typeof mqtt!=='undefined')connectBroker(go,()=>toast('서버 연결 실패 😢'));
+}
+function addFriendByPid(pid,nick){
+  /* '닉네임#코드' 또는 코드만 입력해도 인식 */
+  pid=(pid||'').split('#').pop().trim();
+  if(!pid)return toast('친구 코드를 입력하세요');
+  if(pid===PROFILE.pid)return toast('그건 내 코드잖아요 😅');
+  if(FRIENDS.some(x=>x.pid===pid))return toast('이미 친구예요!');
+  FRIENDS.push({pid,nick:nick||pid});
+  lsSet('bp_friends',FRIENDS);
+  toast('👥 친구 추가 완료!');SFX.star();
+  renderSocial();
+}
+/* 🥚 이스터에그: 10연타=💎100(1회) · 20연타=🛠 개발자 모드 토글 */
+let DEV=lsGet('bp_dev',false);
+function renderDevChip(){
+  const c=$('#devChip');if(c)c.style.display=DEV?'inline-block':'none';
+}
+(function(){
+  const el=$('#lobbyAvatar');if(!el)return;
+  let cnt=0,lastT=0;
+  el.style.cursor='pointer';
+  el.addEventListener('click',()=>{
+    const now=Date.now();
+    if(now-lastT>1200)cnt=0;      /* 1.2초 이상 쉬면 리셋 */
+    lastT=now;cnt++;
+    el.classList.remove('eggwiggle');void el.offsetWidth;el.classList.add('eggwiggle');
+    tone(300+cnt*70,0.05,'sine',0.06);
+    if(cnt===10){
+      if(lsGet('bp_egg1',false)){toast('이미 비밀 선물을 받았잖아요 😏 (계속 두드려볼까…?)');}
+      else{
+        lsSet('bp_egg1',true);
+        addGem(100);
+        SFX.fever();shake();
+        toast('🥚 이스터에그 발견!! 비밀 보석 상자 💎+100!!');
+        el.classList.add('eggparty');
+        setTimeout(()=>el.classList.remove('eggparty'),1600);
+      }
+    }
+    if(cnt>=20){
+      cnt=0;
+      DEV=!DEV;lsSet('bp_dev',DEV);
+      renderDevChip();
+
+      SFX.fever();shake();
+      toast(DEV?'🛠 개발자 모드 ON! 아바타 아래 DEV 버튼 등장':'🛠 개발자 모드 OFF');
+      el.classList.add('eggparty');
+      setTimeout(()=>el.classList.remove('eggparty'),1600);
+    }
+  });
+})();
+/* 🛠 개발자 패널 */
+$('#devChip').onclick=()=>{$('#devModal').classList.add('open');};
+$('#devClose').onclick=()=>$('#devModal').classList.remove('open');
+document.querySelectorAll('[data-dev]').forEach(b=>{
+  b.onclick=()=>{
+    const k=b.dataset.dev;
+    if(k==='g100')addGem(100);
+    else if(k==='g1000')addGem(1000);
+    else if(k==='xp500'){addXP(500);toast('⭐ XP +500!');}
+    else if(k==='quest'){qEvent('sell',999);qEvent('sell_red',999);qEvent('earn',999999);qEvent('group',99);qEvent('fever',99);qEvent('gold',99);qEvent('combo',99);qEvent('star',3);toast('📋 도전 강제 완료!');}
+    else if(k==='wipe'){
+      if(w_confirm()){try{localStorage.clear();}catch(e){}location.reload();}
+    }
+  };
+});
+function w_confirm(){return confirm('⚠️ 모든 저장 데이터(보석·업적·레벨·꾸미기)를 초기화할까요?');}
+renderDevChip();
+$('#myShopBtn').onclick=()=>{renderMyShop();$('#myShopModal').classList.add('open');};
+$('#socialBtn').onclick=openSocial;
+$('#socialClose').onclick=()=>{SOC.open=false;$('#socialModal').classList.remove('open');};
+document.querySelectorAll('[data-soctab]').forEach(b=>b.onclick=()=>{SOC.tab=b.dataset.soctab;renderSocial();});
+$('#copyCode').onclick=()=>{
+  const code=(PROFILE.nick||'무명')+'#'+PROFILE.pid;
+  if(navigator.clipboard)navigator.clipboard.writeText(code).then(()=>toast('코드 복사 완료! 친구에게 보내세요 📋')).catch(()=>prompt('이 코드를 복사하세요:',code));
+  else prompt('이 코드를 복사하세요:',code);
+};
+$('#friendAddBtn').onclick=()=>{
+  const raw=$('#friendCodeInput').value;
+  const pid=(raw||'').split('#').pop().trim();
+  addFriendByPid(raw);
+  $('#friendCodeInput').value='';
+  /* 친구 카드 미리 받아두기 */
+  if(pid&&client&&netOn){try{client.subscribe(shopTopic(pid));setTimeout(()=>{try{client.unsubscribe(shopTopic(pid));}catch(e){}renderSocial();},1800);}catch(e){}}
+};
+$('#visitAddFriend').onclick=()=>{
+  const c=SOC.map[shopTopic(SOC.viewPid)];
+  addFriendByPid(SOC.viewPid,c&&c.n);
+  $('#visitAddFriend').style.display='none';
+};
+attachSheetSwipe('#socialSheet',()=>{SOC.open=false;$('#socialModal').classList.remove('open');});
+$('#myShopClose').onclick=()=>{$('#myShopModal').classList.remove('open');if(SOC.viewPid){SOC.viewPid=null;applyDecor();}};
+$('#questBtn').onclick=()=>{renderQuests();$('#questModal').classList.add('open');};
+$('#questClose').onclick=()=>$('#questModal').classList.remove('open');
+$('#shareBtn')&&($('#shareBtn').onclick=()=>shareCard());
+function renderDex(){
+  const items=[['🌟','황금 붕어빵',DEX.golden],['🕶️','미스터리 손님',DEX.mystery],['😤','진상 손님',DEX.jinsang],
+    ['🧑‍🤝‍🧑','단체 손님',DEX.group],['📸','리뷰어',DEX.reviewer],['🐟','누적 판매',DEX.sold]];
+  $('#dexGrid').innerHTML=items.map(([e,n,v])=>
+    `<div class="dexcell ${v>0?'':'dexlock'}"><div class="de">${v>0?e:'❔'}</div><div class="dn">${n}</div><div class="dv">${(v||0).toLocaleString()}</div></div>`).join('');
+}
 $('#achBtn').onclick=()=>{
+  renderDex();
   $('#achList').innerHTML=ACH_DEFS.map(a=>{
     const got=!!ACH[a.id];
     return`<div class="achrow ${got?'':'locked'}"><span class="ae">${a.emoji}</span>
@@ -2157,13 +2861,27 @@ $('#achBtn').onclick=()=>{
   $('#achModal').classList.add('open');
 };
 $('#achClose').onclick=()=>$('#achModal').classList.remove('open');
-$('#lbBtn').onclick=()=>{$('#nickInput').value=PROFILE.nick;openLB();};
+$('#lbBtn').onclick=()=>{renderNickLock();openLB();};
 $('#lbClose').onclick=()=>{LB.open=false;$('#lbModal').classList.remove('open');};
 $('#nickSave').onclick=()=>{
-  PROFILE.nick=$('#nickInput').value.trim().slice(0,10);
+  const v=validNick($('#nickInput').value);
+  if(!v){toast('닉네임은 2~10자로 해주세요! (# 사용 불가)');return;}
+  if(v===PROFILE.nick){toast('지금 닉네임과 같아요');return;}
+  if((PROFILE.nickCh||0)>=1){toast('🔒 닉네임 변경은 1회만 가능해요');renderNickLock();return;}
+  PROFILE.nick=v;
+  PROFILE.nickCh=(PROFILE.nickCh||0)+1;
   lsSet('bp_profile',PROFILE);
-  toast('닉네임 저장: '+(PROFILE.nick||'무명 사장'));
+  pubShopCard();
+  toast('닉네임 변경 완료: '+v+' (변경권 사용됨)');
+  renderNickLock();
 };
+function renderNickLock(){
+  const inp=$('#nickInput'),btn=$('#nickSave'),nt=$('#nickNote');
+  const locked=(PROFILE.nickCh||0)>=1;
+  if(inp){inp.disabled=locked;inp.value=PROFILE.nick||'';}
+  if(btn)btn.disabled=locked;
+  if(nt)nt.textContent=locked?'🔒 닉네임 변경권을 이미 사용했어요':'✏️ 닉네임은 딱 1번만 변경할 수 있어요';
+}
 $('#storyContinueBtn').onclick=()=>{
   S.gameMode='endless';S.paused=false;
   $('#storyModal').classList.remove('open');
@@ -2187,7 +2905,8 @@ function renderDecorShop(){
     if(!owned)btn=`<button class="buybtn" data-decor="${it.id}" ${GEMS<it.gem?'disabled':''}>💎 ${it.gem}</button>`;
     else if(cat.type==='equip')btn=`<button class="buybtn" data-decor="${it.id}" ${equipped?'disabled':''}>${equipped?'장착중':'장착'}</button>`;
     else btn=`<button class="buybtn" data-decor="${it.id}">${equipped?'끄기':'켜기'}</button>`;
-    return`<div class="item"><div class="info"><div class="name">${it.emoji} ${it.name}${equipped&&cat.type==='toggle'?' <span style="font-size:10px;color:var(--ok)">ON</span>':''}</div>
+    const icon=cat.id==='avatar'?avatarSVG(it.id,22):it.emoji;
+    return`<div class="item"><div class="info"><div class="name">${icon} ${it.name}${equipped&&cat.type==='toggle'?' <span style="font-size:10px;color:var(--ok)">ON</span>':''}</div>
       <div class="desc">✦ ${effText(it.eff)}${owned?' · 소장중':''}</div></div>${btn}</div>`;
   }).join('');
   /* 현재 적용 중인 효과 합계 */
@@ -2219,7 +2938,7 @@ $('#decorClose').onclick=()=>$('#decorModal').classList.remove('open');
 document.querySelectorAll('[data-gempack]').forEach(b=>{
   b.onclick=()=>toast('💳 결제 기능은 준비 중이에요! 출시 버전에서 지원됩니다');
 });
-applyDecor();(function(){const g=$('#gemCnt');if(g)g.textContent=GEMS;})();
+applyDecor();(function(){const g=$('#gemCnt');if(g)g.textContent=GEMS;})();renderLobbyMeta();
 
 /* 난이도 선택 칩 */
 function renderDiffRows(){
@@ -2354,6 +3073,28 @@ window.addEventListener('load',()=>{
   if(!mqttOK())$('#storageNote').innerHTML='⚠️ 네트워크 라이브러리 로드 실패.<br>인터넷 연결 후 새로고침 해주세요.';
 });
 renderAll();
+
+/* 👤 최초 실행 시 닉네임 필수 설정 (1회 변경권 부여) */
+function validNick(v){
+  v=(v||'').trim();
+  if(v.length<2||v.length>10)return null;
+  if(v.includes('#'))return null;
+  return v;
+}
+if(!PROFILE.nick){
+  setTimeout(()=>$('#nickModal').classList.add('open'),400);
+}
+$('#firstNickBtn').onclick=()=>{
+  const v=validNick($('#firstNickInput').value);
+  if(!v){toast('닉네임은 2~10자로 해주세요! (# 사용 불가)');SFX.angry();return;}
+  PROFILE.nick=v;
+  if(PROFILE.nickCh===undefined)PROFILE.nickCh=0;
+  lsSet('bp_profile',PROFILE);
+  $('#nickModal').classList.remove('open');
+  toast(`🐟 ${v} 사장님, 환영합니다!`);SFX.star();
+  renderLobbyMeta();
+  if(client&&netOn)pubShopCard();
+};
 </script>
 </body>
 </html>
