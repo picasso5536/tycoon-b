@@ -248,6 +248,20 @@ body.multi #partnerLabel{display:block}
 .mold .tag{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);font-family:'Jua';font-size:9.5px;
   padding:1px 7px;border-radius:99px;white-space:nowrap;background:#000a;color:#fff;z-index:2}
 .mold .tag.warn{background:var(--danger);animation:pulse .3s infinite alternate}
+/* 어려움 모드: 닫힌 틀 뚜껑 */
+.lid{position:absolute;inset:5px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:15px;background:linear-gradient(180deg,#454b5c,#262b38);
+  box-shadow:inset 0 2px 4px #ffffff18,inset 0 -3px 6px #000a,0 2px 6px #0008;z-index:2}
+.lidhandle{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:26px;height:5px;
+  border-radius:99px;background:#181c26;box-shadow:inset 0 1px 2px #000}
+.lid.lidflip{animation:lidspin .5s ease-in-out}
+@keyframes lidspin{0%{transform:rotateX(0)}50%{transform:rotateX(180deg) scale(1.05)}100%{transform:rotateX(360deg)}}
+.lid.liddone{background:linear-gradient(180deg,#5c5340,#38301e);box-shadow:inset 0 2px 4px #ffd94d33,0 0 14px #ffd94d66;
+  animation:pulse .6s infinite alternate}
+.lid.lidburnt{background:linear-gradient(180deg,#3a2626,#1e1212);box-shadow:0 0 12px #ff5d5d55;
+  animation:pulse .3s infinite alternate}
+.mold .tag.done{background:var(--ok);color:#0c2810;animation:pulse .5s infinite alternate}
+.mold .tag.flipnow{background:var(--glow);color:#3a2200;animation:pulse .5s infinite alternate}
 .mold.flip .tag{background:var(--glow);color:#3a2200;animation:pulse .5s infinite alternate}
 .mold.perfect .tag{background:var(--ok);color:#0c2f14;animation:pulse .5s infinite alternate}
 .mold.burnt .tag{background:var(--danger)}
@@ -1140,6 +1154,7 @@ function startDayLocal(day){
   $('#startModal').classList.remove('open');
   S.running=true;S.paused=false;
   document.body.classList.add('playing');
+  if(isHardFlow()&&day===1)setTimeout(()=>toast('🔥 고수 조작: 반죽 3단계 후 ⬇️닫기 → 👆탭 뒤집기 → ⬆️열기!'),1200);
   renderAll();renderExtBtn();
   /* 스테이지 배너: 새 수요 메뉴 등장 안내 */
   const e=E();
@@ -1167,14 +1182,20 @@ function fishSVG(color,eye){
     ${eye?'<circle cx="20" cy="24" r="3.4" fill="#3a2410"/>':''}
   </svg>`;
 }
-const COLORS={empty:'#2c2f3a',batter1:'#e8d7ae',filled:'#e8d7ae',cook1:'#f2dfb6',flip:'#eecf96',flipping:'#e6c284',cook2:'#e0b06a',perfect:'#d98a2b',burnt:'#4a2e1c',fire:'#4a2e1c'};
+const COLORS={toClose:'#e8c67e',empty:'#2c2f3a',batter1:'#e8d7ae',filled:'#e8d7ae',cook1:'#f2dfb6',flip:'#eecf96',flipping:'#e6c284',cook2:'#e0b06a',perfect:'#d98a2b',burnt:'#4a2e1c',fire:'#4a2e1c'};
 
 /* ═══════════ 렌더링 ═══════════ */
 function moldTag(st,hp,warn){
-  if(warn&&(st==='batter1'||st==='filled'))return'⚠️ 곧 타요! 서둘러!';
+  if(warn&&(st==='batter1'||st==='filled'||st==='toClose'))return'⚠️ 곧 타요! 서둘러!';
   if(st==='empty')return'🥣 반죽을 부어요';
   if(st==='batter1')return'속재료를 넣어요! 🟤';
   if(st==='filled')return'🥣 반죽으로 덮어요!';
+  if(st==='toClose')return'⬇️ 스와이프로 틀 닫기!';
+  if(st==='cl1'||st==='cl2')return'틀 안에서 굽는 중… 🔥';
+  if(st==='clFlip')return'👆 탭해서 틀째 뒤집기!';
+  if(st==='clFlipping')return'철커덩~!';
+  if(st==='clDone')return'♨️ 다 익었다! ⬆️ 열기!';
+  if(st==='clBurnt')return'🔥 타는 냄새!! ⬆️ 열어봐!';
   if(st==='cook1'||st==='cook2')return'굽는 중… 🔥';
   if(st==='flip')return'↕ 스와이프로 뒤집기!';
   if(st==='flipping')return'촤악~!';
@@ -1184,12 +1205,22 @@ function moldTag(st,hp,warn){
   return'';
 }
 function moldInner(st,fill,hp,warn){
-  const half=st==='batter1'||st==='filled';
+  const closed=st&&st.startsWith('cl');
+  if(closed){
+    /* 닫힌 틀: 뚜껑 시각화 */
+    let h=`<div class="lid ${st==='clFlipping'?'lidflip':''} ${st==='clDone'?'liddone':''} ${st==='clBurnt'?'lidburnt':''}">
+      <div class="lidhandle"></div>${st==='clDone'?'♨️':st==='clBurnt'?'💨':'🔥'}</div>`;
+    h+=`<div class="tag ${st==='clDone'?'done':''} ${st==='clFlip'?'flipnow':''} ${st==='clBurnt'?'warn':''}">${moldTag(st,hp,warn)}</div>`;
+    if(st==='clDone')h+=`<div class="steam">♨️</div>`;
+    return h;
+  }
+  const half=st==='batter1'||st==='filled'||st==='toClose';
   let h=`<div class="fishwrap${st==='flipping'?' flipping':''}${half?' half':''}">${fishSVG(COLORS[st]||COLORS.empty,st!=='empty'&&st!=='fire'&&!half)}</div>`;
   if(st==='filled'&&fill)h+=`<div class="fillDot">${FILLS[fill].emoji}</div>`;
   h+=`<div class="tag${warn&&half?' warn':''}">${moldTag(st,hp,warn)}</div>`;
   if(st==='fire')h+=`<div class="fireEmoji">🔥</div>`;
   if(st==='flip')h+=`<div class="swipeHint">↕️</div>`;
+  if(st==='toClose')h+=`<div class="swipeHint">⬇️</div>`;
   if(st==='cook1'||st==='cook2'||st==='perfect')h+=`<div class="steam">♨️</div>`;
   return h;
 }
@@ -1223,15 +1254,23 @@ function renderPartnerPan(){
     g.appendChild(d);
   });
 }
+const isHardFlow=()=>S.diff==='hard'||S.diff==='vhard';
 function bindMoldEvents(el,i){
-  /* 스와이프 감지(뒤집기) + 탭(그 외 동작) */
+  /* 스와이프 감지(방향 포함) + 탭 */
   let sy=null,st=0;
   el.addEventListener('pointerdown',e=>{sy=e.clientY;st=Date.now();},{passive:true});
   el.addEventListener('pointerup',e=>{
     const m=S.molds[i];
     const dy=sy===null?0:e.clientY-sy;
     const isSwipe=Math.abs(dy)>=26&&Date.now()-st<600;
+    const dir=dy>0?'down':'up';
     sy=null;
+    if(isHardFlow()){
+      /* 어려움 모드: ⬇️=틀 닫기 / ⬆️=틀 열기 / 탭=뒤집기·기타 */
+      if(isSwipe){moldSwipeHard(i,dir);return;}
+      tapMold(i);
+      return;
+    }
     if(m.st==='flip'){
       if(isSwipe)doFlip(i);
       else{toast('↕ 위나 아래로 스와이프해서 뒤집어요!');SFX.land();}
@@ -1240,6 +1279,29 @@ function bindMoldEvents(el,i){
     if(isSwipe)return; /* 다른 상태에선 스와이프 무시 */
     tapMold(i);
   });
+}
+/* 어려움 모드: 틀 닫기/열기 */
+function moldSwipeHard(i,dir){
+  const m=S.molds[i];
+  if(dir==='down'){
+    if(m.st==='toClose'){
+      m.st='cl1';m.t=0;m.warn=false;
+      SFX.land();toast('철컥! 틀을 닫았어요 🔥');
+      renderMyPan();markDirty();
+    }else if(m.st&&m.st.startsWith('cl')){toast('이미 닫혀있어요!');}
+  }else{ /* up: 열기 */
+    if(m.st==='clDone'){
+      m.st='perfect';m.t=0;
+      SFX.collect();toast('활짝! 노릇노릇하게 익었어요 ✨ 탭해서 수확!');
+      renderMyPan();markDirty();
+    }else if(m.st==='clBurnt'){
+      m.st='burnt';m.t=0;
+      SFX.burnt();shake();toast('앗… 틀 안에서 새까맣게 타버렸어요 🔥🥲');
+      renderMyPan();markDirty();
+    }else if(m.st==='cl1'||m.st==='cl2'||m.st==='clFlip'){
+      toast('아직 익는 중이에요! 🔥');SFX.land();
+    }
+  }
 }
 function doFlip(i){
   const m=S.molds[i];
@@ -1397,11 +1459,32 @@ function tapMold(i){
     if(sel!=='batter'){toast('🥣 반죽으로 덮어야 구울 수 있어요!');SFX.land();return;}
     if(e.batter<=0){toast('반죽이 없어요! 🛒 상점에서 구매');return;}
     if(isCoop())MP.me.cons.batter++;else S.batter--;
-    m.st='cook1';m.t=0;m.warn=false;
-    SFX.pour();
-    toast('지글지글~ 굽기 시작! 🔥');
+    if(isHardFlow()){
+      m.st='toClose';m.t=0;m.warn=false;
+      SFX.pour();
+      toast('반죽 완료! ⬇️ 아래로 스와이프해 틀을 닫아요!');
+    }else{
+      m.st='cook1';m.t=0;m.warn=false;
+      SFX.pour();
+      toast('지글지글~ 굽기 시작! 🔥');
+    }
     renderFills();
   }
+  else if(m.st==='toClose'){toast('⬇️ 아래로 스와이프해서 틀을 닫아요!');SFX.land();}
+  else if(m.st==='clFlip'){
+    /* 어려움 모드: 닫힌 틀 탭 = 통째로 뒤집기 */
+    m.st='clFlipping';m.t=0;
+    SFX.flip();renderMyPan();markDirty();
+    setTimeout(()=>{
+      if(m.st!=='clFlipping')return;
+      m.st='cl2';m.t=0;
+      SFX.land();toast('철커덩~ 틀째로 뒤집기! 🔄');
+      renderMyPan();markDirty();
+    },500);
+  }
+  else if(m.st==='cl1'||m.st==='cl2'){toast('굽는 중… 틀이 닫혀있어요 🔥');}
+  else if(m.st==='clDone'){toast('⬆️ 위로 스와이프해서 틀을 열어요!');SFX.land();}
+  else if(m.st==='clBurnt'){toast('타는 냄새가…!? ⬆️ 위로 열어서 확인!');SFX.land();}
   else if(m.st==='perfect'){
     if(isCoop())MP.me.prod[m.fill]++;
     else S.tray[m.fill]++;
@@ -1613,6 +1696,43 @@ function loop(ts){
       if(m.t>=dd.rawBurn){ /* 뜨거운 틀 위에 방치 → 그대로 타버림 */
         m.st='burnt';m.t=0;m.warn=false;dirtyM=true;SFX.burnt();
         toast('앗, 준비만 하다가 타버렸어요! 🥲');
+      }
+    }
+    else if(m.st==='toClose'){
+      /* 틀을 안 닫고 방치 → 밑면이 탄다 */
+      m.t+=dt;
+      if(!m.warn&&m.t>=dd.rawBurn-4){m.warn=true;dirtyM=true;SFX.land();}
+      if(m.t>=dd.rawBurn){
+        m.st='burnt';m.t=0;m.warn=false;dirtyM=true;SFX.burnt();shake();
+        toast('🍳 밑면이 다 탔어요! 틀을 안 닫아서… 🥲');
+      }
+    }
+    else if(m.st==='cl1'){m.t+=dt;if(m.t>=dd.cook){m.st='clFlip';m.t=0;dirtyM=true;SFX.land();}}
+    else if(m.st==='clFlip'){
+      m.t+=dt;
+      if(m.t>=dd.flipWin+4){m.st='clBurnt';m.t=0;dirtyM=true;SFX.burnt();toast('🔥 어… 틀에서 타는 냄새가!?');}
+    }
+    else if(m.st==='cl2'){
+      m.t+=dt;
+      if(m.t>=dd.cook){
+        m.st='clDone';m.t=0;dirtyM=true;
+        SFX.star();
+        toast('♨️ 고소한 냄새! 다 익었어요! ⬆️ 위로 열어요!');
+      }
+    }
+    else if(m.st==='clDone'){
+      /* 틀 닫은 채로 방치 → 안에서 탄다 */
+      m.t+=dt;
+      if(m.t>=perfWin){m.st='clBurnt';m.t=0;dirtyM=true;SFX.burnt();toast('🔥 틀 안에서 타는 냄새가!!');}
+    }
+    else if(m.st==='clBurnt'){
+      m.t+=dt;
+      if(m.t>=dd.burntToFire*1.5){ /* 닫혀있어 산소가 적어 발화는 느림 */
+        m.st='fire';m.t=0;m.fireHp=FIRE_HP;dirtyM=true;
+        S.dayBurnt++;
+        if(isCoop())MP.me.burnt++;
+        toast('🚨 틀에서 불이!! 연타해서 꺼주세요!');
+        SFX.fire();shake();syncFireN();
       }
     }
     else if(m.st==='cook1'){m.t+=dt;if(m.t>=dd.cook){m.st='flip';m.t=0;dirtyM=true;}}
