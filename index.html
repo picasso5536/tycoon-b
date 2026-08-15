@@ -256,10 +256,13 @@ body.multi #partnerLabel{display:block}
   border-radius:99px;background:#181c26;box-shadow:inset 0 1px 2px #000}
 .lid.lidflip{animation:lidspin .5s ease-in-out}
 @keyframes lidspin{0%{transform:rotateX(0)}50%{transform:rotateX(180deg) scale(1.05)}100%{transform:rotateX(360deg)}}
-.lid.liddone{background:linear-gradient(180deg,#5c5340,#38301e);box-shadow:inset 0 2px 4px #ffd94d33,0 0 14px #ffd94d66;
-  animation:pulse .6s infinite alternate}
-.lid.lidburnt{background:linear-gradient(180deg,#3a2626,#1e1212);box-shadow:0 0 12px #ff5d5d55;
-  animation:pulse .3s infinite alternate}
+.lid.liddone{background:linear-gradient(180deg,#5c5340,#38301e);
+  animation:lidglow .6s infinite alternate}
+@keyframes lidglow{from{box-shadow:inset 0 2px 4px #ffd94d33,0 0 8px #ffd94d44}
+  to{box-shadow:inset 0 2px 4px #ffd94d55,0 0 18px #ffd94daa}}
+.lid.lidburnt{background:linear-gradient(180deg,#3a2626,#1e1212);
+  animation:lidsmoke .3s infinite alternate}
+@keyframes lidsmoke{from{box-shadow:0 0 6px #ff5d5d44}to{box-shadow:0 0 16px #ff5d5daa}}
 .mold .tag.done{background:var(--ok);color:#0c2810;animation:pulse .5s infinite alternate}
 .mold .tag.flipnow{background:var(--glow);color:#3a2200;animation:pulse .5s infinite alternate}
 .mold.flip .tag{background:var(--glow);color:#3a2200;animation:pulse .5s infinite alternate}
