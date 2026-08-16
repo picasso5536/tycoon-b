@@ -1096,8 +1096,84 @@ const SFX={
   fever(){[659,784,988,1318,1568].forEach((f,i)=>tone(f,0.1,'triangle',0.12,i*0.06));},
   star(){[523,659,784,1046,1318].forEach((f,i)=>tone(f,0.14,'triangle',0.12,i*0.09));},
 };
+
+/* ═══════════ 배경음악: 동물의 숲 감성 (재즈 코드 + 벨 멜로디, 무한 루프) ═══════════ */
+const BGM={on:false, timer:null, step:0, master:null, chordIdx:0, mode:'lobby'};
+const M2F=m=>440*Math.pow(2,(m-69)/12);
+const BGM_CHORDS=[
+  [60,64,67,71],[57,60,64,67],[62,65,69,72],[55,59,62,65],
+  [60,64,67,71],[57,60,64,67],[53,57,60,64],[55,59,62,67]
+];
+const BGM_PENTA=[72,74,76,79,81,84,86];
+function bgmVoice(freq,dur,type,vol,when,attack){
+  const a=ac();if(!a)return;
+  const o=a.createOscillator(),g=a.createGain();
+  o.type=type;o.frequency.value=freq;
+  const t=a.currentTime+when;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(vol,t+(attack||0.01));
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g);g.connect(BGM.master||a.destination);
+  o.start(t);o.stop(t+dur+0.05);
+}
+/* 인게임: 밝고 신나는 진행 */
+const BGM_CHORDS_GAME=[[60,64,67,72],[62,65,69,74],[64,67,71,74],[65,69,72,76],[60,64,67,72],[67,71,74,77],[65,69,72,76],[55,59,62,67]];
+const BGM_PENTA_GAME=[72,74,76,79,81,84,86,88];
+function bgmDrum(kind,when){
+  const a=ac();if(!a)return;const t=a.currentTime+(when||0);
+  if(kind==='kick'){const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(45,t+0.12);g.gain.setValueAtTime(0.18,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.14);o.connect(g);g.connect(BGM.master||a.destination);o.start(t);o.stop(t+0.16);}
+  else{const len=Math.floor(a.sampleRate*0.03);const buf=a.createBuffer(1,len,a.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2);const src=a.createBufferSource();src.buffer=buf;const g=a.createGain();g.gain.value=0.06;const hp=a.createBiquadFilter();hp.type='highpass';hp.frequency.value=7000;src.connect(hp);hp.connect(g);g.connect(BGM.master||a.destination);src.start(t);}
+}
+function bgmStep(){
+  const a=ac();if(!a||muted||!BGM.on)return;
+  const game=BGM.mode==='game';
+  const beat=game?0.33:0.5;
+  const chords=game?BGM_CHORDS_GAME:BGM_CHORDS;
+  const penta=game?BGM_PENTA_GAME:BGM_PENTA;
+  const chord=chords[BGM.chordIdx%chords.length];
+  if(BGM.step%4===0){
+    const padType=game?'sawtooth':'triangle';const padVol=game?0.032:0.045;
+    chord.forEach((m,i)=>bgmVoice(M2F(m-12),beat*4*0.95,padType,padVol,0,0.05+i*0.01));
+    bgmVoice(M2F(chord[0]-24),beat*0.9,'sine',game?0.12:0.10,0);
+    BGM.chordIdx++;
+  }
+  if(BGM.step%4===2)bgmVoice(M2F(chord[0]-12),beat*0.8,'sine',0.07,0);
+  if(game){
+    if(BGM.step%2===0)bgmDrum('kick');
+    bgmDrum('hat');
+    if(BGM.step%4===2)bgmDrum('hat',beat*0.5);
+  }
+  const melChance=game?0.9:0.72;
+  if(Math.random()<melChance){
+    const useChord=Math.random()<0.4;
+    const note=useChord?chord[1+Math.floor(Math.random()*3)]+12:penta[Math.floor(Math.random()*penta.length)];
+    const melType=game?'square':'sine';const melVol=game?0.055:0.075;
+    bgmVoice(M2F(note),beat*(Math.random()<0.3?1.3:0.6),melType,melVol,0.02,0.004);
+    if(Math.random()<(game?0.45:0.35))bgmVoice(M2F(note+12),beat*0.4,'triangle',0.022,0.02);
+    if(game&&Math.random()<0.3){const n2=penta[Math.floor(Math.random()*penta.length)];bgmVoice(M2F(n2),beat*0.4,'square',0.045,beat*0.5,0.004);}
+  }
+  BGM.step++;
+  BGM.timer=setTimeout(bgmStep,beat*1000);
+}
+function bgmStart(mode){
+  const a=ac();if(!a)return;
+  if(mode)BGM.mode=mode;
+  if(!BGM.master){BGM.master=a.createGain();BGM.master.gain.value=0.6;BGM.master.connect(a.destination);}
+  if(BGM.on)return;
+  BGM.on=true;BGM.step=0;BGM.chordIdx=0;
+  clearTimeout(BGM.timer);bgmStep();
+}
+function bgmSetMode(mode){if(BGM.mode===mode)return;BGM.mode=mode;BGM.step=0;BGM.chordIdx=0;}
+function bgmStop(){BGM.on=false;clearTimeout(BGM.timer);}
+function bgmToggle(){if(BGM.on){bgmStop();return false;}bgmStart();return true;}
 ['touchstart','mousedown'].forEach(ev=>document.addEventListener(ev,()=>ac(),{once:true,passive:true}));
-$('#muteBtn').onclick=()=>{muted=!muted;$('#muteBtn').textContent=muted?'🔇':'🔊';};
+$('#muteBtn').onclick=()=>{
+  muted=!muted;$('#muteBtn').textContent=muted?'🔇':'🔊';
+  if(muted)bgmStop();else bgmStart();
+};
+['touchstart','mousedown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{
+  if(!muted&&!BGM.on)setTimeout(bgmStart,120);
+},{once:true,passive:true}));
 function shake(){const a=$('#app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake');}
 
 /* ═══════════ 영구 저장(브라우저) ═══════════ */
@@ -1826,6 +1902,7 @@ function startDayLocal(day){
   $('#startModal').classList.remove('open');
   S.running=true;S.paused=false;
   document.body.classList.add('playing');
+  if(!muted){if(BGM.on)bgmSetMode('game');else bgmStart('game');}
   if(isHardFlow()&&day===1)setTimeout(()=>toast('🔥 고수 조작: 반죽 3단계 후 ⬇️닫기 → 👆탭 뒤집기 → ⬆️열기!'),1200);
   renderAll();renderExtBtn();
   /* 스테이지 배너: 새 수요 메뉴 등장 안내 */
@@ -2892,6 +2969,7 @@ function quitToLobby(silentMsg){
   }
   S.running=false;S.paused=false;
   document.body.classList.remove('playing');
+  if(!muted){if(BGM.on)bgmSetMode('lobby');else bgmStart('lobby');}
   ['quitModal','dayModal','shopModal','achModal','lbModal','storyModal'].forEach(id=>$('#'+id).classList.remove('open'));
   $('#rushBanner').classList.remove('on');
   $('#extBtn').classList.remove('show');
