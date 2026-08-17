@@ -1609,7 +1609,7 @@ function D(){
     spawn:Math.max(1.6,(7-ed*0.5)/c.spd),
     patience:Math.max(7,(26-ed*1.7)*c.pat/((S.mode==='solo'&&!MP.active)?curStage().pMul:1))*(1+FXC.pat+(S.permPat||0))*(evIs('rain')?1.2:1),
     orderMax:Math.min(4,Math.ceil(1+ed*0.45)),
-    cook:Math.max(2.4,(4-(ed-1)*0.12))*(1-FXC.cook)*(1-COOK_CUT[cookLvNow()]),
+    cook:Math.max(1.2,(4-(ed-1)*0.12))*(1-FXC.cook)*(1-cookCut()),
     perfect:Math.max(1.8,4-(ed-1)*0.18),
     flipWin:Math.max(1.4,3-(ed-1)*0.12),
     burntToFire:Math.max(3,(6-(ed-1)*0.3))*(1+FXC.fire),
@@ -1673,8 +1673,15 @@ const BROKERS=[
 let client=null,netOn=false;
 const mqttOK=()=>typeof mqtt!=='undefined';
 const isCoop=()=>MP.active&&!MP.vs; /* 경제 공유는 협동에서만 */
-const COOK_CUT=[0,0.15,0.25];
+const COOK_CUT=[0,0.15,0.25];                 // 협동/대결: 인게임 연료(0~2단계)
+const COOK_CUT_PERM=[0,0.10,0.18,0.25,0.30,0.34]; // 솔로: 영구 명품화로(0~5레벨)
 function cookLvNow(){if(isCoop()){const a=MP.me.up.cookLv||0,b=(MP.other&&MP.other.up&&MP.other.up.cookLv)||0;return Math.max(a,b);}return S.cookLv||0;}
+/* 현재 굽기 시간 감소율(0~1). 솔로는 영구표, 멀티는 연료표 사용 (레벨 초과 시 클램프) */
+function cookCut(){
+  const lv=cookLvNow();
+  const tbl=(isCoop()||MP.active)?COOK_CUT:COOK_CUT_PERM;
+  return tbl[Math.min(lv,tbl.length-1)]||0;
+}
 const TOPIC_ROOT='bungeo-tycoon-v4';
 const tMeta=()=>`${TOPIC_ROOT}/${MP.code}/meta`;
 const tMe=()=>`${TOPIC_ROOT}/${MP.code}/${MP.role}`;
