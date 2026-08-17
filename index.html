@@ -1095,6 +1095,10 @@ const SFX={
   combo(n){const notes=[523,659,784,1046];notes.slice(0,Math.min(4,1+(n%4))).forEach((f,i)=>tone(f,0.09,'sine',0.11,i*0.06));},
   fever(){[659,784,988,1318,1568].forEach((f,i)=>tone(f,0.1,'triangle',0.12,i*0.06));},
   star(){[523,659,784,1046,1318].forEach((f,i)=>tone(f,0.14,'triangle',0.12,i*0.09));},
+  /* 무쇠 틀 닫기: 두툼한 '철컥' (금속 클릭 + 낮은 울림) */
+  lidClose(){tone(520,0.09,'square',0.16,0,-260);tone(180,0.22,'triangle',0.20,0.03,-70);tone(90,0.18,'sine',0.14,0.04);},
+  /* 무쇠 틀 열기: 경쾌하게 위로 열리는 '철커덩~' */
+  lidOpen(){tone(280,0.10,'triangle',0.16,0,180);tone(440,0.14,'square',0.13,0.06,160);tone(760,0.18,'sine',0.13,0.13,120);},
 };
 
 /* ═══════════ 배경음악: 동물의 숲 감성 (재즈 코드 + 벨 멜로디, 무한 루프) ═══════════ */
@@ -1568,7 +1572,10 @@ const DIFFS={
   vhard:{name:'매우 어려움',emoji:'💀',spd:1.5,pat:0.62,goal:1.6,ramp:1.7},
 };
 function diffOf(){return DIFFS[S.diff]||DIFFS.normal;}
-function effDay(d){return 1+((d||S.day)-1)*diffOf().ramp;} /* 난이도 반영 유효 스테이지 */
+function effDay(d){
+  if(S.mode==='solo'&&S.gameMode==='stage'&&!MP.active)return S.stage||1; /* 스테이지=진행도 */
+  return 1+((d||S.day)-1)*diffOf().ramp;
+}
 
 /* ═══════════ 스테이지 (혼자 하기 · 조작 어려움 통일) ═══════════ */
 const STAGE_COUNT=24;
@@ -1624,6 +1631,13 @@ function demandKinds(d){
   if(ed>=2)ks.push('cream');
   if(ed>=4)ks.push('sweet');
   if(ed>=6)ks.push('pizza');
+  return ks;
+}
+function demandKindsForStage(stg){
+  const ks=['red'];
+  if(stg>=2)ks.push('cream');
+  if(stg>=4)ks.push('sweet');
+  if(stg>=6)ks.push('pizza');
   return ks;
 }
 const DEMAND_W={red:3,cream:2,sweet:2,pizza:1};
@@ -1914,10 +1928,17 @@ function startDayLocal(day){
   renderAll();renderExtBtn();
   /* 스테이지 배너: 새 수요 메뉴 등장 안내 */
   const e=E();
-  const prev=day>1?demandKinds(day-1):['red'];
-  const news=demandKinds(day).filter(k=>!prev.includes(k));
+  let prev,news;
+  if(S.mode==='solo'&&S.gameMode==='stage'&&!MP.active){
+    const stg=S.stage||1;
+    prev=stg>1?demandKindsForStage(stg-1):['red'];
+    news=demandKinds(day).filter(k=>!prev.includes(k));
+  }else{
+    prev=day>1?demandKinds(day-1):['red'];
+    news=demandKinds(day).filter(k=>!prev.includes(k));
+  }
   const bn=$('#dayBanner');
-  bn.firstChild.textContent='DAY '+day+' · '+diffOf().emoji+diffOf().name;
+  bn.firstChild.textContent=(S.mode==='solo'&&S.gameMode==='stage'&&!MP.active)?('STAGE '+(S.stage||1)):('DAY '+day+' · '+diffOf().emoji+diffOf().name);
   let sub;
   if(news.length){
     const nm=news.map(k=>FILLS[k].emoji+FILLS[k].name).join(', ');
@@ -2042,13 +2063,13 @@ function moldSwipeHard(i,dir){
   if(dir==='down'){
     if(m.st==='toClose'){
       m.st='cl1';m.t=0;m.warn=false;
-      SFX.land();toast('철컥! 틀을 닫았어요 🔥');
+      SFX.lidClose();toast('철컥! 틀을 닫았어요 🔥');
       renderMyPan();markDirty();
     }else if(m.st&&m.st.startsWith('cl')){toast('이미 닫혀있어요!');}
   }else{ /* up: 열기 */
     if(m.st==='clDone'){
       m.st='perfect';m.t=0;
-      SFX.collect();toast('활짝! 노릇노릇하게 익었어요 ✨ 탭해서 수확!');
+      SFX.lidOpen();toast('활짝! 노릇노릇하게 익었어요 ✨ 탭해서 수확!');
       renderMyPan();markDirty();
     }else if(m.st==='clBurnt'){
       m.st='burnt';m.t=0;
@@ -2112,7 +2133,14 @@ function renderTray(){
 function renderHUD(){
   const e=E();
   $('#money').textContent=fmt(e.money);
-  $('#day').textContent=S.day;
+  if(S.mode==='solo'&&S.gameMode==='stage'&&!MP.active){
+    const lbl=$('#day').previousSibling;
+    $('#day').textContent=S.stage||1;
+    const st=$('#day').parentNode;if(st)st.firstChild.textContent='STAGE ';
+  }else{
+    const st=$('#day').parentNode;if(st)st.firstChild.textContent='DAY ';
+    $('#day').textContent=S.day;
+  }
   $('#rep').textContent='❤️ '+e.rep.toFixed(1);
   $('#batterCnt').textContent=e.batter;
   const _dl=(S.mode==='solo'&&S.stageTimeLimit)?S.stageTimeLimit:DAY_LEN;
