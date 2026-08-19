@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- TestFlight·앱스토어 제출용. 실기기 직접 설치(ad-hoc)와는 다른 방식이다. -->
+  <key>method</key>
+  <string>app-store-connect</string>
+
+  <!-- 팀 ID 는 CI 에서 치환한다 (계정마다 다르므로 커밋하지 않는다) -->
+  <key>teamID</key>
+  <string>__TEAM_ID__</string>
+
+  <key>signingStyle</key>
+  <string>manual</string>
+
+  <key>provisioningProfiles</key>
+  <dict>
+    <key>io.github.picasso5536.tycoonb</key>
+    <string>__PROFILE_NAME__</string>
+  </dict>
+
+  <!-- 업로드는 워크플로가 따로 한다. 여기서는 IPA 만 만든다. -->
+  <key>uploadSymbols</key>
+  <true/>
+  <key>uploadBitcode</key>
+  <false/>
+  <key>destination</key>
+  <string>export</string>
+</dict>
+</plist>
