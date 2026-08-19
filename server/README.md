@@ -38,6 +38,35 @@ const API_BASE = 'https://tycoon-b-api.your-account.workers.dev';
 
 `API_BASE` 를 비워 두면 온라인 기능만 꺼지고 혼자 하기는 정상 동작합니다.
 
+## GitHub Actions 로 자동 배포
+
+`server/` 가 바뀌면 `.github/workflows/deploy-server.yml` 이 테스트 후 배포합니다.
+기본 브랜치(main)에서만 돕니다 — 기능 브랜치가 운영 서버를 덮어쓰면 안 되니까요.
+
+저장소 Settings → Secrets and variables → Actions 에 두 개를 등록하세요.
+
+| Secret | 어디서 |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | [dash.cloudflare.com/profile/api-tokens](https://dash.cloudflare.com/profile/api-tokens) → Create Token |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare 대시보드 사이드바 |
+
+토큰 권한은 **Edit Cloudflare Workers** 템플릿을 쓰되, **D1 을 직접 추가**해야 합니다
+(템플릿이 D1 보다 먼저 만들어져서 빠져 있습니다). 최종적으로 네 가지가 필요합니다.
+
+| 구분 | 권한 |
+| --- | --- |
+| Account | Workers Scripts · Edit |
+| Account | D1 · Edit |
+| Account | Workers KV Storage · Edit |
+| Account | Account Settings · Read |
+
+토큰은 생성 직후 화면에서만 보입니다. 놓치면 다시 만들어야 합니다.
+저장소에 절대 커밋하지 마세요 — Secrets 에만 넣습니다.
+
+**스키마 변경은 자동으로 적용되지 않습니다.** 테이블을 추가·변경했다면
+Actions 탭 → *서버 배포* → *Run workflow* 에서 `apply_schema` 를 켜고 수동 실행하세요.
+매 배포마다 스키마를 밀면 사고가 나기 쉬워서 일부러 분리했습니다.
+
 ## 로컬 개발
 
 ```bash
