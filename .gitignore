@@ -28,6 +28,12 @@ ios/DerivedData/
 *.xcuserstate
 xcuserdata/
 
+# ── 서버 ───────────────────────────────────────────
+# wrangler 로컬 개발 상태 (D1·Durable Object sqlite)
+server/.wrangler/
+# 배포 시 실제 database_id 가 들어가는 파일은 커밋하되,
+# 로컬 실험용 값이 섞이지 않도록 주의할 것
+
 # ── 기타 ───────────────────────────────────────────
 .DS_Store
 *.log

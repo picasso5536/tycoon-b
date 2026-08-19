@@ -59,13 +59,6 @@ async function buildFonts() {
   await writeFile(join(VENDOR, 'fonts.css'), css, 'utf8');
 }
 
-async function buildMqtt() {
-  await copyFile(
-    join(ROOT, 'node_modules', 'mqtt', 'dist', 'mqtt.min.js'),
-    join(VENDOR, 'mqtt.min.js')
-  );
-}
-
 async function buildHtml() {
   let html = await readFile(join(ROOT, 'index.html'), 'utf8');
 
@@ -85,15 +78,7 @@ async function buildHtml() {
     'Google Fonts link'
   );
 
-  // 3) cdnjs mqtt.js → 번들 mqtt.js
-  html = replaceOnce(
-    html,
-    '<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>',
-    '<script src="vendor/mqtt.min.js"></script>',
-    'mqtt CDN script'
-  );
-
-  // 4) 네이티브 보정 자산 주입 (게임 스크립트보다 먼저 실행되어야 함)
+  // 3) 네이티브 보정 자산 주입 (게임 스크립트보다 먼저 실행되어야 함)
   html = replaceOnce(
     html,
     '</head>',
@@ -115,13 +100,12 @@ async function main() {
   await mkdir(VENDOR, { recursive: true });
 
   await buildFonts();
-  await buildMqtt();
   await copyFile(join(ROOT, 'assets/favicon.png'), join(WWW, 'favicon.png'));
   await copyFile(join(ROOT, 'src/native/native.css'), join(WWW, 'native.css'));
   await copyFile(join(ROOT, 'src/native/native.js'), join(WWW, 'native.js'));
   await buildHtml();
 
-  console.log('[build-www] www/ 생성 완료 (폰트·mqtt 번들 포함, 원격 의존성 0개)');
+  console.log('[build-www] www/ 생성 완료 (폰트 번들 포함, 원격 의존성 0개)');
 }
 
 main().catch((err) => {

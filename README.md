@@ -17,6 +17,7 @@
 
 ```
 index.html              ← 게임 본체 (웹 배포본, 유일한 원본)
+server/                 ← API 서버 (계정·랭킹·방·명부) — server/README.md 참고
 scripts/build-www.mjs   ← index.html → www/ 로 굽는 빌드 (CDN 제거 + 네이티브 보정 주입)
 scripts/make-assets.mjs ← 앱 아이콘 / 스플래시 원본 PNG 생성
 src/native/             ← 네이티브 전용 CSS·JS (웹에는 들어가지 않음)
@@ -117,6 +118,22 @@ npx @capacitor/assets generate                  # 모든 해상도 생성
 | iOS 버전 | Xcode → App 타깃 → General |
 
 `appId` 는 스토어 등록 후에는 바꿀 수 없으니 출시 전에 확정하세요.
+
+## 서버
+
+랭킹·함께하기·가게 구경은 자체 API 서버를 씁니다. 예전에는 공개 MQTT 브로커를 썼는데,
+누구나 랭킹에 임의 점수를 쓰고 모든 방을 엿볼 수 있는 구조였습니다.
+
+배포 방법과 검증 규칙은 [`server/README.md`](server/README.md)에 있습니다.
+배포한 주소를 `index.html` 의 `API_BASE` 에 넣으면 연결됩니다.
+
+```js
+const API_BASE = 'https://tycoon-b-api.your-account.workers.dev';
+```
+
+비워 두면 온라인 기능만 꺼지고 **혼자 하기는 그대로 동작**합니다.
+
+기기를 옮길 때는 소셜 화면의 **복구 코드**를 쓰세요. 저장소를 지우면 계정과 기록을 잃습니다.
 
 ## 라이선스
 
