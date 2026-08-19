@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
       - run: npm ci
       - name: www/ 생성 (원격 의존성 0개 검증 포함)
@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
       - uses: actions/setup-java@v4
         with:
@@ -39,7 +39,7 @@ jobs:
       - uses: android-actions/setup-android@v3
       - run: npm ci
       - name: 웹 자산 빌드 + 네이티브 동기화
-        run: npx cap sync android
+        run: npm run build && npx cap sync android
       - name: Gradle 디버그 빌드
         working-directory: android
         run: |
@@ -58,11 +58,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
       - run: npm ci
       - name: 웹 자산 빌드 + 네이티브 동기화
-        run: npx cap sync ios
+        run: npm run build && npx cap sync ios
       - name: Xcode 빌드 (서명 없음, 시뮬레이터 타깃)
         working-directory: ios/App
         run: |

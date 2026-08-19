@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "붕어빵 타이쿤 - iOS / Android native app (Capacitor wrapper)",
+  "engines": {
+    "node": ">=22"
+  },
   "type": "module",
   "scripts": {
     "build": "node scripts/build-www.mjs",

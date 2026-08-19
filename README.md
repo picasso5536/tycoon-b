@@ -40,6 +40,8 @@ android/ · ios/         ← 네이티브 프로젝트
 
 ## 개발 환경 준비
 
+**Node.js 22 이상**이 필요합니다 (Capacitor CLI 8 요구사항).
+
 ```bash
 npm install
 npm run build      # www/ 생성
