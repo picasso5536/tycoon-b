@@ -12,11 +12,11 @@ tag = "v1"
 new_sqlite_classes = ["Room"]
 
 # D1 — 계정 / 랭킹 / 명부
-# database_id 는 `wrangler d1 create tycoon-b` 후 출력된 값으로 채운다.
+# database_id 는 계정 식별자일 뿐 비밀값이 아니다 (API 토큰 없이는 아무것도 못 한다).
 [[d1_databases]]
 binding = "DB"
 database_name = "tycoon-b"
-database_id = "REPLACE_WITH_YOUR_D1_ID"
+database_id = "82fa7f8f-cdf4-41d6-922a-ffd0e4926b8e"
 
 [observability]
 enabled = true
