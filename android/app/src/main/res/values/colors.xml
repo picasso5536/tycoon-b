@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 게임 팔레트(index.html :root)와 동일 -->
+    <color name="colorPrimary">#141b2e</color>
+    <color name="colorPrimaryDark">#0d1322</color>
+    <color name="colorAccent">#ffb347</color>
+    <color name="colorBackground">#0d1322</color>
+</resources>

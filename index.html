@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>붕어빵 타이쿤 🐟 온라인 협동판</title>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
 <style>
 :root{
   --night:#141b2e; --night2:#1d2740;
@@ -798,6 +797,17 @@ body.multi #pingRow{display:flex}
         <button class="nicksave" id="friendAddBtn">추가</button>
       </div>
       <p class="tip">서로 코드를 추가하면 언제든 가게를 구경할 수 있어요</p>
+
+      <div style="margin-top:14px;padding-top:12px;border-top:1px dashed #ffffff22">
+        <div style="font-size:12px;margin-bottom:6px">🔑 계정 복구 코드
+          <button class="socbtn" id="showRecovery">보기</button></div>
+        <p class="tip" id="recoveryBox" style="word-break:break-all">
+          기기를 바꾸거나 저장소를 지우면 기록을 잃어요. 코드를 적어 두세요.</p>
+        <div class="nickrow" style="margin-top:4px">
+          <input class="nickinput" id="recoverInput" placeholder="다른 기기의 복구 코드">
+          <button class="nicksave" id="recoverBtn">복구</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1678,14 +1688,273 @@ const MP={
   lastPingSeen:0,lastStartedAt:-1,summaryShownFor:0,snap:null,
   lastExtApplied:0,lastReqT:0,custMirror:[],
 };
-const BROKERS=[
-  'wss://mqtt.eclipseprojects.io:443/mqtt',
-  'wss://broker.emqx.io:8084/mqtt',
-  'wss://broker.hivemq.com:8884/mqtt',
-  'wss://test.mosquitto.org:8081',
-];
-let client=null,netOn=false;
-const mqttOK=()=>typeof mqtt!=='undefined';
+/* ═══════════ 서버 연결 (계정 · 랭킹 · 방 · 명부) ═══════════
+   공개 MQTT 브로커를 대체한다. 바뀐 것:
+     - 신원을 서버가 발급한다 (기존 pid 는 승계용으로만 보낸다)
+     - 랭킹은 서버만 쓴다. 클라이언트는 제출만 한다
+     - 방은 서버 WebSocket 으로 격리된다. 남의 방을 엿볼 방법이 없다
+     - 명부는 전체 구독이 아니라 건수 제한이 걸린 조회다              */
+
+/* 배포한 Workers 주소로 바꾼다. 비워 두면 온라인 기능만 꺼지고 혼자 하기는 정상 동작한다. */
+const API_BASE = 'https://tycoon-b-api.tycoon-b.workers.dev';
+
+let AUTH = lsGet('bp_auth', null);   /* {id, token, recovery} */
+let netOn = false;
+const srvOK = () => !!API_BASE;
+
+/** 서버 호출. 실패는 예외로 던져 호출부에서 사용자 메시지를 정하게 한다. */
+async function api(method, path, body, opts) {
+  if (!API_BASE) throw new Error('offline');
+  const res = await fetch(API_BASE + path, {
+    method,
+    headers: {
+      ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      ...((opts && opts.noAuth) || !AUTH ? {} : { Authorization: 'Bearer ' + AUTH.token }),
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const text = await res.text();
+  let data = null;
+  try { data = JSON.parse(text); } catch (e) { /* 본문이 JSON 이 아닐 수 있다 */ }
+  if (!res.ok) {
+    const err = new Error((data && data.message) || ('HTTP ' + res.status));
+    err.code = data && data.error;
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+/** 최초 1회 계정 발급. 기존 로컬 pid 를 함께 보내 친구 목록을 잇는다. */
+async function ensureAccount() {
+  if (!srvOK()) return null;
+  if (AUTH && AUTH.token) return AUTH;
+  const made = await api('POST', '/v1/accounts', {
+    nick: PROFILE.nick || undefined,
+    legacy_pid: PROFILE.pid,          /* 마이그레이션: 예전 신원을 서버가 기억한다 */
+  }, { noAuth: true });
+  AUTH = { id: made.account_id, token: made.token, recovery: made.recovery_code };
+  lsSet('bp_auth', AUTH);
+  /* 앞으로의 신원은 서버가 준 것을 쓴다. 기존 pid 는 legacy 로 남긴다. */
+  PROFILE.legacyPid = PROFILE.pid;
+  PROFILE.pid = made.account_id;
+  lsSet('bp_profile', PROFILE);
+  return AUTH;
+}
+
+/** 복구 코드로 다른 기기의 계정을 이어받는다. */
+async function recoverAccount(code) {
+  const got = await api('POST', '/v1/accounts/recover',
+    { recovery_code: String(code || '').trim().toUpperCase() }, { noAuth: true });
+  AUTH = { id: got.account_id, token: got.token, recovery: null };
+  lsSet('bp_auth', AUTH);
+  PROFILE.pid = got.account_id;
+  if (got.nick) PROFILE.nick = got.nick;
+  lsSet('bp_profile', PROFILE);
+  return AUTH;
+}
+
+/** 온라인 기능을 쓰기 직전에 부른다. 준비되면 true. */
+async function netReady() {
+  if (!srvOK()) return false;
+  try {
+    await ensureAccount();
+    netOn = true;
+    renderNet();
+    return true;
+  } catch (e) {
+    netOn = false;
+    renderNet();
+    return false;
+  }
+}
+
+/* ── 판(run) 수명주기 ──
+   서버가 시작 시각을 가져야 "즉시 999일 제출"을 막을 수 있다. */
+let RUN_ID = null;
+let RUN_LOG = [];          /* 3단계: 그날의 판매 로그 [[경과ms, 개수, 금액], ...] */
+let RUN_DAY_START = 0;     /* 그날 시작 시각 (로그의 기준점) */
+
+async function srvStartRun(diff) {
+  RUN_ID = null;
+  if (!(await netReady())) return null;
+  try {
+    const made = await api('POST', '/v1/runs', { diff: diff || S.diff || 'normal' });
+    RUN_ID = made.run_id;
+  } catch (e) {
+    RUN_ID = null;
+  }
+  return RUN_ID;
+}
+
+/** 하루 시작 — 판매 로그를 새로 연다 */
+function srvBeginDay() {
+  RUN_LOG = [];
+  RUN_DAY_START = Date.now();
+}
+
+/** 판매 1건 기록. serveLocal 에서 부른다. */
+function srvLogSale(count, pay) {
+  if (RUN_LOG.length >= 240) return;   /* 서버 상한과 같은 값 */
+  RUN_LOG.push([Date.now() - RUN_DAY_START, count, Math.round(pay)]);
+}
+
+/* ═══════════ 랭킹 ═══════════ */
+const LB = { rows: [], week: '', open: false, diff: 'normal', loading: false };
+
+/** 하루 마감마다 호출. 서버가 검증하고 주간 최고 기록만 남긴다. */
+async function lbSubmit() {
+  if (MP.vs) return;                      /* 대결 기록은 별도 */
+  if (!RUN_ID || !(await netReady())) return;
+  const earned = MP.active ? combinedStats().earned : S.runEarned;
+  try {
+    await api('POST', '/v1/runs/' + RUN_ID + '/submit', {
+      day: S.day,
+      earned: Math.round(earned),
+      day_sales: Math.round(S.daySales),
+      log: RUN_LOG,                       /* 상위권이면 서버가 정합성을 검사한다 */
+      nick: PROFILE.nick || undefined,
+      lv: lvOf(XP).lv,
+      multi: MP.active ? 1 : 0,
+    });
+  } catch (e) {
+    /* 거부 사유를 조용히 삼키지 않는다 — 정상 플레이가 막히면 알아야 한다 */
+    if (e.code && e.code !== 'day_not_advanced') {
+      toast('기록 제출 실패: ' + (e.message || e.code));
+    }
+  }
+}
+
+async function fetchLB(diff) {
+  LB.diff = diff; LB.rows = []; LB.loading = true;
+  $('#lbList').innerHTML = '<div style="opacity:.6;padding:20px;text-align:center">불러오는 중…</div>';
+  renderDiffChipsLB();
+  if (!(await netReady())) {
+    LB.loading = false;
+    $('#lbList').innerHTML = '<div style="opacity:.6;padding:20px;text-align:center">서버에 연결할 수 없어요 😢</div>';
+    return;
+  }
+  try {
+    const got = await api('GET', '/v1/leaderboard?diff=' + encodeURIComponent(diff) + '&limit=10');
+    LB.rows = got.rows || [];
+    LB.week = got.week;
+    const label = $('#lbWeekLbl'); if (label) label.textContent = got.week;
+  } catch (e) {
+    $('#lbList').innerHTML = '<div style="opacity:.6;padding:20px;text-align:center">랭킹을 불러오지 못했어요 😢</div>';
+    LB.loading = false;
+    return;
+  }
+  LB.loading = false;
+  renderLB();
+}
+
+/* ═══════════ 방 (WebSocket) ═══════════ */
+let roomSock = null;
+
+/**
+ * 방에 접속한다. 성공하면 onReady, 실패하면 onFail(메시지).
+ * MQTT 와 달리 자리(host/guest)를 서버가 배정하므로 남의 자리에 끼어들 수 없다.
+ */
+async function roomConnect(code, role, onReady, onFail) {
+  if (!(await netReady())) { onFail('서버에 연결할 수 없어요'); return; }
+  roomClose();
+  const base = API_BASE.replace(/^http/, 'ws');
+  const path = role === 'host' ? 'host' : 'ws';
+  const url = `${base}/v1/rooms/${encodeURIComponent(code)}/${path}?token=${encodeURIComponent(AUTH.token)}`;
+
+  let settled = false;
+  const sock = new WebSocket(url);
+  roomSock = sock;
+
+  sock.onopen = () => { settled = true; netOn = true; renderNet(); onReady(); };
+  sock.onmessage = (ev) => { try { handleRoomMsg(JSON.parse(ev.data)); } catch (e) { /* 무시 */ } };
+  sock.onclose = () => {
+    netOn = false; renderNet();
+    if (!settled) { settled = true; onFail('방에 들어가지 못했어요. 코드를 확인해 주세요'); }
+  };
+  sock.onerror = () => { /* onclose 에서 처리 */ };
+}
+
+function roomClose() {
+  if (roomSock) { try { roomSock.close(); } catch (e) { /* 이미 닫힘 */ } roomSock = null; }
+  netOn = false;
+}
+
+function roomSend(obj) {
+  if (roomSock && roomSock.readyState === 1) {
+    try { roomSock.send(JSON.stringify(obj)); } catch (e) { /* 무시 */ }
+  }
+}
+
+/** 서버가 중계한 방 메시지 처리. 기존 handleMsg 의 토픽 분기를 대체한다. */
+function handleRoomMsg(obj) {
+  if (!obj || !obj.t) return;
+
+  if (obj.t === 'meta') {
+    MP.meta = obj; onMetaTick();
+  } else if (obj.t === 'state') {
+    /* 서버가 role 을 붙여 준다. 내가 보낸 것은 되돌아오지 않는다. */
+    MP.other = obj; onPingTick(); applyRemoteExt();
+    if (MP.role === 'host') applyServeReqs();
+    if (MP.role === 'guest' && !MP.vs && Array.isArray(obj.cust)) {
+      /* 손님 미러 병합: 있던 손님은 값만 갱신 (카드 재생성 방지) */
+      const inc = obj.cust, byId = {}; inc.forEach(c => byId[c.i] = c);
+      let membership = false;
+      MP.custMirror = MP.custMirror.filter(c => { const keep = !!byId[c.i]; if (!keep) membership = true; return keep; });
+      inc.forEach(c => {
+        const ex = MP.custMirror.find(x => x.i === c.i);
+        if (ex) { ex.p = c.p; ex.m = c.m; }
+        else { MP.custMirror.push({ ...c }); membership = true; }
+      });
+      if (membership) renderCustomers(); else updateCustomerBars();
+    }
+    renderPartnerPan(); renderExtBtn(); renderCombo();
+  } else if (obj.t === 'presence') {
+    if (obj.joined) toast('짝꿍이 들어왔어요! 👋');
+    else { MP.other = null; toast('짝꿍의 연결이 끊겼어요 😢'); }
+  } else if (obj.t === 'error') {
+    return;   /* 서버가 거부한 발행 — 조용히 무시 */
+  }
+
+  renderPartner();
+  if (!S.running) renderAll(); else renderHUD();
+}
+
+/* ═══════════ 명부 (가게 카드) ═══════════
+   기존 bungeo-shop-v1/+ 전체 구독을 대체한다.
+   SOC.map 의 키는 이제 토픽이 아니라 계정 ID 다. */
+const shopKey = pid => pid;
+
+/** 내 가게 카드 올리기 — 본인 것만 쓸 수 있다 */
+async function pubShopCard() {
+  if (!(await netReady())) return;
+  const card = myCardData();
+  try {
+    await api('PUT', '/v1/profiles/me', {
+      nick: card.n, avatar: card.av, equip: card.eq, tags: card.tg,
+      lv: card.lv, sold: card.sold, streak: card.st,
+    });
+  } catch (e) { /* 카드 갱신 실패는 게임 진행을 막지 않는다 */ }
+}
+
+/** 여러 계정의 카드를 한 번에 가져온다 (친구 목록용) */
+async function loadProfiles(ids) {
+  if (!ids.length || !(await netReady())) return;
+  try {
+    const got = await api('GET', '/v1/profiles?ids=' + encodeURIComponent(ids.join(',')));
+    (got.rows || []).forEach(row => { SOC.map[shopKey(row.account_id)] = row; });
+  } catch (e) { /* 조회 실패 시 기존 캐시를 그대로 쓴다 */ }
+}
+
+/** 최근 갱신순 둘러보기 — 전체를 긁는 대신 서버가 건수를 제한한다 */
+async function browseProfiles() {
+  if (!(await netReady())) return;
+  try {
+    const got = await api('GET', '/v1/profiles?limit=20');
+    (got.rows || []).forEach(row => { SOC.map[shopKey(row.account_id)] = row; });
+  } catch (e) { /* 무시 */ }
+}
+
 const isCoop=()=>MP.active&&!MP.vs; /* 경제 공유는 협동에서만 */
 const COOK_CUT=[0,0.15,0.25];                 // 협동/대결: 인게임 연료(0~2단계)
 const COOK_CUT_PERM=[0,0.10,0.18,0.25,0.30,0.34]; // 솔로: 영구 명품화로(0~5레벨)
@@ -1696,69 +1965,7 @@ function cookCut(){
   const tbl=(isCoop()||MP.active)?COOK_CUT:COOK_CUT_PERM;
   return tbl[Math.min(lv,tbl.length-1)]||0;
 }
-const TOPIC_ROOT='bungeo-tycoon-v4';
-const tMeta=()=>`${TOPIC_ROOT}/${MP.code}/meta`;
-const tMe=()=>`${TOPIC_ROOT}/${MP.code}/${MP.role}`;
-const tOther=()=>`${TOPIC_ROOT}/${MP.code}/${MP.role==='host'?'guest':'host'}`;
 
-function connectBroker(onReady,onFail){
-  if(client){onReady();return;}
-  let idx=0;const tried=[];
-  function tryNext(){
-    if(idx>=BROKERS.length){onFail('모든 서버 연결 실패 ('+tried.join(', ')+')');return;}
-    const url=BROKERS[idx++];
-    const shortName=url.replace('wss://','').split(/[:/]/)[0];
-    toast(`서버 ${idx}/${BROKERS.length} 연결 시도중: ${shortName}…`);
-    let settled=false,c;
-    try{
-      c=mqtt.connect(url,{clientId:'bp_'+Math.random().toString(16).slice(2,12),
-        keepalive:30,connectTimeout:9000,reconnectPeriod:2500,clean:true});
-    }catch(e){tried.push(shortName+':예외');tryNext();return;}
-    const to=setTimeout(()=>{if(!settled){settled=true;tried.push(shortName+':시간초과');try{c.end(true);}catch(e){}tryNext();}},10000);
-    c.on('connect',()=>{
-      if(!settled){
-        settled=true;clearTimeout(to);
-        client=c;netOn=true;renderNet();
-        client.on('message',(t,p)=>handleMsg(t,p.toString()));
-        client.on('close',()=>{netOn=false;renderNet();});
-        client.on('connect',()=>{netOn=true;renderNet();resubscribe();});
-        onReady();
-      }else{netOn=true;renderNet();resubscribe();}
-    });
-    c.on('error',()=>{});
-  }
-  tryNext();
-}
-function resubscribe(){if(client&&MP.active&&MP.code)client.subscribe([tMeta(),tOther()]);}
-function subscribeRoom(){if(client)client.subscribe([tMeta(),tOther()]);}
-function unsubscribeRoom(){if(client&&MP.code)try{client.unsubscribe([tMeta(),tOther()]);}catch(e){}}
-
-function handleMsg(topic,payload){
-  let obj=null;try{obj=JSON.parse(payload);}catch(e){return;}
-  if(topic.startsWith('bungeo-lb-')){lbHandle(topic,obj);return;}
-  if(topic.startsWith('bungeo-shop-v1/')){socHandle(topic,obj);return;}
-  if(topic===tMeta()){
-    MP.meta=obj;onMetaTick();
-  }else if(topic===tOther()){
-    MP.other=obj;onPingTick();applyRemoteExt();
-    if(MP.role==='host')applyServeReqs();
-    if(MP.role==='guest'&&!MP.vs&&Array.isArray(obj.cust)){
-      /* 손님 미러 병합: 있던 손님은 값만 갱신 (카드 재생성 방지) */
-      const inc=obj.cust,byId={};inc.forEach(c=>byId[c.i]=c);
-      let membership=false;
-      MP.custMirror=MP.custMirror.filter(c=>{const keep=!!byId[c.i];if(!keep)membership=true;return keep;});
-      inc.forEach(c=>{
-        const ex=MP.custMirror.find(x=>x.i===c.i);
-        if(ex){ex.p=c.p;ex.m=c.m;}
-        else{MP.custMirror.push({...c});membership=true;}
-      });
-      if(membership)renderCustomers();else updateCustomerBars();
-    }
-    renderPartnerPan();renderExtBtn();renderCombo();
-  }
-  renderPartner();
-  if(!S.running)renderAll();else renderHUD();
-}
 let pubTimer=null;
 function markDirty(){
   if(!MP.active)return;
@@ -1767,7 +1974,7 @@ function markDirty(){
 }
 function myMoldCount(){return isCoop()?MP.me.up.mold:S.moldCount;}
 function pubMe(){
-  if(!client||!MP.active)return;
+  if(!MP.active)return;
   MP.me.hb=Date.now();
   MP.me.av=DECOR.equip.avatar;
   MP.me.vsScore=S.daySales; /* 대결 모드 실시간 점수 */
@@ -1776,7 +1983,7 @@ function pubMe(){
     MP.me.cust=S.customers.filter(c=>!c.leaving).map(c=>({i:c.i,f:c.face,o:c.order,p:Math.round(c.patience*10)/10,m:c.maxPatience,y:c.ty||'normal'}));
     MP.me.combo=S.combo;
   }
-  try{client.publish(tMe(),JSON.stringify(MP.me),{retain:true});}catch(e){}
+  roomSend({...MP.me,t:'state'});
 }
 </script>
 <script>
@@ -1908,6 +2115,7 @@ function renderCombo(){
 function startDayLocal(day){
   /* 협동: 사장님이 고른 난이도로 동기화 */
   if(MP.active&&MP.meta&&MP.meta.diff&&DIFFS[MP.meta.diff])S.diff=MP.meta.diff;
+  srvBeginDay();   /* 서버 검증용 판매 로그 시작 */
   S.day=day;S.time=0;
   S.customers=[];S.spawnTimer=2.5;
   S.combo=0;renderCombo();
@@ -2335,6 +2543,7 @@ function serveLocal(cu,ev,byAlba){
   else{S.money+=pay;S.rep=Math.min(5,S.rep+0.1);}
   S.daySales+=pay;S.daySold+=cnt;
   S.runEarned+=pay;
+  srvLogSale(cnt,pay);   /* 서버 리플레이 검증용 */
   if(S.runEarned>=100000)ach('rich');
   checkStory();
   cu.leaving=true;
@@ -2561,76 +2770,34 @@ function loop(ts){
 }
 requestAnimationFrame(loop);
 
-/* ═══════════ 온라인 랭킹 🏆 (MQTT retained 기반) ═══════════ */
-const LB={map:{},open:false,diff:'normal',subT:null};
-function lbWk(off){const d=new Date(Date.now()+(off||0)*864e5*7);const on=new Date(d.getFullYear(),0,1);
-  const wk=Math.ceil((((d-on)/864e5)+on.getDay()+1)/7);return d.getFullYear()+'-W'+wk;}
-const lbSub=d=>`bungeo-lb-v2/${lbWk()}/${d}/+`;
-const lbMy=d=>`bungeo-lb-v2/${lbWk()}/${d}/${PROFILE.pid}`;
-const lbSubPrev=d=>`bungeo-lb-v2/${lbWk(-1)}/${d}/+`;
-function lbSubmit(){
-  if(MP.vs)return; /* 대결 기록은 별도 */
-  /* 하루 마감마다 최고 기록 갱신 시 제출 */
-  const score=MP.active?combinedStats().earned:S.runEarned;
-  const rec={n:(PROFILE.nick||'무명 사장').slice(0,10),d:S.day,s:score,m:MP.active?1:0,lv:lvOf(XP).lv,ts:Date.now()};
-  const bestKey='bp_best_'+lbWk()+'_'+S.diff;
-  const best=lsGet(bestKey,{d:0,s:0});
-  if(rec.d<best.d||(rec.d===best.d&&rec.s<=best.s))return;
-  lsSet(bestKey,{d:rec.d,s:rec.s});
-  const send=()=>{try{client.publish(lbMy(S.diff),JSON.stringify(rec),{retain:true});}catch(e){}};
-  if(client&&netOn)send();
-  else if(typeof mqtt!=='undefined')connectBroker(send,()=>{});
-}
-function lbHandle(topic,obj){
-  LB.map[topic]=obj;
-  if(LB.open)renderLB();
-}
+/* ═══════════ 온라인 랭킹 🏆 (서버 기반) ═══════════
+   제출과 조회 모두 서버를 거친다. 주차는 서버가 UTC 로 계산해 내려준다. */
 function openLB(){
   $('#lbModal').classList.add('open');LB.open=true;
-  const wl=$('#lbWeekLbl');if(wl)wl.textContent=lbWk();
   claimPrevWeek();
   if(!S.running)renderDiffChipsLB();
   fetchLB(LB.diff);
 }
-function fetchLB(diff){
-  LB.diff=diff;LB.map={};
-  $('#lbList').innerHTML='<div style="opacity:.6;padding:20px;text-align:center">불러오는 중…</div>';
-  renderDiffChipsLB();
-  const go=()=>{
-    try{client.subscribe(lbSub(diff));}catch(e){}
-    clearTimeout(LB.subT);
-    LB.subT=setTimeout(()=>{renderLB();try{client.unsubscribe(lbSub(diff));}catch(e){}},2600);
-  };
-  if(client&&netOn)go();
-  else if(typeof mqtt!=='undefined')connectBroker(go,()=>{$('#lbList').innerHTML='<div style="opacity:.6;padding:20px;text-align:center">서버 연결 실패 😢</div>';});
-  else $('#lbList').innerHTML='<div style="opacity:.6;padding:20px;text-align:center">오프라인 상태예요</div>';
-}
 function renderLB(){
-  const rows=Object.entries(LB.map).filter(([k])=>k.includes('/'+lbWk()+'/')).map(([,v])=>v)
-    .filter(r=>r&&r.n!==undefined)
-    .sort((a,b)=>b.d-a.d||b.s-a.s).slice(0,10);
+  const rows=LB.rows;
   if(!rows.length){$('#lbList').innerHTML='<div style="opacity:.6;padding:20px;text-align:center">아직 기록이 없어요. 1등을 노려보세요!</div>';return;}
   $('#lbList').innerHTML=rows.map((r,i)=>
     `<div class="lbrow"><span class="lbrank">${['🥇','🥈','🥉'][i]||(i+1)}</span>
-     <span class="lbname">${r.n}${r.lv?` <small style='color:#8fd3ff'>Lv.${r.lv}</small>`:''}${r.m?' 🤝':''}</span>
-     <span class="lbscore">DAY ${r.d} · ${fmt(r.s)}원</span></div>`).join('');
+     <span class="lbname">${r.nick}${r.lv?` <small style='color:#8fd3ff'>Lv.${r.lv}</small>`:''}${r.multi?' 🤝':''}</span>
+     <span class="lbscore">DAY ${r.day} · ${fmt(r.earned)}원</span></div>`).join('');
 }
-function claimPrevWeek(){
-  if(lsGet('bp_wkclaim','')===lbWk())return;
-  const doIt=()=>{
-    try{client.subscribe(lbSubPrev(LB.diff));}catch(e){return;}
-    setTimeout(()=>{
-      try{client.unsubscribe(lbSubPrev(LB.diff));}catch(e){}
-      const prev=Object.entries(LB.map).filter(([k])=>k.includes('/'+lbWk(-1)+'/'))
-        .map(([k,v])=>({k,...v})).sort((a,b)=>b.d-a.d||b.s-a.s);
-      const myI=prev.findIndex(r=>r.k.endsWith('/'+PROFILE.pid));
-      lsSet('bp_wkclaim',lbWk());
-      if(myI<0)return;
-      const rw=myI===0?10:myI===1?7:myI===2?5:myI<10?3:0;
-      if(rw>0){addGem(rw);toast(`🏆 지난주 리그 ${myI+1}위! 보상 💎+${rw}`);SFX.star();}
-    },2200);
-  };
-  if(client&&netOn)doIt();
+/* 지난주 순위 보상. 서버에서 지난주 보드를 받아 내 자리를 찾는다. */
+async function claimPrevWeek(){
+  if(!(await netReady()))return;
+  let prev;
+  try{prev=await api('GET','/v1/leaderboard?week_offset=-1&limit=10&diff='+encodeURIComponent(LB.diff));}
+  catch(e){return;}
+  if(lsGet('bp_wkclaim','')===prev.week)return;
+  lsSet('bp_wkclaim',prev.week);
+  const myI=(prev.rows||[]).findIndex(r=>r.account_id===(AUTH&&AUTH.id));
+  if(myI<0)return;
+  const rw=myI===0?10:myI===1?7:myI===2?5:myI<10?3:0;
+  if(rw>0){addGem(rw);toast(`🏆 지난주 리그 ${myI+1}위! 보상 💎+${rw}`);SFX.star();}
 }
 function renderDiffChipsLB(){
   $('#lbDiffChips').innerHTML=Object.keys(DIFFS).map(k=>
@@ -2781,8 +2948,8 @@ $('#nextDayBtn').onclick=()=>{
   startDayLocal(S.day+1);
 };
 function pubMeta(){
-  if(!client||!MP.active||MP.role!=='host')return;
-  try{client.publish(tMeta(),JSON.stringify(MP.meta),{retain:true});}catch(e){}
+  if(!MP.active||MP.role!=='host')return;
+  roomSend({...MP.meta,t:'meta'});
 }
 
 /* ═══════════ 상점 ═══════════ */
@@ -2995,10 +3162,10 @@ function quitToLobby(silentMsg){
   /* 협동 정리: 상대에게 종료 알림 */
   if(MP.active){
     try{
-      if(MP.role==='host'&&client){MP.meta={...(MP.meta||{}),state:'ended'};pubMeta();}
-      if(client){MP.me.hb=0;client.publish(tMe(),JSON.stringify(MP.me),{retain:true});}
+      if(MP.role==='host'){MP.meta={...(MP.meta||{}),state:'ended'};pubMeta();}
+      MP.me.hb=0;roomSend({...MP.me,t:'state'});
     }catch(e){}
-    unsubscribeRoom();
+    roomClose();
     MP.active=false;MP.other=null;MP.meta=null;MP.custMirror=[];
     document.body.classList.remove('multi');
   }
@@ -3092,11 +3259,6 @@ function myCardData(){
   return{n:PROFILE.nick||'무명 사장',av:DECOR.equip.avatar,eq:DECOR.equip,tg:DECOR.tg,
     lv:lvOf(XP).lv,sold:DEX.sold||0,st:STREAK.n,ts:Date.now()};
 }
-const shopTopic=pid=>`bungeo-shop-v1/${pid}`;
-function pubShopCard(){
-  if(!client||!netOn)return;
-  try{client.publish(shopTopic(PROFILE.pid),JSON.stringify(myCardData()),{retain:true});}catch(e){}
-}
 /* 임의 카드의 장착을 body 클래스에 임시 적용 (닫을 때 applyDecor()로 복원) */
 function applyCardDecor(card){
   DECOR_CATS.filter(c=>c.type==='equip').forEach(c=>{
@@ -3141,19 +3303,21 @@ function renderLobbyScene(){
 /* ── 구경/친구 상태 ── */
 const SOC={map:{},open:false,tab:'browse',viewPid:null,subT:null};
 let FRIENDS=lsGet('bp_friends',[]);
-function socHandle(topic,obj){SOC.map[topic]=obj;if(SOC.open)renderSocial();}
-function openSocial(){
+async function openSocial(){
   $('#socialModal').classList.add('open');SOC.open=true;
   $('#myCode').textContent=(PROFILE.nick||'무명')+'#'+PROFILE.pid;
   renderSocial();
-  const go=()=>{
-    pubShopCard();
-    try{client.subscribe('bungeo-shop-v1/+');}catch(e){}
-    clearTimeout(SOC.subT);
-    SOC.subT=setTimeout(()=>{renderSocial();try{client.unsubscribe('bungeo-shop-v1/+');}catch(e){}},2600);
-  };
-  if(client&&netOn)go();
-  else if(typeof mqtt!=='undefined')connectBroker(go,()=>{if(SOC.tab==='browse')$('#socBody').innerHTML='<div style="opacity:.6;padding:18px;text-align:center">서버 연결 실패 😢</div>';});
+  if(!(await netReady())){
+    if(SOC.tab==='browse')$('#socBody').innerHTML='<div style="opacity:.6;padding:18px;text-align:center">서버에 연결할 수 없어요 😢</div>';
+    return;
+  }
+  await pubShopCard();
+  /* 전체 구독 대신: 친구는 지목 조회, 둘러보기는 건수 제한 조회 */
+  await Promise.all([
+    loadProfiles(FRIENDS.map(f=>f.pid)),
+    browseProfiles(),
+  ]);
+  if(SOC.open)renderSocial();
 }
 function shopRow(pid,c,isFriend){
   return`<div class="socrow" data-visit="${pid}">
@@ -3174,7 +3338,7 @@ function renderSocial(){
       :'<div style="opacity:.6;padding:18px;text-align:center">가게를 불러오는 중…<br><small>다른 사장님이 접속한 적이 있어야 보여요</small></div>';
   }else{
     body.innerHTML=(FRIENDS.length?FRIENDS.map(fr=>{
-      const c=SOC.map[shopTopic(fr.pid)]||{n:fr.nick,av:'av_chef',lv:1,sold:0};
+      const c=SOC.map[shopKey(fr.pid)]||{n:fr.nick,av:'av_chef',lv:1,sold:0};
       return`<div class="socrow"><span class="socav">${avatarSVG(c.av||'av_chef',30)}</span>
         <span class="socname">${c.n||fr.nick}<small>Lv.${c.lv||1} · 🐟 ${(c.sold||0).toLocaleString()}</small></span>
         <button class="socbtn" data-visit="${fr.pid}">구경</button>
@@ -3190,21 +3354,16 @@ function renderSocial(){
 }
 function visitShop(pid){
   const doShow=()=>{
-    const c=SOC.map[shopTopic(pid)];
+    const c=SOC.map[shopKey(pid)];
     if(!c){toast('아직 가게 정보가 없어요 (상대가 한 번 접속해야 해요)');return;}
     SOC.viewPid=pid;
     applyCardDecor(c);
     renderShopScene(c,false);
     $('#myShopModal').classList.add('open');
   };
-  if(SOC.map[shopTopic(pid)])return doShow();
-  const go=()=>{
-    try{client.subscribe(shopTopic(pid));}catch(e){}
-    setTimeout(()=>{try{client.unsubscribe(shopTopic(pid));}catch(e){}doShow();},1800);
-    toast('가게를 찾는 중… 🔭');
-  };
-  if(client&&netOn)go();
-  else if(typeof mqtt!=='undefined')connectBroker(go,()=>toast('서버 연결 실패 😢'));
+  if(SOC.map[shopKey(pid)])return doShow();
+  toast('가게를 찾는 중… 🔭');
+  loadProfiles([pid]).then(doShow);
 }
 function addFriendByPid(pid,nick){
   /* '닉네임#코드' 또는 코드만 입력해도 인식 */
@@ -3335,10 +3494,33 @@ $('#friendAddBtn').onclick=()=>{
   addFriendByPid(raw);
   $('#friendCodeInput').value='';
   /* 친구 카드 미리 받아두기 */
-  if(pid&&client&&netOn){try{client.subscribe(shopTopic(pid));setTimeout(()=>{try{client.unsubscribe(shopTopic(pid));}catch(e){}renderSocial();},1800);}catch(e){}}
+  if(pid)loadProfiles([pid]).then(()=>renderSocial());
+};
+$('#showRecovery').onclick=()=>{
+  if(!AUTH){toast('아직 계정이 없어요. 온라인 기능을 한 번 사용하면 생겨요');return;}
+  if(!AUTH.recovery){
+    $('#recoveryBox').textContent='이 기기에서는 복구 코드를 다시 볼 수 없어요. 발급 시 적어 둔 코드를 쓰세요.';
+    return;
+  }
+  $('#recoveryBox').innerHTML='<b style="color:var(--glow);font-family:\'Jua\';letter-spacing:1px">'
+    +AUTH.recovery+'</b><br>이 코드를 적어 두세요. 다른 기기에서 기록을 이어받을 수 있어요.';
+  if(navigator.clipboard)navigator.clipboard.writeText(AUTH.recovery).then(()=>toast('복구 코드 복사 완료 📋')).catch(()=>{});
+};
+$('#recoverBtn').onclick=async()=>{
+  const code=$('#recoverInput').value.trim();
+  if(!code){toast('복구 코드를 입력하세요');return;}
+  if(!confirm('이 기기의 계정을 교체할까요? 지금 계정의 랭킹 기록은 접근할 수 없게 돼요.'))return;
+  try{
+    await recoverAccount(code);
+    $('#recoverInput').value='';
+    toast('계정을 복구했어요! 🔑');
+    renderSocial();
+  }catch(e){
+    toast(e.status===404?'복구 코드를 찾을 수 없어요':'복구 실패: '+(e.message||''));
+  }
 };
 $('#visitAddFriend').onclick=()=>{
-  const c=SOC.map[shopTopic(SOC.viewPid)];
+  const c=SOC.map[shopKey(SOC.viewPid)];
   addFriendByPid(SOC.viewPid,c&&c.n);
   $('#visitAddFriend').style.display='none';
 };
@@ -3517,6 +3699,7 @@ function startStage(n){
   S.mode='solo';S.stage=n;S.gameMode='stage';
   const info=stageInfo(n);
   loadRun();
+  srvStartRun(S.diff);
   S.missionKey=info.isMission?info.mkey:null;
   S.stageTimeLimit=(info.isMission&&info.mission.time)?info.mission.time:0;
   document.querySelector('.stallname').textContent='STAGE '+n+(info.isMission?' \u00B7 '+info.mission.name:'');
@@ -3529,6 +3712,7 @@ $('#soloBackBtn').onclick=()=>showCard('menuCard');
 $('#soloStartBtn').onclick=()=>{
   S.mode='solo';
   loadRun();
+  srvStartRun(S.diff);
   $('.stallname').textContent=(RUN.storyLv?STORY_LV[Math.min(RUN.storyLv,STORY_LV.length-1)].name:'🐟 우리동네 붕어빵');
   $('#startModal').classList.remove('open');
   startDayLocal(1);
@@ -3538,7 +3722,7 @@ const CODE_CHARS='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const genCode=()=>Array.from({length:4},()=>CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]).join('');
 
 $('#hostBtn').onclick=()=>{
-  if(!mqttOK()){toast('네트워크 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인하세요.');return;}
+  if(!srvOK()){toast('서버 주소가 설정되지 않았어요. 혼자 하기는 이용할 수 있어요.');return;}
   MP.code=genCode();MP.role='host';MP.active=true;MP.me=emptyBlob();
   MP.vs=(MP.vsSel==='vs');
   MP.other=null;MP.meta={day:1,state:'waiting',startedAt:0,type:MP.vsSel};MP.lastStartedAt=-1;
@@ -3551,8 +3735,7 @@ $('#hostBtn').onclick=()=>{
   $('#hostWaitMsg').textContent='파트너 접속 대기중';
   $('#hostWaitMsg').classList.add('waitdots');
   showCard('hostCard');renderPings();renderNet();
-  connectBroker(()=>{
-    subscribeRoom();
+  roomConnect(MP.code,'host',()=>{
     pubMeta();pubMe();
     $('#roomCodeBig').textContent=MP.code;
     toast('서버 연결 완료! 친구에게 코드를 알려주세요 📡');
@@ -3563,13 +3746,14 @@ $('#hostBtn').onclick=()=>{
   });
 };
 $('#hostBackBtn').onclick=()=>{
-  unsubscribeRoom();MP.active=false;
+  roomClose();MP.active=false;
   document.body.classList.remove('multi');
   showCard('menuCard');
 };
 $('#hostStartBtn').onclick=()=>{
   S.gameMode='endless';
   resetRun();
+  srvStartRun(S.diff);
   $('.stallname').textContent='🐟 우리동네 붕어빵';
   MP.meta={day:1,state:'playing',startedAt:Date.now(),diff:S.diff,type:MP.vsSel};
   pubMeta();
@@ -3579,13 +3763,13 @@ $('#hostStartBtn').onclick=()=>{
 
 const joinWait={active:false,timer:null};
 $('#joinBtn').onclick=()=>{
-  if(!mqttOK()){toast('네트워크 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인하세요.');return;}
+  if(!srvOK()){toast('서버 주소가 설정되지 않았어요. 혼자 하기는 이용할 수 있어요.');return;}
   showCard('joinCard');setTimeout(()=>$('#codeInput').focus(),200);
 };
 $('#joinBackBtn').onclick=()=>{
   if(joinWait.timer){clearTimeout(joinWait.timer);joinWait.timer=null;}
   joinWait.active=false;
-  if(MP.active){unsubscribeRoom();MP.active=false;document.body.classList.remove('multi');}
+  if(MP.active){roomClose();MP.active=false;document.body.classList.remove('multi');}
   showCard('menuCard');
 };
 $('#joinGoBtn').onclick=()=>{
@@ -3594,15 +3778,14 @@ $('#joinGoBtn').onclick=()=>{
   $('#joinGoBtn').disabled=true;
   MP.code=code;MP.role='guest';MP.me=emptyBlob();MP.other=null;MP.meta=null;MP.lastStartedAt=-1;
   MP.lastExtApplied=0;MP.custMirror=[];
-  connectBroker(()=>{
+  roomConnect(code,'guest',()=>{
     MP.active=true;
-    subscribeRoom();
     joinWait.active=true;
     joinWait.timer=setTimeout(()=>{
       joinWait.timer=null;joinWait.active=false;
       $('#joinGoBtn').disabled=false;
       if(!MP.meta){
-        unsubscribeRoom();MP.active=false;
+        roomClose();MP.active=false;
         toast('방을 찾을 수 없어요 🥲 코드를 확인하세요');
         return;
       }
@@ -3638,7 +3821,7 @@ function enterAsGuest(){
 }
 
 window.addEventListener('load',()=>{
-  if(!mqttOK())$('#storageNote').innerHTML='⚠️ 네트워크 라이브러리 로드 실패.<br>인터넷 연결 후 새로고침 해주세요.';
+  if(!srvOK())$('#storageNote').innerHTML='⚠️ 서버 주소가 설정되지 않았어요.<br>온라인 기능(랭킹·함께하기)은 비활성화됩니다.';
 });
 renderAll();
 
@@ -3661,7 +3844,7 @@ $('#firstNickBtn').onclick=()=>{
   $('#nickModal').classList.remove('open');
   toast(`🐟 ${v} 사장님, 환영합니다!`);SFX.star();
   renderLobbyMeta();renderLobbyScene();
-  if(client&&netOn)pubShopCard();
+  pubShopCard();
 };
 </script>
 </body>

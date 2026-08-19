@@ -1,0 +1,16 @@
+{
+  "name": "tycoon-b-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local --port 8787",
+    "test": "node --test test/*.test.mjs",
+    "db:init": "wrangler d1 execute tycoon-b --local --file=schema.sql",
+    "db:init:remote": "wrangler d1 execute tycoon-b --remote --file=schema.sql",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.124.0"
+  }
+}

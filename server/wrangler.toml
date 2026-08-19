@@ -1,0 +1,22 @@
+name = "tycoon-b-api"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+# 방 하나가 Durable Object 하나. 와일드카드 구독이라는 개념 자체가 없다.
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]
+
+# D1 — 계정 / 랭킹 / 명부
+# database_id 는 계정 식별자일 뿐 비밀값이 아니다 (API 토큰 없이는 아무것도 못 한다).
+[[d1_databases]]
+binding = "DB"
+database_name = "tycoon-b"
+database_id = "82fa7f8f-cdf4-41d6-922a-ffd0e4926b8e"
+
+[observability]
+enabled = true

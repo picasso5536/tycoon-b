@@ -1,0 +1,102 @@
+name: 서버 배포
+
+# server/ 가 바뀌면 Cloudflare 에 자동 배포합니다.
+#
+# 필요한 저장소 Secret 두 개:
+#   CLOUDFLARE_API_TOKEN   — dash.cloudflare.com/profile/api-tokens 에서 발급
+#                            권한: Workers Scripts(Edit) · D1(Edit)
+#                                  Workers KV Storage(Edit) · Account Settings(Read)
+#   CLOUDFLARE_ACCOUNT_ID  — Cloudflare 대시보드 사이드바에서 확인
+#
+# 기본 브랜치에서만 배포합니다. 기능 브랜치가 운영 서버를 덮어쓰면 안 되니까요.
+on:
+  push:
+    branches: [main]
+    paths: ['server/**', '.github/workflows/deploy-server.yml']
+  workflow_dispatch:
+    inputs:
+      apply_schema:
+        description: '스키마도 적용할까요? (테이블 추가·변경이 있을 때만)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-server
+  cancel-in-progress: false   # 배포 중 취소는 위험하다
+
+jobs:
+  test:
+    name: 서버 테스트
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - name: 의존성 설치
+        working-directory: server
+        run: npm ci
+      - name: 로컬 D1 초기화
+        working-directory: server
+        run: npx wrangler d1 execute tycoon-b --local --file=schema.sql
+      - name: 개발 서버 기동
+        working-directory: server
+        run: |
+          npx wrangler dev --local --port 8787 > /tmp/wrangler.log 2>&1 &
+          # 응답할 때까지 기다린다 (고정 sleep 은 느리거나 모자라다)
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:8787/ >/dev/null && break
+            sleep 2
+          done
+          curl -sf http://127.0.0.1:8787/ || { echo "서버 기동 실패"; cat /tmp/wrangler.log; exit 1; }
+      - name: 통합 테스트
+        working-directory: server
+        run: node --test --test-force-exit 'test/*.test.mjs'
+      - name: 실패 시 서버 로그
+        if: failure()
+        run: cat /tmp/wrangler.log || true
+
+  deploy:
+    name: Cloudflare 배포
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - name: 의존성 설치
+        working-directory: server
+        run: npm ci
+
+      - name: 설정 점검
+        working-directory: server
+        run: |
+          if grep -q 'REPLACE_WITH_YOUR_D1_ID' wrangler.toml; then
+            echo "::error::wrangler.toml 의 database_id 가 아직 placeholder 입니다."
+            echo "npx wrangler d1 create tycoon-b 로 만든 뒤 그 값을 채워 커밋하세요."
+            exit 1
+          fi
+
+      # 스키마는 매번 돌리지 않는다. 테이블을 바꿨을 때만 수동으로 켠다.
+      - name: 스키마 적용
+        if: inputs.apply_schema
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: server
+          command: d1 execute tycoon-b --remote --file=schema.sql --yes
+
+      - name: 배포
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: server
+          command: deploy

@@ -1,0 +1,165 @@
+name: TestFlight 배포
+
+# 아이폰 실기기 테스트용. Mac 없이 GitHub 의 macOS 러너에서 서명·업로드한다.
+#
+# 필요한 Secret 7개 (Settings → Secrets and variables → Actions):
+#   APPLE_CERTIFICATE_P12       배포 인증서 + 개인키 (.p12 를 base64 로)
+#   APPLE_CERTIFICATE_PASSWORD  위 .p12 의 비밀번호
+#   APPLE_PROVISIONING_PROFILE  프로비저닝 프로파일 (.mobileprovision 을 base64 로)
+#   APPLE_PROFILE_NAME          프로파일 이름 (개발자 포털에 표시된 그대로)
+#   APPLE_TEAM_ID               10자리 팀 ID
+#   APPSTORE_API_KEY_ID         App Store Connect API 키 ID
+#   APPSTORE_API_ISSUER_ID      API 발급자 ID
+#   APPSTORE_API_PRIVATE_KEY    API 키 .p8 파일 내용 그대로
+#
+# 만드는 방법은 docs/ios-testflight.md 참고.
+on:
+  workflow_dispatch:
+    inputs:
+      notes:
+        description: '테스터에게 보여줄 변경 사항'
+        type: string
+        default: '테스트 빌드'
+  push:
+    tags: ['ios-v*']        # 태그를 밀면 자동 배포
+
+jobs:
+  testflight:
+    name: 빌드 · 서명 · 업로드
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: 필수 Secret 확인
+        env:
+          CERT: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        run: |
+          missing=""
+          [ -z "$CERT" ] && missing="$missing APPLE_CERTIFICATE_P12"
+          [ -z "$TEAM" ] && missing="$missing APPLE_TEAM_ID"
+          [ -z "$KEY" ]  && missing="$missing APPSTORE_API_PRIVATE_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Secret 이 없습니다:$missing"
+            echo "docs/ios-testflight.md 의 준비 절차를 먼저 마치세요."
+            exit 1
+          fi
+
+      - name: 웹 자산 빌드 + 네이티브 동기화
+        run: |
+          npm ci
+          npm run build
+          npx cap sync ios
+
+      # ── 서명 자산 설치 ──
+      # 러너는 매번 폐기되는 일회용 머신이지만, 키체인은 임시로 만들어 쓰고 끝에 지운다.
+      - name: 인증서와 프로파일 설치
+        env:
+          CERT_P12: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          CERT_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          PROFILE: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+        run: |
+          KEYCHAIN="$RUNNER_TEMP/build.keychain"
+          KEYCHAIN_PASSWORD="$(openssl rand -base64 24)"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+
+          echo "$CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" \
+            -P "$CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          # codesign 이 암호 프롬프트 없이 키를 쓰도록 허용
+          security set-key-partition-list -S apple-tool:,apple: -s \
+            -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" >/dev/null
+          security list-keychains -d user -s "$KEYCHAIN" login.keychain
+          rm "$RUNNER_TEMP/cert.p12"
+
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROFILE" | base64 --decode > \
+            ~/Library/MobileDevice/Provisioning\ Profiles/build.mobileprovision
+
+          echo "설치된 서명 인증서:"
+          security find-identity -v -p codesigning "$KEYCHAIN"
+
+      - name: ExportOptions 채우기
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          PROFILE_NAME: ${{ secrets.APPLE_PROFILE_NAME }}
+        run: |
+          sed -i '' "s|__TEAM_ID__|$TEAM_ID|; s|__PROFILE_NAME__|$PROFILE_NAME|" \
+            ios/ci/ExportOptions.plist
+          cat ios/ci/ExportOptions.plist
+
+      # 빌드 번호는 매번 달라야 한다. 같은 번호로 두 번 올리면 Apple 이 거부한다.
+      - name: 빌드 번호 설정
+        working-directory: ios/App
+        run: |
+          BUILD_NUMBER=$(( ${{ github.run_number }} + 100 ))
+          echo "빌드 번호: $BUILD_NUMBER"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" App/Info.plist \
+            || agvtool new-version -all "$BUILD_NUMBER"
+
+      - name: 아카이브
+        working-directory: ios/App
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          PROFILE_NAME: ${{ secrets.APPLE_PROFILE_NAME }}
+        run: |
+          xcodebuild archive \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -destination 'generic/platform=iOS' \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_STYLE=Manual \
+            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            -allowProvisioningUpdates
+
+      - name: IPA 내보내기
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist ios/ci/ExportOptions.plist \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates
+          ls -la "$RUNNER_TEMP/export"
+
+      - name: TestFlight 업로드
+        env:
+          API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        run: |
+          # altool 은 정해진 경로에서 키를 찾는다
+          mkdir -p ~/private_keys
+          echo "$API_PRIVATE_KEY" > ~/private_keys/AuthKey_${API_KEY_ID}.p8
+
+          IPA=$(ls "$RUNNER_TEMP/export"/*.ipa | head -1)
+          echo "업로드: $IPA"
+          xcrun altool --upload-app -f "$IPA" -t ios \
+            --apiKey "$API_KEY_ID" --apiIssuer "$API_ISSUER_ID"
+
+          rm -f ~/private_keys/AuthKey_${API_KEY_ID}.p8
+
+      - name: IPA 를 아티팩트로도 보관
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tycoon-b-ios-ipa
+          path: ${{ runner.temp }}/export/*.ipa
+          if-no-files-found: warn
+
+      - name: 키체인 정리
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/build.keychain" || true
+          rm -f ~/Library/MobileDevice/Provisioning\ Profiles/build.mobileprovision || true

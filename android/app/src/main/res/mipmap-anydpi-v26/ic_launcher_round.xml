@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 배경은 마스크 모양(원/사각/스퀘어클)과 무관하게 꽉 차야 하므로 inset 없이 사용 -->
+    <background android:drawable="@mipmap/ic_launcher_background" />
+    <!-- 전경(붕어빵)은 세이프존(중앙 66%) 안에 들어가도록 inset -->
+    <foreground>
+        <inset android:drawable="@mipmap/ic_launcher_foreground" android:inset="16.7%" />
+    </foreground>
+</adaptive-icon>

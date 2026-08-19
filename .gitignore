@@ -1,0 +1,39 @@
+# ── 의존성 / 빌드 산출물 ─────────────────────────────
+node_modules/
+# scripts/build-www.mjs 가 index.html 로부터 생성하는 산출물
+www/
+
+# ── Android ────────────────────────────────────────
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/app/release/
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# ── iOS ────────────────────────────────────────────
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/App/Pods/
+ios/App/Podfile.lock
+ios/App/output/
+ios/App/build/
+ios/DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# ── 서버 ───────────────────────────────────────────
+# wrangler 로컬 개발 상태 (D1·Durable Object sqlite)
+server/.wrangler/
+# 배포 시 실제 database_id 가 들어가는 파일은 커밋하되,
+# 로컬 실험용 값이 섞이지 않도록 주의할 것
+
+# ── 기타 ───────────────────────────────────────────
+.DS_Store
+*.log
