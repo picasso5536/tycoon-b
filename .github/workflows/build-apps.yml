@@ -1,0 +1,80 @@
+name: 앱 빌드 (Android / iOS)
+
+# 앱 빌드 결과물을 Actions 아티팩트로 내려받을 수 있게 합니다.
+#  - Android: 서명 없는 디버그 APK (기기에 바로 설치 가능)
+#  - iOS:     서명 없는 .app (시뮬레이터 실행용) — 실기기/앱스토어는 Xcode 서명 필요
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  web:
+    name: 웹 자산 빌드 검증
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - name: www/ 생성 (원격 의존성 0개 검증 포함)
+        run: npm run build
+
+  android:
+    name: Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - run: npm ci
+      - name: 웹 자산 빌드 + 네이티브 동기화
+        run: npx cap sync android
+      - name: Gradle 디버그 빌드
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tycoon-b-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+  ios:
+    name: iOS 시뮬레이터 빌드
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - name: 웹 자산 빌드 + 네이티브 동기화
+        run: npx cap sync ios
+      - name: Xcode 빌드 (서명 없음, 시뮬레이터 타깃)
+        working-directory: ios/App
+        run: |
+          xcodebuild \
+            -scheme App \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tycoon-b-simulator-app
+          path: ios/App/build/Build/Products/Debug-iphonesimulator/App.app
+          if-no-files-found: error

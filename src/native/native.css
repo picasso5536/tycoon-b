@@ -1,0 +1,33 @@
+/* ─────────────────────────────────────────────────────────────
+   붕어빵 타이쿤 — 네이티브(iOS/Android) 전용 보정 스타일
+   웹 버전(index.html)에는 주입되지 않고, Capacitor 빌드에만 포함됩니다.
+   ───────────────────────────────────────────────────────────── */
+
+/* 노치·다이나믹 아일랜드·제스처 바 영역 확보 */
+#app{
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+
+/* 상태바 뒤로 비치는 배경이 흰색으로 뜨지 않도록 고정 */
+html{background:#0d1322}
+
+/* iOS WKWebView 고무줄 스크롤(바운스) 제거 */
+html,body{
+  overscroll-behavior:none;
+  position:fixed;
+  width:100%;
+  overflow:hidden;
+}
+
+/* 길게 눌렀을 때 뜨는 시스템 콜아웃/드래그 방지 */
+body{
+  -webkit-touch-callout:none;
+  -webkit-user-drag:none;
+}
+
+/* 입력창에서는 텍스트 선택이 가능해야 함 */
+input,textarea{
+  user-select:text;
+  -webkit-user-select:text;
+}
